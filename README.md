@@ -8,7 +8,8 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 
 ```
 
-├──  data_prep					contains scripts for preparing train, test, validation and score samples │   ├── example_prep_train_samp.py 
+├──  data_prep					contains scripts for preparing train, test, validation and score samples
+│   ├── example_prep_train_samp.py 
 │
 │
 ├──  feature_engineering		contains all feature engineering modules
