@@ -2,10 +2,11 @@ Data preprocessing, feature engineering, training and deployment of eks pattern 
 
 
 
-**Project Structure**
+# Project Structure
 
 Initial project structure for the eks-ml-pipeline. This will evolve over the time to reflect latest changes. 
 
+```
 
 ├──  data_prep					contains scripts for preparing train, test, validation and score samples │   ├── example_prep_train_samp.py 
 │
@@ -38,6 +39,7 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 │    └── eventually we will be moving to msspackages│  
 │ 
 
+```
 
      
      
