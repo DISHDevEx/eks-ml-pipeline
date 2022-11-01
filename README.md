@@ -2,7 +2,7 @@ Data preprocessing, feature engineering, training and deployment of eks pattern 
 
 
 
-# Project Structure
+**Project Structure**
 
 Initial project structure for the eks-ml-pipeline. This will evolve over the time to reflect latest changes. 
 
@@ -28,11 +28,11 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 │    ├── example_sparse_to_dense.py  
 │
 │
-├──  reporting				contains all reporting modules 
+├──  reporting					contains all reporting modules 
 │    ├── example_roc_report.py
 │
 │
-└── tests						this foler contains unit and integration tests of the project
+└── tests						contains unit and integration tests of the project
 │    ├── unit
 │    └── integration
 │ 
