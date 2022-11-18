@@ -1,79 +1,56 @@
-##Filter by cluster, node, pod, and container all of the indexes that have anomolous behavior in them. We will later on purge our datasets of the clusters that behave in these manners to train on clean data
-
-filter_Condition_Cluster = np.where( df_cluster['cluster_failed_node_count']>0 ) 
 
 
+##ingest data
+(1) Read in data
 
-filter_Condition_Node = np.where( 
-                                    (df_node['node_memory_failcnt']>0) |
-                                    (df_node['node_memory_hierarchical_pgfault']>0) |
-                                    (df_node['node_memory_hierarchical_pgmajfault']>0)|
-                                    (df_node['node_memory_pgfault']>0)|
-                                    (df_node['node_memory_pgmajfault']>0)|
-                                    (df_node['node_network_rx_dropped']>0)|
-                                    (df_node['node_network_rx_errors']>0)|
-                                    (df_node['node_network_tx_dropped']>0)|
-                                    (df_node['node_network_tx_errors']>0)
-                                   
-                                    
-                                )
+##init an empty structure to hold instance
+(2) instance_dfs = []
 
 
-
-
-
-
-
-
-
-filter_Condition_Pod = np.where( 
-                                    (df_pod['pod_memory_failcnt']>0) |
-                                    (df_pod['pod_memory_hierarchical_pgfault']>0) |
-                                    (df_pod['pod_memory_hierarchical_pgmajfault']>0)|
-                                    (df_pod['pod_memory_pgfault']>0)|
-                                    (df_pod['pod_memory_pgmajfault']>0)|
-                                    (df_pod['pod_network_rx_dropped']>0)|
-                                    (df_pod['pod_network_rx_errors']>0)|
-                                    (df_pod['pod_network_tx_dropped']>0)|
-                                    (df_pod['pod_network_tx_errors']>0) |
-                                    (df_pod['pod_status'] == 'Failed')
-                                )
-
-
-
-
-filter_Condition_Container = np.where( 
-                                    (df_container['container_memory_failcnt']>0) |
-                                    (df_container['container_memory_hierarchical_pgfault']>0) |
-                                    (df_container['container_memory_hierarchical_pgmajfault']>0)|
-                                    (df_container['container_memory_pgmajfault']>0)
-                                    
-                                )
-
-
-unhealthy_clusternames_cluster = df_cluster.loc[filter_Condition_Cluster]['ClusterName'].unique().tolist()
-unhealthy_clusternames_node = df_node.loc[filter_Condition_Node]['ClusterName'].unique().tolist()
-unhealthy_clusternames_pod = df_pod.loc[filter_Condition_Pod]['ClusterName'].unique().tolist()
-unhealthy_clusternames_container = df_container.loc[filter_Condition_Container]['ClusterName'].unique().tolist()
-
-
-
-### FIND UNHEALTHY
-all_unhealthy_cluster_names = list(set(unhealthy_clusternames_cluster+unhealthy_clusternames_node+unhealthy_clusternames_pod+unhealthy_clusternames_container))
-
-
-
-
-# Create non anomalous data
-df_node_non_anomalous = df_node[~df_node['ClusterName'].isin(all_unhealthy_cluster_names)]
-
-
-
-##Feature set to be extracted: CPU(%), Memory(%), Total Network Bytes
-Extract CPU, Memory, Network per node and save
-
-for instance_id in df_node_non_anomalous:
-    minmaxscaler(features)
+##get all usable nodeIDs
+(3) iterate through all nodeID Dataframes:
     
+    drop nulls['node_cpu_utilization','node_memory_utilization','node_network_total_bytes'] in nodeID Dataframe
+    
+    
+    if nodeID Dataframe has: 
+        a) Number of timestamps >= 60
+        c) Max time delta <= 75 seconds
+        d) Min time delta >= 45 seconds
+        
+        
+        Then: instance_dfs.append(nodeID Dataframe)
+
+            
+(4) #Create trianing samples that LSTM can take in with shape: [Numofsamples,Timesteps,NumFeatures]
+
+##global variable
+time_steps = 12
+batch_size = 6
+n_samples = batch_size*1000000000 ##made up number ideally it should be a very large number of samples
 
 
+features = ['node_cpu_utilization','node_memory_utilization','node_network_total_bytes']
+
+x_train = np.zeros((n_samples,time_steps,len(features)))
+for b in range(n_samples):
+    
+    ##pick random df, and normalize
+    df = random.choice(instance_dfs)
+    df = df.drop(columns = ['InstanceId'])
+    df = df.set_index('Timestamp')
+    df = df.sort_index()
+    df[features] = scaler.fit_transform(df[features])
+    
+    
+    
+    sample = np.zeros((n_samples,len(features)))
+    ##make sure length of df is atleast 40
+    first_time = random.choice(range(len(df)-time_steps))
+    df.head()
+    sample = df[features].iloc[first_time:first_time+time_steps]
+    x_train[b] = sample
+
+
+(5) Save x_train in s3   
+s3.save(x_train)

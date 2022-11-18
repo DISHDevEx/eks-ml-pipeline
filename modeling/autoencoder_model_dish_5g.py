@@ -16,13 +16,13 @@ from matplotlib import pyplot as plt
 ##constructor!!
 class Autoencoder_Model_Dish_5g():
     ## constructor takes in timesteps, batch size, learning rate, and a train_valid ratio
-    ## timesteps is the number of time intervals inside of a batch
-    ## number of batches or samples per epoch
+    ## timesteps is the number of time intervals inside of a sample
+    ## number of  samples per iteration
     ## learning rate is the hyperparameter eta
     ## train_valid_ratio indicates the training and validation split crafted from the training set. IE the input dataset will be split for training and validation. The baseline for this is set to 70/30. Change it to 100/0
     
     
-    def __init__(self, time_steps = 12, batch_size=60, learning_rate=0.001,
+    def __init__(self, time_steps = 12, batch_size=6, learning_rate=0.001,
                  train_valid_ratio=0):
         
         
@@ -58,6 +58,7 @@ class Autoencoder_Model_Dish_5g():
         ##init the self nueral net to None, later it will be defined
         self.nn = None
 
+        ##not needed -- remove
         self.results_df = None
         
     ## this function calculates a threshold 
@@ -91,7 +92,7 @@ class Autoencoder_Model_Dish_5g():
         
         
         ##nn compile groups layers into a model; the loss here is MSE, optimizer is Adam, learning rate is predefined
-        self.nn.compile(optimizer=tf.keras.optimizers.Adam(lr=self.lr), loss="mse")
+        self.nn.compile(optimizer=tf.keras.optimizers.Adam(lr=self.lr), loss="mae")
         self.nn.summary()
 
         
@@ -113,8 +114,6 @@ class Autoencoder_Model_Dish_5g():
         anom_scores = scaler.fit_transform(residuals.reshape(-1, 1))
         anom_scores[anom_scores > 1.0] = 1.0
         return anom_scores
-
-    
     
 
     def train(self, x_train):
@@ -146,6 +145,9 @@ class Autoencoder_Model_Dish_5g():
                 ],
             )
 
+            
+            
+            
             ##plot the train loss and val loss
             plt.figure()
             plt.plot(history.history["loss"], label="Training Loss")
@@ -171,7 +173,7 @@ class Autoencoder_Model_Dish_5g():
 
     def test(self, x_test):
         """
-        Appends a column to the df with classes
+        returns predictions, residuals, anomaly_Scores
         """
 
         logging.info("Autoencoder tests!")
@@ -179,8 +181,7 @@ class Autoencoder_Model_Dish_5g():
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
 
-            if self.x_train is None or self.nn is None:
-                raise ModelException("Model not trained, cannot test")
+
                 
             test_pred, test_err = self.__calculate_pred_and_err(x_test)
             residuals = np.abs(test_pred - x_test)
