@@ -7,9 +7,9 @@
     "features_list":
     [
       {
-        "feature_name":"node_cpu_utilization ",
-        "feature_description":"The percentage of CPU cores utilized on a per node basis",
-        "feature_datatype":"float",
+        "feature_name":"InstanceId ",
+        "feature_description":"Instance ID of the EC2 Instance of the node in the cluster. ",
+        "feature_datatype":"string",
         "feature_type": "existing"
       },
       {
@@ -19,16 +19,16 @@
         "feature_type": "existing"
       },
       {
-        "feature_name":"",
-        "feature_description":"",
-        "feature_datatype":"",
-        "feature_type": "existing/created"
+        "feature_name":"node_memory_utilization",
+        "feature_description":"The percentage of memory currently being used by the node compared to the total limit",
+        "feature_datatype":"float",
+        "feature_type": "existing"
       },
       {
-        "feature_name":"",
-        "feature_description":"",
-        "feature_datatype":"",
-        "feature_type": "existing/created"
+        "feature_name":"node_network_total_bytes",
+        "feature_description":"The amount of all network recreived and transfered for the worker node network interfaces in a cluster.",
+        "feature_datatype":"float",
+        "feature_type": "existing"
       }
     ]
   }
