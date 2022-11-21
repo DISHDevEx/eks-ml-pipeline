@@ -8,7 +8,7 @@ def node_autoencoder_ad_preprocessing():
     node_spark_context= node_data.get_spark()
     err, node_df = node_data.read()
     if err == 'PASS':
-        features_df = get_features()
+        features_df = get_features("node_autoencoder_ad_features","11-21-2022")
         return node_df, features_df
     else:
         empty_df = pd.DataFrame()
