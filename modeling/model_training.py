@@ -18,7 +18,7 @@ from sklearn.model_selection import train_test_split
 import _pickle as cPickle
 
 
-def main()
+if __name__ == "__main__":
     ##global variable
     timesteps = 12
     time_steps = 12
@@ -35,7 +35,9 @@ def main()
 
     ## in this dataset .007% of all rows have a null. So we will drop them quickly since they do not effect the dataset as a whole. For larger processing, we should apply more dataquality filters
     """
-    (3) iterate through all nodeID Dataframes:
+     more dataquality filters:
+     
+    -->iterate through all nodeID Dataframes:
 
         drop nulls['node_cpu_utilization','node_memory_utilization','node_network_total_bytes'] in nodeID Dataframe
 

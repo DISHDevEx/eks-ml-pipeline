@@ -9,6 +9,11 @@ import tensorflow as tf
 from keras import layers
 from matplotlib import pyplot as plt
 
+"""
+Contributed by Vinayak Sharma and David Cherney
+
+"""
+
 
 
 
@@ -17,9 +22,9 @@ from matplotlib import pyplot as plt
 class Autoencoder_Model_Dish_5g():
     ## constructor takes in timesteps, batch size, learning rate, and a train_valid ratio
     ## timesteps is the number of time intervals inside of a sample
-    ## number of  samples per iteration
+    ## batch size is number of  samples per iteration
     ## learning rate is the hyperparameter eta
-    ## train_valid_ratio indicates the training and validation split crafted from the training set. IE the input dataset will be split for training and validation. The baseline for this is set to 70/30. Change it to 100/0
+    ## train_valid_ratio indicates the training and validation split crafted from the training set. IE the input dataset will be split for training and validation.
     
     
     def __init__(self, time_steps = 12, batch_size=6, learning_rate=0.001,
