@@ -57,7 +57,7 @@ if __name__ == "__main__":
     ## for normalization
     # scaler = StandardScaler()
 
-    scaler = MinMaxScaler(feature_range=(0, 1))
+    scaler = StandardScaler()
 
     instance_dfs =[]
     for instance in training_df['InstanceId'].unique():

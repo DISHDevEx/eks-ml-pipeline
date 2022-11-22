@@ -37,10 +37,10 @@ if __name__ == "__main__":
 
 
     ##read in data 
-    training_df_full = pd.read_parquet('/root/healthy_clusters_node_month.parquet')
+    df_full = pd.read_parquet('/root/healthy_clusters_node_month.parquet')
     columns_to_keep = ['Timestamp','InstanceId','node_cpu_utilization','node_memory_utilization','node_network_total_bytes']
-    training_df = training_df_full.drop(training_df_full.columns.difference(columns_to_keep),1, inplace=False)
-    training_df['Timestamp'] = pd.to_datetime(training_df['Timestamp'], unit='ms')
+    df_full = df_full.drop(df_full.columns.difference(columns_to_keep),1, inplace=False)
+    df_full['Timestamp'] = pd.to_datetime(df_full['Timestamp'], unit='ms')
 
     ## in this dataset .007% of all rows have a null. So we will drop them quickly since they do not effect the dataset as a whole. For larger processing, we should apply more dataquality filters
     """
@@ -56,13 +56,13 @@ if __name__ == "__main__":
         store NodeID dataframe
 
     """
-    training_df = training_df.dropna()
-    test_df = training_df.copy()
-    test_df = test_df[test_df.InstanceId == 'i-0b36e8825c482f762']
+    df_full = df_full.dropna()
+    
+    
+    ###CREATE TEST SET (Holdout set)
+    test_df = df_full[df_full.InstanceId == 'i-0b36e8825c482f762']
 
 
-    ## for normalization
-    # scaler = StandardScaler()
 
     ## drop the instanceId
     test_df = test_df.drop("InstanceId",1, inplace=False)
@@ -72,6 +72,7 @@ if __name__ == "__main__":
     test_df = test_df.set_index('Timestamp')
 
     ##normalize test_df 
+    scaler = StandardScaler()
     test_df[features] = scaler.fit_transform(test_df[features])
 
 
