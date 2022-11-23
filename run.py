@@ -1,8 +1,5 @@
 from feature_engineering import node_autoencoder_ad_preprocessing
 import pandas as pd
 
-data, features  = node_autoencoder_ad_preprocessing()
-print(data.show())
-
-pd.set_option('display.max_columns', None)
-print(features)
+data = node_autoencoder_ad_preprocessing("node_autoencoder_ad_features","11-21-2022","2022","10","10","10")
+print(data.show(truncate=False))
