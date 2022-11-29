@@ -11,6 +11,10 @@ from matplotlib import pyplot as plt
 
 """
 Contributed by Vinayak Sharma and David Cherney
+MSS Dish 5g - Pattern Detection
+Groundwork to help us self heal
+
+this models serves to provide MSS with a tool to excavate anomalies in an unsupervised fashion
 
 """
 
@@ -24,10 +28,10 @@ class Autoencoder_Model_Dish_5g():
     ## timesteps is the number of time intervals inside of a sample
     ## batch size is number of  samples per iteration
     ## learning rate is the hyperparameter eta
-    ## train_valid_ratio indicates the training and validation split crafted from the training set. IE the input dataset will be split for training and validation.
+    ## train_valid_ratio indicates the training and validation split crafted from the training set. IE the input dataset will be split for training and validation
     
-    def __init__(self, time_steps = 12, batch_size=6, learning_rate=0.001,
-                 train_valid_ratio=0, epochs = 100):
+    def __init__(self, time_steps=12, batch_size=6, learning_rate=0.001,
+                 validation_split=.1, epochs=100, nuerons = 128, dropout_rate=.1):
         
         ## super().__init__() allows for inheritence amongst child classes
         super().__init__()
@@ -53,14 +57,20 @@ class Autoencoder_Model_Dish_5g():
         ##create an x_train
         self.x_train: np.ndarray = None
         
-        ##set the train valid ratio (initialized to .7)
-        self.train_valid_ratio = train_valid_ratio
-        
         ##init the self nueral net to None, later it will be defined
         self.nn = None
         
         ##init the number of epochs for the nueral network to train
-        self.epochs = 100
+        self.epochs = epochs
+        
+        ##init the valid sploit
+        self.validation_split = validation_split
+        
+        ##init nuerons
+        self.nuerons = nuerons
+        
+        ##init dropout rate
+        self.dropout_rate = dropout_rate
         
     ## this function calculates a threshold 
     @staticmethod
@@ -81,11 +91,11 @@ class Autoencoder_Model_Dish_5g():
         ##none of the nueral network is hard coded (except for the number of nuerons b)
         self.nn = keras.Sequential(
             [
-                layers.LSTM(128, input_shape=(self.x_train.shape[1], self.x_train.shape[2])),
-                layers.Dropout(rate=0.2),
+                layers.LSTM(self.nuerons, input_shape=(self.x_train.shape[1], self.x_train.shape[2])),
+                layers.Dropout(rate=self.dropout_rate),
                 layers.RepeatVector(self.x_train.shape[1]),
-                layers.LSTM(128, return_sequences=True),
-                layers.Dropout(rate=0.2),
+                layers.LSTM(self.nuerons, return_sequences=True),
+                layers.Dropout(rate=self.dropout_rate),
                 layers.TimeDistributed(layers.Dense(self.x_train.shape[2])),
             ]
         )
@@ -128,7 +138,7 @@ class Autoencoder_Model_Dish_5g():
                 self.x_train,
                 epochs=self.epochs,
                 batch_size=self.batch_size,
-                validation_split=.1,
+                validation_split=self.validation_split,
                 callbacks=[
                     keras.callbacks.EarlyStopping(monitor="val_loss", patience=5, mode="min")
                 ],
@@ -141,7 +151,7 @@ class Autoencoder_Model_Dish_5g():
             plt.legend()
             plt.show()
             
-            ##train predictions and train mae. 
+            ##train predictions and train mae
             train_predictions, train_mae = self.__calculate_pred_and_err(self.x_train)
             
             ##create a copy of the train for "results"
@@ -169,11 +179,6 @@ class Autoencoder_Model_Dish_5g():
             residuals = np.abs(test_pred - x_test)
             anomaly_scores = self.__calculate_anomaly_score(residuals , self.error_threshold)
             return test_pred,residuals,anomaly_scores
-
-        
-        
-        
-        
         
     def customize_matplotlib(self, color="black", labelsize=16, fontsize="xx-large"):
         """
@@ -189,14 +194,11 @@ class Autoencoder_Model_Dish_5g():
         plt.rcParams["xtick.labelsize"] = labelsize
         plt.rcParams["ytick.color"] = color
         plt.rcParams["ytick.labelsize"] = labelsize
-    #     plt.rcParams["axes.titlecolor"] = labelsize
         plt.rcParams["text.color"] = color
         plt.rcParams["axes.labelsize"] = labelsize
         plt.rcParams["axes.labelcolor"] = color
         plt.rcParams["legend.fontsize"] = fontsize
-    
-    
- 
+        
     def visualize(self, results_df: pd.DataFrame, metric_name: str, last_train_sample: int = None, title: str = "Anomaly visualization"):
         self.customize_matplotlib()
         PREDICTIONS_COLUMN = "predictions"
@@ -214,7 +216,7 @@ class Autoencoder_Model_Dish_5g():
         fig.set_size_inches(20, 20)
         results_df[metric_name].plot.line(ax=ax)
         columns_labels: list = ["Actual TS"]
-
+            
         if last_train_sample is not None:
             ax.axvspan(results_df.index[0], results_df.index[last_train_sample], alpha=0.5, color="gray")
             columns_labels.append("Training part")
@@ -254,7 +256,6 @@ class Autoencoder_Model_Dish_5g():
             columns_labels.append("Predicted & GT Anomalies")
 
         ax.legend(columns_labels)
-        # fig.suptitle(title, fontsize=16)
 
         if ANOM_SCORE_COLUMN in results_df:
             ax2 = fig.add_subplot(212)
