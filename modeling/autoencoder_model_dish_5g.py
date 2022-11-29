@@ -14,31 +14,27 @@ Contributed by Vinayak Sharma and David Cherney
 
 """
 
-
-
-
-
-##constructor!!
 class Autoencoder_Model_Dish_5g():
+    """
+    @:constructor takes in timesteps, batch size, learning rate, and a train_valid ratio
+    
+    @:returns object of class 
+    """
     ## constructor takes in timesteps, batch size, learning rate, and a train_valid ratio
     ## timesteps is the number of time intervals inside of a sample
     ## batch size is number of  samples per iteration
     ## learning rate is the hyperparameter eta
     ## train_valid_ratio indicates the training and validation split crafted from the training set. IE the input dataset will be split for training and validation.
     
-    
     def __init__(self, time_steps = 12, batch_size=6, learning_rate=0.001,
-                 train_valid_ratio=0):
-        
-        
-        
+                 train_valid_ratio=0, epochs = 100):
         
         ## super().__init__() allows for inheritence amongst child classes
         super().__init__()
         
-            
         ##init error threshold
         self.error_threshold = None
+        
         ##anomaly score threshold is set to .95
         self.anomaly_score_threshold: float = 0.95
             
@@ -62,25 +58,24 @@ class Autoencoder_Model_Dish_5g():
         
         ##init the self nueral net to None, later it will be defined
         self.nn = None
-
-        ##not needed -- remove
-        self.results_df = None
+        
+        ##init the number of epochs for the nueral network to train
+        self.epochs = 100
         
     ## this function calculates a threshold 
     @staticmethod
     def __calculate_threshold(valid_errors: np.ndarray) -> float:
         return 2 * np.max(valid_errors)
-
-
+    
     ## this function inits the model
     def __initialize_nn(self, x_train):
         
-        ##this line of code reformats my data!!!! input to the constructor is a dataframe (lol), however the LSTM actually expects a tensor of size (batch,timesteps,features)
+        ##set x_train
         self.x_train =  x_train
         
-        
-        ##actually define the nueral network here. Its a Keras sequential with an LSTM, a dropout, a repeat vector, then another LSTM, another dropout, and a timedistributed output. The output is mapped back the number of features. 
-        
+        ##actually define the nueral network here. 
+        ##Its a Keras sequential with an LSTM, a dropout, a repeat vector, then another LSTM, another dropout, and a timedistributed output. 
+        ##The output is mapped back the number of features. 
         ##RepeatVector "Repeats the input n times."https://keras.io/api/layers/reshaping_layers/repeat_vector/
         
         ##none of the nueral network is hard coded (except for the number of nuerons b)
@@ -95,21 +90,14 @@ class Autoencoder_Model_Dish_5g():
             ]
         )
         
-        
         ##nn compile groups layers into a model; the loss here is MSE, optimizer is Adam, learning rate is predefined
         self.nn.compile(optimizer=tf.keras.optimizers.Adam(lr=self.lr), loss="mae")
         self.nn.summary()
-
         
-    
     def __calculate_pred_and_err(self, data):
         predictions = self.nn.predict(data)
         mae_loss = np.mean(np.abs(predictions - data), axis=1)
-        
-
         return predictions,mae_loss
-    
-    
     
     def __calculate_anomaly_score(self, residuals: np.ndarray, initial_threshold: float = 1.0):
         max_resid = np.nanmax(np.array(residuals, dtype=np.float64))
@@ -128,30 +116,23 @@ class Autoencoder_Model_Dish_5g():
             - fits the model
         @:returns nothing 
         """
+        
         ##log that the autoencoder model training has begun
         logging.info("Autoencoder model training started")
-
         
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-
             self.__initialize_nn(x_train)
-
-
-
             history = self.nn.fit(
                 self.x_train,
                 self.x_train,
-                epochs=100,
+                epochs=self.epochs,
                 batch_size=self.batch_size,
                 validation_split=.1,
                 callbacks=[
                     keras.callbacks.EarlyStopping(monitor="val_loss", patience=5, mode="min")
                 ],
             )
-
-            
-            
             
             ##plot the train loss and val loss
             plt.figure()
@@ -159,10 +140,7 @@ class Autoencoder_Model_Dish_5g():
             plt.plot(history.history["val_loss"], label="Validation Loss")
             plt.legend()
             plt.show()
-
             
-            
-
             ##train predictions and train mae. 
             train_predictions, train_mae = self.__calculate_pred_and_err(self.x_train)
             
@@ -174,27 +152,22 @@ class Autoencoder_Model_Dish_5g():
             print("error_threshold",self.error_threshold)
             self.trained = True
             
-
-
     def test(self, x_test):
         """
-        returns predictions, residuals, anomaly_Scores
+        @:param x_test: test data. Must be of shape [ samples, timesteps, features]
+        
+        -apply inferencing
+        
+        @:returns test_pred,residuals,anomaly_scores vectors 
         """
-
+        
         logging.info("Autoencoder tests!")
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-
-
-                
             test_pred, test_err = self.__calculate_pred_and_err(x_test)
             residuals = np.abs(test_pred - x_test)
-            
-            
-
             anomaly_scores = self.__calculate_anomaly_score(residuals , self.error_threshold)
-            
             return test_pred,residuals,anomaly_scores
 
         
@@ -203,6 +176,15 @@ class Autoencoder_Model_Dish_5g():
         
         
     def customize_matplotlib(self, color="black", labelsize=16, fontsize="xx-large"):
+        """
+        @:param  color: color you want for your matplot lib (string)
+        @:param  labelsize: size you want for your labels (int)
+        @:param fontsize: size you want for your font text (int)
+
+        -apply matplot lib changes
+
+        @:returns nothing
+        """
         plt.rcParams["xtick.color"] = color
         plt.rcParams["xtick.labelsize"] = labelsize
         plt.rcParams["ytick.color"] = color
@@ -287,26 +269,4 @@ class Autoencoder_Model_Dish_5g():
 
 
 
-
-# ### try and make a new test function rq
-#     def testManyBatches(self, x_test):
-#         """
-#         Appends a column to the df with classes
-#         """
-
-#         logging.info("Autoencoder tests!")
-# #         display(test_df.head())
-#         with warnings.catch_warnings():
-#             warnings.simplefilter("ignore")
-
-#             if self.x_train is None or self.nn is None:
-#                 raise ModelException("Model not trained, cannot test")
-#             x_test = x_test.reshape(5,12,1)
-#             test_pred, test_err = self.__calculate_pred_and_err(x_test)
-
-#             residuals = np.abs(test_pred - x_test)
-# #             print('residuals',residuals)
-#             anomaly_scores = calculate_anomaly_score(residuals,self.error_threshold)
-                
-#             return test_pred,anomaly_scores
 
