@@ -11,6 +11,10 @@ from matplotlib import pyplot as plt
 
 """
 Contributed by Vinayak Sharma and David Cherney
+MSS Dish 5g - Pattern Detection
+Groundwork to help us self heal
+
+this models serves to provide MSS with a tool to excavate anomalies in an unsupervised fashion
 
 """
 
@@ -24,10 +28,10 @@ class Autoencoder_Model_Dish_5g():
     ## timesteps is the number of time intervals inside of a sample
     ## batch size is number of  samples per iteration
     ## learning rate is the hyperparameter eta
-    ## train_valid_ratio indicates the training and validation split crafted from the training set. IE the input dataset will be split for training and validation.
+    ## train_valid_ratio indicates the training and validation split crafted from the training set. IE the input dataset will be split for training and validation
     
     def __init__(self, time_steps=12, batch_size=6, learning_rate=0.001,
-                 validation_split=.1, epochs=100, nuerons = 128, dropout_rate=128):
+                 validation_split=.1, epochs=100, nuerons = 128, dropout_rate=.1):
         
         ## super().__init__() allows for inheritence amongst child classes
         super().__init__()
@@ -147,7 +151,7 @@ class Autoencoder_Model_Dish_5g():
             plt.legend()
             plt.show()
             
-            ##train predictions and train mae. 
+            ##train predictions and train mae
             train_predictions, train_mae = self.__calculate_pred_and_err(self.x_train)
             
             ##create a copy of the train for "results"
