@@ -3,10 +3,10 @@
 def cleanup(feature_list):
 
     processed_features = []
-    for feature in features:
-        feature = feature.strip()
-        feature = "".join(feature.split())
-        feature = feature.replace('.','')
-        processed_features.append(feature)
+    for feature in feature_list:
+        cleaned_feature = feature.strip()
+        cleaned_feature = "".join(cleaned_feature.split())
+        cleaned_feature = cleaned_feature.replace('.','')
+        processed_features.append(cleaned_feature)
 
     return processed_features
