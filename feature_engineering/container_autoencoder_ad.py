@@ -8,18 +8,17 @@ from sklearn.preprocessing import StandardScaler
 
 def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour):
 
-    node_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value ='Container')
-    err, node_df = node_data.read()
+    pyspark_container_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value ='Container')
+    err, pyspark_container_df = node_data.read()
 
     if err == 'PASS':
-
         #get features
         features_df = get_features(feature_group_name,feature_group_created_date)
         features = features_df["feature_name"].to_list()
         processed_features = feature_processor.cleanup(features)
     
         #filter inital node df based on request features
-        container_df = container_df.select("Timestamp", "kubernetes", *processed_features)
+        container_df = pyspark_container_df.select("Timestamp", "kubernetes", *processed_features)
         container_df = container_df.withColumn("Timestamp",(col("Timestamp")/1000).cast("timestamp"))
         
         # Drop NA
@@ -49,7 +48,7 @@ def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_cre
     
 
 def container_autoencoder_ad_feature_engineering(input_features_df, input_processed_df):
-
+    
     model_parameters = input_features_df["model_parameters"]
     features =  feature_processor.cleanup(input_features_df["feature_name"].to_list())
     
@@ -57,29 +56,33 @@ def container_autoencoder_ad_feature_engineering(input_features_df, input_proces
     batch_size = model_parameters[0]["batch_size"]
     n_samples = batch_size * model_parameters[0]["sample_multiplier"]
     
-    
-    x_train = np.zeros((n_samples,time_steps,len(features)))
-    
-    for b in range(600):
-
+    container_data = np.zeros((n_samples,time_steps,len(features)))
+    for n in range(n_samples):
         ##pick random df, and normalize
-        random_instance_id = input_processed_df.select("InstanceId").orderBy(rand()).limit(1)
-        filtered_instance_id = (input_processed_df["InstanceId"]==random_instance_id["InstanceId"][0])
-        train_df = input_processed_df[filtered_instance_id][['Timestamp'] + features].select('*')
-        train_df.show(truncate=False)
-        train_df = train_df.sort_values(by='Timestamp').reset_index(drop=True)
+        random_instance_df= input_processed_df.select("InstanceId").orderBy(rand()).limit(1)
+        container_fe_df = input_processed_df[(input_processed_df["InstanceId"] == random_instance_df.first()["InstanceId"])][['Timestamp'] + features].select('*')
+        container_fe_df = container_fe_df.sort("Timestamp")
         
         #scaler transformations
-        train_df[features] = StandardScaler().fit_transform(train_df[features])
+        assembler = VectorAssembler(inputCols=features, outputCol="vectorized_features")
+        container_fe_df = assembler.transform(container_fe_df)
+        scaler = StandardScaler(inputCol = "vectorized_features", outputCol = "scaled_features", withMean=True, withStd=True)
+        container_fe_df = scaler.fit(container_fe_df).transform(container_fe_df)
+        container_fe_df.show(truncate=False)
         
-        
-        start = random.choice(range(len(train_df)-time_steps))
-        x_train[b,:,:] = train_df[start:start+time_steps][features]
+        #final X_train tensor
+        start = random.choice(range(len(container_fe_df)-time_steps))
+        container_data[n,:,:] = container_fe_df[start:start+time_steps][scaled_features]
 
-    final_training_data  = x_train
-    print(final_training_data)
+    print(container_data)
+    print(container_data.shape)
     
-    return final_training_data
+    return container_data
 
     
     
+def container_autoencoder_train_test_split(input_df):
+    
+    container_train, container_test = input_df.randomSplit(weights=[0.8,0.2], seed=200)
+
+    return container_train, container_test

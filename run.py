@@ -34,12 +34,19 @@ def container_training_data_builder():
     # pd.set_option('display.max_columns', None)  
     # print(container_features_data.head())
     # print(container_processed_data.show(truncate=False))
+    
+    #test, train split
+    container_train_data, container_test_data = container_autoencoder_train_test_split(container_processed_data)
 
-    #feature engineering
-    container_training_data = container_autoencoder_ad_feature_engineering(container_features_data, container_processed_data)
-    print(container_training_data.show(truncate=False))
-
-    #s3_operations.write_to_s3(training_data, s3_path)
+    #Train data feature engineering
+    node_training_data = container_autoencoder_ad_feature_engineering(container_features_data, container_train_data)
+    #s3_operations.write_to_s3(node_training_data, s3_path)
+    print(node_training_data.show(truncate=False))
+ 
+    #Test data feature engineering
+    node_testing_data = container_autoencoder_ad_feature_engineering(container_features_data, container_test_data)
+    #s3_operations.write_to_s3(node_testing_data, s3_path)
+    print(node_testing_data.show(truncate=False))
     
     
 if __name__ == "__main__":

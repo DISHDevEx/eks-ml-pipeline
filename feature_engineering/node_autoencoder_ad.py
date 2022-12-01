@@ -8,8 +8,8 @@ from pyspark.ml.feature import VectorAssembler, StandardScaler
 
 def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour):
 
-    node_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value ='Node')
-    err, node_df = node_data.read()
+    pyspark_node_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value ='Node')
+    err, pyspark_node_df = node_data.read()
 
     if err == 'PASS':
 
@@ -19,7 +19,7 @@ def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_
         processed_features = feature_processor.cleanup(features)
     
         #filter inital node df based on request features
-        node_df = node_df.select("Timestamp", "InstanceId", *processed_features)
+        node_df = pyspark_node_df.select("Timestamp", "InstanceId", *processed_features)
         node_df = node_df.withColumn("Timestamp",(col("Timestamp")/1000).cast("timestamp"))
         
         # Drop NA
