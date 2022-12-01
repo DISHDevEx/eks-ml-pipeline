@@ -47,10 +47,10 @@ def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_cre
     
     
 
-def container_autoencoder_ad_feature_engineering(input_features_df, input_processed_df):
+def container_autoencoder_ad_feature_engineering(input_container_features_df, input_container_processed_df):
     
-    model_parameters = input_features_df["model_parameters"]
-    features =  feature_processor.cleanup(input_features_df["feature_name"].to_list())
+    model_parameters = input_container_features_df["model_parameters"]
+    features =  feature_processor.cleanup(input_container_features_df["feature_name"].to_list())
     
     time_steps = model_parameters[0]["time_steps"]
     batch_size = model_parameters[0]["batch_size"]
@@ -59,8 +59,8 @@ def container_autoencoder_ad_feature_engineering(input_features_df, input_proces
     container_data = np.zeros((n_samples,time_steps,len(features)))
     for n in range(n_samples):
         ##pick random df, and normalize
-        random_instance_df= input_processed_df.select("InstanceId").orderBy(rand()).limit(1)
-        container_fe_df = input_processed_df[(input_processed_df["InstanceId"] == random_instance_df.first()["InstanceId"])][['Timestamp'] + features].select('*')
+        random_instance_df= input_container_processed_df.select("InstanceId").orderBy(rand()).limit(1)
+        container_fe_df = input_container_processed_df[(input_container_processed_df["InstanceId"] == random_instance_df.first()["InstanceId"])][['Timestamp'] + features].select('*')
         container_fe_df = container_fe_df.sort("Timestamp")
         
         #scaler transformations
