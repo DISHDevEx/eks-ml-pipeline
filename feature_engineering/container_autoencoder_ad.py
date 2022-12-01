@@ -3,7 +3,7 @@ import random
 from utilities import feature_processor, null_report
 from msspackages import Pyspark_data_ingestion, get_features
 from pyspark.sql.functions import col, count, rand
-from sklearn.preprocessing import StandardScaler
+from pyspark.ml.feature import VectorAssembler, StandardScaler
 
 
 def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour):

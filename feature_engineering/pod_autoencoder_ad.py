@@ -6,6 +6,9 @@ from pyspark.sql.functions import col, count, rand, get_json_object
 from pyspark.ml.feature import VectorAssembler, StandardScaler
 
 
+
+
+
 def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour):
 
     pod_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value ='Pod')
