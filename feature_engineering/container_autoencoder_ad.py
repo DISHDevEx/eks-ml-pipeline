@@ -7,9 +7,9 @@ from pyspark.ml.feature import VectorAssembler, StandardScaler
 from pyspark.ml import Pipeline
 
 
-def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour):
+def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour, input_setup = "default"):
 
-    pyspark_container_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value ='Container')
+    pyspark_container_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup,  filter_column_value ='Container')
     err, pyspark_container_df = pyspark_container_data.read()
 
     if err == 'PASS':
@@ -24,8 +24,6 @@ def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_cre
         
         # Drop NA
         cleaned_container_df = container_df.na.drop(subset=processed_features)
-        
-        cleaned_container_df.show(truncate=False)
 
         
         #Quality(timestamp filtered) nodes
@@ -33,8 +31,8 @@ def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_cre
         quality_filtered_containers = quality_filtered_container_df.filter(col("timestamp_count").between(45,75))
         
 
-        #Processed Node DF                                                      
-        processed_container_df = cleaned_container_df.filter(col("container_name_pod_id").isin(quality_filtered_nodes["container_name_pod_id"]))
+        #Processed Container DF                                                      
+        processed_container_df = cleaned_container_df.filter(col("container_name_pod_id").isin(quality_filtered_containers["container_name_pod_id"]))
         
         #Null report
         null_report_df = null_report.report_generator(processed_container_df, processed_features)     
@@ -61,32 +59,20 @@ def container_autoencoder_ad_feature_engineering(input_container_features_df, in
     for n in range(n_samples):
         ##pick random df, and normalize
         random_container_df= input_container_processed_df.select("container_name_pod_id").orderBy(rand()).limit(1)
-        container_fe_df = input_container_processed_df[(input_container_processed_df["container_name_pod_id"] == random_instance_df.first()["container_name_pod_id"])][['Timestamp'] + features].select('*')
+        container_fe_df = input_container_processed_df[(input_container_processed_df["container_name_pod_id"] == random_container_df.first()["container_name_pod_id"])][["Timestamp","container_name_pod_id"] + features].select('*')
         container_fe_df = container_fe_df.sort("Timestamp")
         
         #scaler transformations
-        scaled_features = []
-        for feature in features:
-            scaled_features = scaled_features + ["scaled_"+feature]
-            assembler = VectorAssembler(inputCols=[feature], outputCol="vectorized_" + feature)
-            scaler = StandardScaler(inputCol = "vectorized_" + feature, outputCol = "scaled_"+ feature)
-            pipeline = Pipeline(stages=[assembler, scaler])
-            container_fe_scaled_df = pipeline.fit(container_fe_df).transform(container_fe_df)
+        assembler = VectorAssembler(inputCols=features, outputCol="vectorized_features")
+        scaler = StandardScaler(inputCol = "vectorized_features", outputCol = "scaled_features", withMean=True, withStd=True)
+        pipeline = Pipeline(stages=[assembler, scaler])
+        container_fe_df = pipeline.fit(container_fe_df).transform(container_fe_df)
+        
+        container_fe_df = container_fe_df.select("Timestamp","container_name_pod_id",*features,"scaled_features")
             
-        container_fe_scaled_df.show(truncate=False)
-        print(scaled_features)
-
-        
-        #final X_train tensor
-        start = random.choice(range(container_fe_scaled_df.count()-time_steps))
-        #node_data[n,:,:] = node_fe_scaled_df[start:start+time_steps][scaled_features]
-        container_data[n,:,:] = container_fe_scaled_df.withColumn("Row",row_number().over(Window.orderBy(lit(0)))).filter(col("Row").between(start,start+time_steps)).drop("Row").select(*scaled_features)
-        
-
-    print(container_data)
-    print(container_data.shape)
+        container_fe_df.show(truncate=False) 
     
-    return container_data
+    return container_fe_df
 
     
     
