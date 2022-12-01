@@ -75,8 +75,8 @@ def pod_autoencoder_ad_feature_engineering(input_features_df, input_processed_df
     pod_data = np.zeros((n_samples,time_steps,len(features)))
     for n in range(n_samples):
         ##pick random df, and normalize
-        random_instance_df= input_node_processed_df.select("pod_id").orderBy(rand()).limit(1)
-        pod_fe_df = input_node_processed_df[(input_node_processed_df["pod_id"] == random_instance_df.first()["pod_id"])][['Timestamp'] + features].select('*')
+        random_instance_df= input_processed_df.select("pod_id").orderBy(rand()).limit(1)
+        pod_fe_df = input_processed_df[(input_processed_df["pod_id"] == random_instance_df.first()["pod_id"])][['Timestamp'] + features].select('*')
         pod_fe_df = pod_fe_df.sort("Timestamp")
         
         #scaler transformations
@@ -86,12 +86,15 @@ def pod_autoencoder_ad_feature_engineering(input_features_df, input_processed_df
         pod_fe_df = scaler.fit(pod_fe_df).transform(pod_fe_df)
         pod_fe_df.show(truncate=False)
         
+        print('pod_fe_df.count()', pod_fe_df.count())
+        print('pod_fe_df.count()-time_steps', pod_fe_df.count()-time_steps)
+        
         #final X_train tensor
-        start = random.choice(range(len(pod_fe_df)-time_steps))
+        start = random.choice(range(pod_fe_df.count()-time_steps))
         pod_data[n,:,:] = pod_fe_df[start:start+time_steps][scaled_features]
 
     print(pod_data)
-    print(pod_data.shape)
+    #print(pod_data.shape)
     
     return pod_data
 

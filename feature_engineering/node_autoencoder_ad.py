@@ -2,8 +2,9 @@ import numpy as np
 import random
 from utilities import feature_processor, null_report
 from msspackages import Pyspark_data_ingestion, get_features
-from pyspark.sql.functions import col, count, rand
+from pyspark.sql.functions import col, count, rand, row_number, lit
 from pyspark.ml.feature import VectorAssembler, StandardScaler
+from pyspark.ml import Pipeline
 
 
 def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour):
@@ -63,24 +64,30 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
         node_fe_df = node_fe_df.sort("Timestamp")
         
         #scaler transformations
-        assembler = VectorAssembler(inputCols=features, outputCol="vectorized_features")
-        node_fe_df = assembler.transform(node_fe_df)
-        scaler = StandardScaler(inputCol = "vectorized_features", outputCol = "scaled_features", withMean=True, withStd=True)
-        node_fe_df = scaler.fit(node_fe_df).transform(node_fe_df)
-        node_fe_df.show(truncate=False)
-        node_fe_count = node_fe_df.count()
+        scaled_features = []
+        for feature in features:
+            scaled_features = scaled_features + ["scaled_"+feature]
+            assembler = VectorAssembler(inputCols=[feature], outputCol="vectorized_" + feature)
+            scaler = StandardScaler(inputCol = "vectorized_" + feature, outputCol = "scaled_"+ feature)
+            pipeline = Pipeline(stages=[assembler, scaler])
+            node_fe_scaled_df = pipeline.fit(node_fe_df).transform(node_fe_df)
+            
+        node_fe_scaled_df.show(truncate=False)
+        print(scaled_features)
+
         
         #final X_train tensor
-        start = random.choice(range(node_fe_count-time_steps))
-        node_fe_df = node_fe_df.toPandas()
-        node_data[n,:,:] = node_fe_df[start:start+time_steps]["scaled_features"]
+        start = random.choice(range(node_fe_scaled_df.count()-time_steps))
+        #node_data[n,:,:] = node_fe_scaled_df[start:start+time_steps][scaled_features]
+        node_data[n,:,:] = node_fe_scaled_df.withColumn("Row",row_number().over(Window.orderBy(lit(0)))).filter(col("Row").between(start,start+time_steps)).drop("Row").select(*scaled_features)
+        
 
     print(node_data)
     print(node_data.shape)
     
     return node_data
 
-    
+
 
 def node_autoencoder_train_test_split(input_df):
     
