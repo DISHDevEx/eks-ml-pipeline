@@ -71,7 +71,6 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
         node_fe_df = pipeline.fit(node_fe_df).transform(node_fe_df)
             
     node_fe_df = node_fe_df.select("Timestamp","InstanceId",*features,"scaled_features")
-    node_fe_df.show(truncate=False) 
 
     return node_fe_df
 

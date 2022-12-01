@@ -15,11 +15,9 @@ def node_training_data_builder():
 
     #Train data feature engineering
     node_training_data = node_autoencoder_ad_feature_engineering(node_features_data, node_train_data)
-    print(node_training_data.show(truncate=False))
  
     #Test data feature engineering
     node_testing_data = node_autoencoder_ad_feature_engineering(node_features_data, node_test_data)
-    print(node_testing_data.show(truncate=False))
     
     return node_training_data, node_testing_data
 
@@ -39,11 +37,9 @@ def container_training_data_builder():
 
     #Train data feature engineering
     container_training_data = container_autoencoder_ad_feature_engineering(container_features_data, container_train_data)
-    print(container_training_data.show(truncate=False))
  
     #Test data feature engineering
     container_testing_data = container_autoencoder_ad_feature_engineering(container_features_data, container_test_data)
-    print(container_testing_data.show(truncate=False))
     
     return container_training_data, container_testing_data
     

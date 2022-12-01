@@ -56,7 +56,7 @@ def container_autoencoder_ad_feature_engineering(input_container_features_df, in
     n_samples = batch_size * model_parameters[0]["sample_multiplier"]
     
     node_data = np.zeros((n_samples,time_steps,len(features)))
-    for n in range(n_samples):
+    for n in range(1):
         ##pick random df, and normalize
         random_container_df= input_container_processed_df.select("container_name_pod_id").orderBy(rand()).limit(1)
         container_fe_df = input_container_processed_df[(input_container_processed_df["container_name_pod_id"] == random_container_df.first()["container_name_pod_id"])][["Timestamp","container_name_pod_id"] + features].select('*')
@@ -69,7 +69,6 @@ def container_autoencoder_ad_feature_engineering(input_container_features_df, in
         container_fe_df = pipeline.fit(container_fe_df).transform(container_fe_df)
         
     container_fe_df = container_fe_df.select("Timestamp","container_name_pod_id",*features,"scaled_features")
-    container_fe_df.show(truncate=False) 
     
     return container_fe_df
 
