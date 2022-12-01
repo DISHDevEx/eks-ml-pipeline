@@ -9,7 +9,7 @@ from pyspark.ml.feature import VectorAssembler, StandardScaler
 def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour):
 
     pyspark_node_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value ='Node')
-    err, pyspark_node_df = node_data.read()
+    err, pyspark_node_df = pyspark_node_data.read()
 
     if err == 'PASS':
 

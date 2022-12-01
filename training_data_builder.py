@@ -1,4 +1,7 @@
-from feature_engineering import node_autoencoder_ad_preprocessing, node_autoencoder_ad_feature_engineering, node_autoencoder_train_test_split, container_autoencoder_ad_preprocessing, container_autoencoder_ad_feature_engineering
+from feature_engineering import node_autoencoder_ad_preprocessing, node_autoencoder_ad_feature_engineering, node_autoencoder_train_test_split
+from feature_engineering import container_autoencoder_ad_preprocessing, container_autoencoder_ad_feature_engineering
+from feature_engineering import pod_autoencoder_ad_preprocessing, pod_autoencoder_ad_feature_engineering
+
 from utilities import s3_operations
 import pandas as pd
 
@@ -25,6 +28,26 @@ def node_training_data_builder():
     print(node_testing_data.show(truncate=False))
 
     
+def pod_training_data_builder():
+    
+    #pre processing
+    pod_features_data, pod_processed_data = pod_autoencoder_ad_preprocessing("pod_autoencoder_ad","11-30-2022","2022","10","10","10")
+    #pd.set_option('display.max_columns', None)  
+    print(pod_features_data.head())
+    print(pod_processed_data.show(truncate=False))
+    
+    #test, train split
+    pod_train_data, pod_test_data = pod_autoencoder_train_test_split(pod_processed_data)
+
+    #Train data feature engineering
+    pod_training_data = pod_autoencoder_ad_feature_engineering(pod_features_data, pod_train_data)
+    #s3_operations.write_to_s3(node_training_data, s3_path)
+    print(pod_training_data.show(truncate=False))
+ 
+    #Test data feature engineering
+    pod_testing_data = pod_autoencoder_ad_feature_engineering(pod_features_data, pod_test_data)
+    #s3_operations.write_to_s3(node_testing_data, s3_path)
+    print(pod_testing_data.show(truncate=False))
     
     
 def container_training_data_builder():
@@ -50,4 +73,5 @@ def container_training_data_builder():
     
     
 if __name__ == "__main__":
-    node_training_data_builder()
+    #node_training_data_builder()
+    pod_training_data_builder()
