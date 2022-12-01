@@ -68,9 +68,8 @@ def container_autoencoder_ad_feature_engineering(input_container_features_df, in
         pipeline = Pipeline(stages=[assembler, scaler])
         container_fe_df = pipeline.fit(container_fe_df).transform(container_fe_df)
         
-        container_fe_df = container_fe_df.select("Timestamp","container_name_pod_id",*features,"scaled_features")
-            
-        container_fe_df.show(truncate=False) 
+    container_fe_df = container_fe_df.select("Timestamp","container_name_pod_id",*features,"scaled_features")
+    container_fe_df.show(truncate=False) 
     
     return container_fe_df
 

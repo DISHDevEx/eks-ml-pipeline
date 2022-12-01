@@ -58,7 +58,7 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
     n_samples = batch_size * model_parameters[0]["sample_multiplier"]
     
     node_data = np.zeros((n_samples,time_steps,len(features)))
-    for n in range(1):
+    for n in range(n_samples):
         ##pick random df, and normalize
         random_instance_df= input_node_processed_df.select("InstanceId").orderBy(rand()).limit(1)
         node_fe_df = input_node_processed_df[(input_node_processed_df["InstanceId"] == random_instance_df.first()["InstanceId"])][["Timestamp", "InstanceId"] + features].select('*')
@@ -70,8 +70,8 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
         pipeline = Pipeline(stages=[assembler, scaler])
         node_fe_df = pipeline.fit(node_fe_df).transform(node_fe_df)
             
-        node_fe_df = node_fe_df.select("Timestamp","InstanceId",*features,"scaled_features")
-        node_fe_df.show(truncate=False) 
+    node_fe_df = node_fe_df.select("Timestamp","InstanceId",*features,"scaled_features")
+    node_fe_df.show(truncate=False) 
 
     return node_fe_df
 
