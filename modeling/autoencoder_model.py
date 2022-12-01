@@ -18,7 +18,7 @@ this models serves to provide MSS with a tool to excavate anomalies in an unsupe
 
 """
 
-class Autoencoder_Model_Dish_5g():
+class autoencoder_model_dish_5g():
     """
     @:constructor takes in timesteps, batch size, learning rate, and a train_valid ratio
     

@@ -9,7 +9,7 @@ from pyspark.ml.feature import VectorAssembler, StandardScaler
 def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour):
 
     pyspark_node_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value ='Node')
-    err, pyspark_node_df = node_data.read()
+    err, pyspark_node_df = pyspark_node_data.read()
 
     if err == 'PASS':
 
@@ -68,10 +68,12 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
         scaler = StandardScaler(inputCol = "vectorized_features", outputCol = "scaled_features", withMean=True, withStd=True)
         node_fe_df = scaler.fit(node_fe_df).transform(node_fe_df)
         node_fe_df.show(truncate=False)
+        node_fe_count = node_fe_df.count()
         
         #final X_train tensor
-        start = random.choice(range(len(node_fe_df)-time_steps))
-        node_data[n,:,:] = node_fe_df[start:start+time_steps][scaled_features]
+        start = random.choice(range(node_fe_count-time_steps))
+        node_fe_df = node_fe_df.toPandas()
+        node_data[n,:,:] = node_fe_df[start:start+time_steps]["scaled_features"]
 
     print(node_data)
     print(node_data.shape)

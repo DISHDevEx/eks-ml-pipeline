@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour):
 
     pyspark_container_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value ='Container')
-    err, pyspark_container_df = node_data.read()
+    err, pyspark_container_df = pyspark_container_data.read()
 
     if err == 'PASS':
         #get features
