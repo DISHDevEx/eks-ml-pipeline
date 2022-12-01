@@ -3,13 +3,13 @@ import random
 from utilities import feature_processor, null_report
 from msspackages import Pyspark_data_ingestion, get_features
 from pyspark.sql.functions import col, count, rand
-from sklearn.preprocessing import StandardScaler
+from pyspark.ml.feature import VectorAssembler, StandardScaler
 
 
 def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour):
 
-    node_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value ='Node')
-    err, node_df = node_data.read()
+    pyspark_node_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value ='Node')
+    err, pyspark_node_df = node_data.read()
 
     if err == 'PASS':
 
@@ -19,7 +19,7 @@ def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_
         processed_features = feature_processor.cleanup(features)
     
         #filter inital node df based on request features
-        node_df = node_df.select("Timestamp", "InstanceId", *processed_features)
+        node_df = pyspark_node_df.select("Timestamp", "InstanceId", *processed_features)
         node_df = node_df.withColumn("Timestamp",(col("Timestamp")/1000).cast("timestamp"))
         
         # Drop NA
@@ -46,38 +46,43 @@ def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_
     
     
 
-def node_autoencoder_ad_feature_engineering(input_features_df, input_processed_df):
+def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_processed_df):
 
-    model_parameters = input_features_df["model_parameters"]
-    features =  feature_processor.cleanup(input_features_df["feature_name"].to_list())
+    model_parameters = input_node_features_df["model_parameters"]
+    features =  feature_processor.cleanup(input_node_features_df["feature_name"].to_list())
     
     time_steps = model_parameters[0]["time_steps"]
     batch_size = model_parameters[0]["batch_size"]
     n_samples = batch_size * model_parameters[0]["sample_multiplier"]
     
-    
-    x_train = np.zeros((n_samples,time_steps,len(features)))
-    
-    for b in range(600):
-
+    node_data = np.zeros((n_samples,time_steps,len(features)))
+    for n in range(n_samples):
         ##pick random df, and normalize
-        random_instance_id = input_processed_df.select("InstanceId").orderBy(rand()).limit(1)
-        random_instance_id.show(truncate=False)
-        filtered_instance_id = (input_processed_df['InstanceId']==random_instance_id)
-        train_df = input_processed_df[filtered_instance_id][['Timestamp'] + features].copy()
-        train_df = train_df.sort_values(by='Timestamp').reset_index(drop=True)
+        random_instance_df= input_node_processed_df.select("InstanceId").orderBy(rand()).limit(1)
+        node_fe_df = input_node_processed_df[(input_node_processed_df["InstanceId"] == random_instance_df.first()["InstanceId"])][['Timestamp'] + features].select('*')
+        node_fe_df = node_fe_df.sort("Timestamp")
         
         #scaler transformations
-        train_df[features] = StandardScaler().fit_transform(train_df[features])
+        assembler = VectorAssembler(inputCols=features, outputCol="vectorized_features")
+        node_fe_df = assembler.transform(node_fe_df)
+        scaler = StandardScaler(inputCol = "vectorized_features", outputCol = "scaled_features", withMean=True, withStd=True)
+        node_fe_df = scaler.fit(node_fe_df).transform(node_fe_df)
+        node_fe_df.show(truncate=False)
         
-        
-        start = random.choice(range(len(train_df)-time_steps))
-        x_train[b,:,:] = train_df[start:start+time_steps][features]
+        #final X_train tensor
+        start = random.choice(range(len(node_fe_df)-time_steps))
+        node_data[n,:,:] = node_fe_df[start:start+time_steps][scaled_features]
 
-    final_training_data  = x_train
-    print(final_training_data)
+    print(node_data)
+    print(node_data.shape)
     
-    return final_training_data
+    return node_data
 
     
+
+def node_autoencoder_train_test_split(input_df):
+    
+    node_train, node_test = input_df.randomSplit(weights=[0.8,0.2], seed=200)
+
+    return node_train, node_test
     
