@@ -7,8 +7,8 @@ import json
 import sys
 import statsmodels.api as sm
 import os
-import keras
-from keras import layers
+from tensorflow import keras
+from tensorflow.keras import layers
 import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
 from autoencoder_model_dish_5g import Autoencoder_Model_Dish_5g
@@ -23,9 +23,7 @@ if __name__ == "__main__":
     
     
     
-    ##load in model
-    with open(r"eks_Trained_Autoencoder.pickle", "rb") as input_file:
-        model = cPickle.load(input_file)
+  
     
     ##global variable
     timesteps = 12
@@ -34,8 +32,11 @@ if __name__ == "__main__":
     n_samples = batch_size*100
     features = ['node_cpu_utilization','node_memory_utilization','node_network_total_bytes']
 
-
-
+    model = Autoencoder_Model_Dish_5g(batch_size = batch_size, time_steps = time_steps)
+    model.load_nn('trained_AutoEncoder', 4.6828706218714915)
+    
+    
+    
     ##read in data 
     df_full = pd.read_parquet('/root/healthy_clusters_node_month.parquet')
     columns_to_keep = ['Timestamp','InstanceId','node_cpu_utilization','node_memory_utilization','node_network_total_bytes']

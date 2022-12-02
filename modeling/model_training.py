@@ -7,15 +7,15 @@ import json
 import sys
 import statsmodels.api as sm
 import os
-import keras
-from keras import layers
+from tensorflow import keras
+from tensorflow.keras import layers
 import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
 from autoencoder_model_dish_5g import Autoencoder_Model_Dish_5g
 
 from sklearn.model_selection import train_test_split
 
-import _pickle as cPickle
+import dill  
 
 
 if __name__ == "__main__":
@@ -87,10 +87,10 @@ if __name__ == "__main__":
 
     x_train.shape
 
+    ##Shape for the input to our LSTM Autoencoder is [numberOfSamples, Timesteps, NumberofFeatures]
 
     model = Autoencoder_Model_Dish_5g(batch_size = batch_size, time_steps = time_steps)
     val_err = model.train(x_train)
     
-    with open(r"eks_Trained_Autoencoder.pickle", "wb") as output_file:
-        cPickle.dump(model, output_file)
-    
+    model.save_nn('trained_AutoEncoder')
+  
