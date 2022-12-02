@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
-import keras
+from tensorflow import keras
 import tensorflow as tf
-from keras import layers
+from tensorflow.keras import layers
 from matplotlib import pyplot as plt
 
 """
@@ -18,7 +18,7 @@ this models serves to provide MSS with a tool to excavate anomalies in an unsupe
 
 """
 
-class Autoencoder_Model_Dish_5g():
+class autoencoder_model_dish_5g():
     """
     @:constructor takes in timesteps, batch size, learning rate, and a train_valid ratio
     
@@ -100,7 +100,7 @@ class Autoencoder_Model_Dish_5g():
             ]
         )
         
-        ##nn compile groups layers into a model; the loss here is MSE, optimizer is Adam, learning rate is predefined
+        ##nn compile groups layers into a model; the loss here is MAE, optimizer is Adam, learning rate is predefined
         self.nn.compile(optimizer=tf.keras.optimizers.Adam(lr=self.lr), loss="mae")
         self.nn.summary()
         
@@ -118,6 +118,26 @@ class Autoencoder_Model_Dish_5g():
         anom_scores[anom_scores > 1.0] = 1.0
         return anom_scores
     
+    
+    def save_nn(self, filename):
+        """
+        @:param filename: name of file to save model
+            -saves nn to file
+        @:returns nothing 
+        """
+        tf.keras.models.save_model(self.nn, filename)
+    
+    def load_nn(self, filename, error_threshold):
+        """
+        @:param filename: name of file to save model
+        @:param error_threshold: error_threshold of nn loaded in 
+            -loads nn to file, and sets the class object error_threshold
+        @:returns nothing 
+        """
+    
+        self.nn = tf.keras.models.load_model(filename)
+        self.error_threshold = error_threshold
+        self.trained = True
 
     def train(self, x_train):
         """
