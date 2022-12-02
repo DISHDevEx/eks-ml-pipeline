@@ -55,7 +55,8 @@ def container_autoencoder_ad_feature_engineering(input_container_features_df, in
     batch_size = model_parameters[0]["batch_size"]
     n_samples = batch_size * model_parameters[0]["sample_multiplier"]
     
-    node_data = np.zeros((n_samples,time_steps,len(features)))
+    container_tensor = np.zeros((n_samples,time_steps,len(features)))
+    final_container_fe_df = None
     for n in range(n_samples):
         ##pick random df, and normalize
         random_container_df= input_container_processed_df.select("container_name_pod_id").orderBy(rand()).limit(1)
@@ -68,9 +69,19 @@ def container_autoencoder_ad_feature_engineering(input_container_features_df, in
         pipeline = Pipeline(stages=[assembler, scaler])
         container_fe_df = pipeline.fit(container_fe_df).transform(container_fe_df)
         
-    container_fe_df = container_fe_df.select("Timestamp","container_name_pod_id",*features,"scaled_features")
-    
-    return container_fe_df
+        #tensor builder
+        start = random.choice(range(container_fe_df.count()-time_steps))
+        container_tensor_df = container_fe_df.withColumn("rn", row_number().over(Window.orderBy("container_name_pod_id"))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
+        container_tensor[n,:,:] = container_tensor_df.select("scaled_features").rdd.flatMap(list).collect()
+        
+        if not final_container_fe_df:
+            final_container_fe_df = container_fe_df
+        else:
+            final_container_fe_df = final_container_fe_df.union(container_fe_df)
+ 
+    final_container_fe_df = final_container_fe_df.select("Timestamp","container_name_pod_id",*features,"scaled_features")
+
+    return final_container_fe_df, container_tensor
 
     
     

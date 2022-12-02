@@ -57,7 +57,8 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
     batch_size = model_parameters[0]["batch_size"]
     n_samples = batch_size * model_parameters[0]["sample_multiplier"]
     
-    node_data = np.zeros((n_samples,time_steps,len(features)))
+    node_tensor = np.zeros((n_samples,time_steps,len(features)))
+    final_node_fe_df = None
     for n in range(n_samples):
         ##pick random df, and normalize
         random_instance_df= input_node_processed_df.select("InstanceId").orderBy(rand()).limit(1)
@@ -69,10 +70,20 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
         scaler = StandardScaler(inputCol = "vectorized_features", outputCol = "scaled_features", withMean=True, withStd=True)
         pipeline = Pipeline(stages=[assembler, scaler])
         node_fe_df = pipeline.fit(node_fe_df).transform(node_fe_df)
-            
-    node_fe_df = node_fe_df.select("Timestamp","InstanceId",*features,"scaled_features")
 
-    return node_fe_df
+        #tensor builder
+        start = random.choice(range(node_fe_df.count()-time_steps))
+        node_tensor_df = node_fe_df.withColumn('rn', row_number().over(Window.orderBy('InstanceId'))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
+        node_tensor[n,:,:] = node_tensor_df.select("scaled_features").rdd.flatMap(list).collect()
+        
+        if not final_node_fe_df:
+            final_node_fe_df = node_fe_df
+        else:
+            final_node_fe_df = final_node_fe_df.union(node_fe_df)
+ 
+    final_node_fe_df = final_node_fe_df.select("Timestamp","InstanceId",*features,"scaled_features")
+
+    return final_node_fe_df, node_tensor
 
 
 
