@@ -64,6 +64,8 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
         random_instance_df= input_node_processed_df.select("InstanceId").orderBy(rand()).limit(1)
         node_fe_df = input_node_processed_df[(input_node_processed_df["InstanceId"] == random_instance_df.first()["InstanceId"])][["Timestamp", "InstanceId"] + features].select('*')
         node_fe_df = node_fe_df.sort("Timestamp")
+        node_fe_df = node_fe_df.na.drop(subset=features)
+
         
         #scaler transformations
         assembler = VectorAssembler(inputCols=features, outputCol="vectorized_features")
@@ -74,6 +76,11 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
         #tensor builder
         start = random.choice(range(node_fe_df.count()-time_steps))
         node_tensor_df = node_fe_df.withColumn('rn', row_number().over(Window.orderBy('InstanceId'))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
+        node_tensor_list = node_tensor_df.select("scaled_features").rdd.flatMap(list).collect()
+        if len(node_tensor_list) != 12:
+            print(node_tensor_list)
+            print(start)
+            print(start+time_steps)
         node_tensor[n,:,:] = node_tensor_df.select("scaled_features").rdd.flatMap(list).collect()
         
         if not final_node_fe_df:
