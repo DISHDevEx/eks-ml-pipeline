@@ -2,14 +2,15 @@ import numpy as np
 import random
 from utilities import feature_processor, null_report
 from msspackages import Pyspark_data_ingestion, get_features
-from pyspark.sql.functions import col, count, rand, row_number, lit
+from pyspark.sql import Window
+from pyspark.sql.functions import col, count, rand, row_number
 from pyspark.ml.feature import VectorAssembler, StandardScaler
 from pyspark.ml import Pipeline
 
 
-def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour):
+def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour, input_setup = "default"):
 
-    pyspark_node_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value ='Node')
+    pyspark_node_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Node')
     err, pyspark_node_df = pyspark_node_data.read()
 
     if err == 'PASS':
@@ -56,36 +57,33 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
     batch_size = model_parameters[0]["batch_size"]
     n_samples = batch_size * model_parameters[0]["sample_multiplier"]
     
-    node_data = np.zeros((n_samples,time_steps,len(features)))
+    node_tensor = np.zeros((n_samples,time_steps,len(features)))
+    final_node_fe_df = None
     for n in range(n_samples):
         ##pick random df, and normalize
         random_instance_df= input_node_processed_df.select("InstanceId").orderBy(rand()).limit(1)
-        node_fe_df = input_node_processed_df[(input_node_processed_df["InstanceId"] == random_instance_df.first()["InstanceId"])][['Timestamp'] + features].select('*')
+        node_fe_df = input_node_processed_df[(input_node_processed_df["InstanceId"] == random_instance_df.first()["InstanceId"])][["Timestamp", "InstanceId"] + features].select('*')
         node_fe_df = node_fe_df.sort("Timestamp")
         
         #scaler transformations
-        scaled_features = []
-        for feature in features:
-            scaled_features = scaled_features + ["scaled_"+feature]
-            assembler = VectorAssembler(inputCols=[feature], outputCol="vectorized_" + feature)
-            scaler = StandardScaler(inputCol = "vectorized_" + feature, outputCol = "scaled_"+ feature)
-            pipeline = Pipeline(stages=[assembler, scaler])
-            node_fe_scaled_df = pipeline.fit(node_fe_df).transform(node_fe_df)
-            
-        node_fe_scaled_df.show(truncate=False)
-        print(scaled_features)
+        assembler = VectorAssembler(inputCols=features, outputCol="vectorized_features")
+        scaler = StandardScaler(inputCol = "vectorized_features", outputCol = "scaled_features", withMean=True, withStd=True)
+        pipeline = Pipeline(stages=[assembler, scaler])
+        node_fe_df = pipeline.fit(node_fe_df).transform(node_fe_df)
 
+        #tensor builder
+        start = random.choice(range(node_fe_df.count()-time_steps))
+        node_tensor_df = node_fe_df.withColumn('rn', row_number().over(Window.orderBy('InstanceId'))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
+        node_tensor[n,:,:] = node_tensor_df.select("scaled_features").rdd.flatMap(list).collect()
         
-        #final X_train tensor
-        start = random.choice(range(node_fe_scaled_df.count()-time_steps))
-        #node_data[n,:,:] = node_fe_scaled_df[start:start+time_steps][scaled_features]
-        node_data[n,:,:] = node_fe_scaled_df.withColumn("Row",row_number().over(Window.orderBy(lit(0)))).filter(col("Row").between(start,start+time_steps)).drop("Row").select(*scaled_features)
-        
+        if not final_node_fe_df:
+            final_node_fe_df = node_fe_df
+        else:
+            final_node_fe_df = final_node_fe_df.union(node_fe_df)
+ 
+    final_node_fe_df = final_node_fe_df.select("Timestamp","InstanceId",*features,"scaled_features")
 
-    print(node_data)
-    print(node_data.shape)
-    
-    return node_data
+    return final_node_fe_df, node_tensor
 
 
 
