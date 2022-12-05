@@ -7,8 +7,44 @@ from pyspark.sql.functions import get_json_object, col, count, rand, row_number,
 from pyspark.ml.feature import VectorAssembler, StandardScaler
 from pyspark.ml import Pipeline
 
+"""
+Contributed by David Cherney and Praveen Mada
+MSS Dish 5g - Pattern Detection
+
+this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
+"""
 
 def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour, input_setup = "default"):
+    """
+    inputs
+    ------
+            feature_group_name: STRING
+            json name to get the required features
+            
+            feature_group_created_date: STRING
+            json created date to get the latest features 
+            
+            input_year : STRING | Int
+            the year from which to read data, leave empty for all years
+
+            input_month : STRING | Int
+            the month from which to read data, leave empty for all months
+
+            input_day : STRING | Int
+            the day from which to read data, leave empty for all days
+
+            input_hour: STRING | Int
+            the hour from which to read data, leave empty for all hours
+            
+            input_setup: STRING 
+            machine config
+    
+    outputs
+    -------
+            features_df : processed features dataFrame
+            processed_container_df: pre processed container dataframe
+            
+    """
 
     pyspark_container_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup,  filter_column_value ='Container')
     err, pyspark_container_df = pyspark_container_data.read()
@@ -26,12 +62,10 @@ def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_cre
         # Drop NA
         cleaned_container_df = container_df.na.drop(subset=processed_features)
 
-        
         #Quality(timestamp filtered) nodes
         quality_filtered_container_df = cleaned_container_df.groupBy("container_name_pod_id").agg(count("Timestamp").alias("timestamp_count"))
         quality_filtered_containers = quality_filtered_container_df.filter(col("timestamp_count").between(45,75))
         
-
         #Processed Container DF                                                      
         processed_container_df = cleaned_container_df.filter(col("container_name_pod_id").isin(quality_filtered_containers["container_name_pod_id"]))
         
@@ -44,10 +78,24 @@ def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_cre
     else:
         empty_df = pd.DataFrame()
         return empty_df, empty_df
+ 
     
-    
-
 def container_autoencoder_ad_feature_engineering(input_container_features_df, input_container_processed_df):
+    """
+    inputs
+    ------
+            input_container_features_df: df
+            processed conatiner features df
+            
+            input_container_processed_df: df
+            preprocessing and filtered container df 
+    
+    outputs
+    -------
+            container_tensor : np array for training the model
+            final_container_fe_df: training data df for exposing it as data product
+            
+    """
     
     model_parameters = input_container_features_df["model_parameters"]
     features =  feature_processor.cleanup(input_container_features_df["feature_name"].to_list())
@@ -85,8 +133,20 @@ def container_autoencoder_ad_feature_engineering(input_container_features_df, in
     return final_container_fe_df, container_tensor
 
     
-    
 def container_autoencoder_train_test_split(input_df):
+    """
+    inputs
+    ------
+            input_df: df
+            processed/filtered input df from pre processing
+            
+    
+    outputs
+    -------
+            node_train : train df
+            node_test: test df
+            
+    """
     
     container_train, container_test = input_df.randomSplit(weights=[0.8,0.2], seed=200)
 
