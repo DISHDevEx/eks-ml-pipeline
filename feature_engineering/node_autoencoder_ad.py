@@ -38,7 +38,7 @@ def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_
             the hour from which to read data, leave empty for all hours
             
             input_setup: STRING 
-            machine config
+            kernel config
     
     outputs
     -------
@@ -66,14 +66,14 @@ def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_
 
         #Quality(timestamp filtered) nodes
         quality_filtered_node_df = cleaned_node_df.groupBy("InstanceId").agg(count("Timestamp").alias("timestamp_count"))
+        # to get data that is closer to 1min apart
         quality_filtered_nodes = quality_filtered_node_df.filter(col("timestamp_count").between(45,75))
         
         #Processed Node DF                                                      
         processed_node_df = cleaned_node_df.filter(col("InstanceId").isin(quality_filtered_nodes["InstanceId"]))
         
         #Null report
-        null_report_df = null_report.report_generator(processed_node_df, processed_features)     
-        #null_report_df.show(truncate=False)
+        null_report_df = null_report.report_generator(processed_node_df, processed_features)
         
         return features_df, processed_node_df
 
@@ -108,14 +108,14 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
     
     node_tensor = np.zeros((n_samples,time_steps,len(features)))
     final_node_fe_df = None
+
     for n in range(n_samples):
         ##pick random df, and normalize
-        random_instance_df= input_node_processed_df.select("InstanceId").orderBy(rand()).limit(1)
-        node_fe_df = input_node_processed_df[(input_node_processed_df["InstanceId"] == random_instance_df.first()["InstanceId"])][["Timestamp", "InstanceId"] + features].select('*')
+        random_instance_id= random.choice(input_node_processed_df.select("InstanceId").rdd.flatMap(list).collect())
+        node_fe_df = input_node_processed_df[(input_node_processed_df["InstanceId"] == random_instance_id)][["Timestamp", "InstanceId"] + features].select('*')
         node_fe_df = node_fe_df.sort("Timestamp")
         node_fe_df = node_fe_df.na.drop(subset=features)
 
-        
         #scaler transformations
         assembler = VectorAssembler(inputCols=features, outputCol="vectorized_features")
         scaler = StandardScaler(inputCol = "vectorized_features", outputCol = "scaled_features", withMean=True, withStd=True)
@@ -126,16 +126,15 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
         start = random.choice(range(node_fe_df.count()-time_steps))
         node_tensor_df = node_fe_df.withColumn('rn', row_number().over(Window.orderBy('InstanceId'))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
         node_tensor_list = node_tensor_df.select("scaled_features").rdd.flatMap(list).collect()
-        if len(node_tensor_list) != 12:
-            print(node_tensor_list)
-            print(start)
-            print(start+time_steps)
-        node_tensor[n,:,:] = node_tensor_df.select("scaled_features").rdd.flatMap(list).collect()
-        
-        if not final_node_fe_df:
-            final_node_fe_df = node_fe_df
+        if len(node_tensor_list) == time_steps:
+            node_tensor[n,:,:] = node_tensor_list
+
+            if not final_node_fe_df:
+                final_node_fe_df = node_fe_df
+            else:
+                final_node_fe_df = final_node_fe_df.union(node_fe_df)
         else:
-            final_node_fe_df = final_node_fe_df.union(node_fe_df)
+            n_samples = n_samples+1
  
     final_node_fe_df = final_node_fe_df.select("Timestamp","InstanceId",*features,"scaled_features")
 
@@ -149,7 +148,6 @@ def node_autoencoder_train_test_split(input_df):
             input_df: df
             processed/filtered input df from pre processing
             
-    
     outputs
     -------
             node_train : train df
