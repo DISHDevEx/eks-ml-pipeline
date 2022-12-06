@@ -11,6 +11,8 @@ from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
 from datetime import timedelta
 from sklearn.preprocessing import StandardScaler
+from numpy import save
+from numpy import load
 
 """
 Contributed by Vinayak Sharma and David Cherney
@@ -64,7 +66,12 @@ class pca_ad_dish_5g():
         ##create encode and decode for 
         self.encode_decode_maps = None
         
-        self.ss = None
+        self.ss = StandardScaler()
+        
+    def load_in_vs(self,vs):
+        self.vs = load(vs)
+    def save_vs(self):
+        save('vs.npy', self.vs)
         
     def two_time_slice(self, samples):
         """
@@ -99,7 +106,7 @@ class pca_ad_dish_5g():
         trainX_slices_as_samples, trainX_sliced  =  self.two_time_slice(x_train)
         
         
-        self.ss = StandardScaler()
+        
   
         # initializing, just for shape. The [:] is needed to have a copy instead of a view
         trainX_slices_as_samples_ss = trainX_slices_as_samples[:] 
