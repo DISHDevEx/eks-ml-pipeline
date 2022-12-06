@@ -78,19 +78,17 @@ if __name__ == "__main__":
     ##ensure the data is sorted!!
     test_df = test_df.sort_index()
     
-    
     ##actual inferencing
     y_hat_test = []
     res_test = []
 
-    for i in range(0,12,timesteps):
+    for i in range(0,len(test_df),timesteps):
         if(i + timesteps < len(test_df)):
             sample_topredict_on = test_df.iloc[i:i+timesteps]
             x_test = np.array(sample_topredict_on.to_numpy())
             x_test = x_test.reshape(1,-1,3)
             y_hat,residuals = pca_model.test(x_test)
-            y_hat_reshape = y_hat.reshape(1,12,3) 
-            res_reshape = residuals.reshape(1,12,3) 
-            y_hat_test.append(y_hat_reshape)
-            res_test.append(res_reshape)
+            y_hat_test.append(y_hat)
+            res_test.append(residuals)
+
 

@@ -91,6 +91,5 @@ if __name__ == "__main__":
 
     pca_model = pca_ad_dish_5g(num_of_features=3, number_of_temporal_slices=3, timesteps_per_slice=4, n_modes_to_delete=1)
     residuals,ed_errors,encode_decode_maps = pca_model.train(x_train)
-    residuals_reshaped = residuals.reshape(600,12,3)
     pca_model.save_vs()
   
