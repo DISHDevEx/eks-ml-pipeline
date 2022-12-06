@@ -69,9 +69,22 @@ class pca_ad_dish_5g():
         self.ss = StandardScaler()
         
     def load_in_vs(self,vs):
+        """
+        @:param vs: file path with model weights
+        Takes model weights and:
+            - loads them
+        @:returns nothing
+        """
         self.vs = load(vs)
-    def save_vs(self):
-        save('vs.npy', self.vs)
+        
+    def save_vs(self, filename = 'vs.npy'):
+        """
+        @:param filename
+        Takes model weights and:
+            - saves them in a .npy file
+        @:returns nothing
+        """
+        save(filename, self.vs)
         
     def two_time_slice(self, samples):
         """
