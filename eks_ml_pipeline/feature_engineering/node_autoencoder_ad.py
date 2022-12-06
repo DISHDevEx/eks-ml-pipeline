@@ -110,11 +110,12 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
     node_tensor = np.zeros((n_samples,time_steps,len(features)))
     final_node_fe_df = None
     
-    input_node_processed_df = input_node_processed_df.persist(StorageLevel.MEMORY_ONLY)
+    input_node_processed_df.persist(StorageLevel.MEMORY_ONLY)
 
     for n in range(n_samples):
         ##pick random df, and normalize
         random_instance_id= random.choice(input_node_processed_df.select("InstanceId").rdd.flatMap(list).collect())
+        print(random_instance_id)
         node_fe_df = input_node_processed_df[(input_node_processed_df["InstanceId"] == random_instance_id)][["Timestamp", "InstanceId"] + features].select('*')
         node_fe_df = node_fe_df.sort("Timestamp")
         node_fe_df = node_fe_df.na.drop(subset=features)

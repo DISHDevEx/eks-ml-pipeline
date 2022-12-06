@@ -112,6 +112,7 @@ def container_autoencoder_ad_feature_engineering(input_container_features_df, in
     for n in range(n_samples):
         ##pick random df, and normalize
         random_container_id= random.choice(input_container_processed_df.select("container_name_pod_id").rdd.flatMap(list).collect())
+        print(random_container_id)
         container_fe_df = input_container_processed_df[(input_container_processed_df["container_name_pod_id"] == random_container_id)][["Timestamp","container_name_pod_id"] + features].select('*')
         container_fe_df = container_fe_df.sort("Timestamp")
         container_fe_df = container_fe_df.na.drop(subset=features)
