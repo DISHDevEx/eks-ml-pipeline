@@ -1,6 +1,17 @@
-
+import os
 
 def cleanup(feature_list):
+    """
+    Input:
+    ------
+    feature_list: list
+    features names
+    
+    Output:
+    -------
+    processed_features: list
+    cleaned up features
+    """
 
     processed_features = []
     for feature in feature_list:

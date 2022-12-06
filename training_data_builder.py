@@ -7,6 +7,22 @@ import pandas as pd
 
 
 def node_training_data_builder():
+    """
+    Output
+    ------
+        node_training_data:df
+        training df to be stored in s3
+
+        node_testing_data:df
+        testing df to be stores in s3
+
+        node_training_tensor: np array
+        tensor stored in s3 for model training
+
+        node_testing_tensor: np array
+        tensor stored in s3 for model testing
+
+    """
     
     #pre processing
     node_features_data, node_processed_data = node_autoencoder_ad_preprocessing("node_autoencoder_ad","11-21-2022","2022","10","10","10","128gb")
@@ -46,6 +62,23 @@ def pod_training_data_builder():
     
     
 def container_training_data_builder():
+    """
+    Output
+    -------
+    
+        container_training_data:df
+        training df to be stored in s3
+
+        container_testing_data:df
+        testing df to be stores in s3
+
+        container_training_tensor: np array
+        tensor stored in s3 for model training
+
+        container_testing_tensor: np array
+        tensor stored in s3 for model testing
+    
+    """
     
     #pre processing
     container_features_data, container_processed_data = container_autoencoder_ad_preprocessing("container_autoencoder_ad","11-21-2022","2022","10","10","10","128gb")

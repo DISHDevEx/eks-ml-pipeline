@@ -83,17 +83,23 @@ def pod_autoencoder_ad_feature_engineering(input_features_df, input_processed_df
         pod_fe_df = scaler.fit(pod_fe_df).transform(pod_fe_df)
         pod_fe_df.show(truncate=False)
         
-        print('pod_fe_df.count()', pod_fe_df.count())
-        print('pod_fe_df.count()-time_steps', pod_fe_df.count()-time_steps)
-        
-        #final X_train tensor
+        #tensor builder
         start = random.choice(range(pod_fe_df.count()-time_steps))
-        pod_data[n,:,:] = pod_fe_df[start:start+time_steps][scaled_features]
+        pod_tensor_df = pod_fe_df.withColumn('rn', row_number().over(Window.orderBy('pod_id'))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
+        pod_tensor_list = pod_tensor_df.select("scaled_features").rdd.flatMap(list).collect()
+        if len(pod_tensor_list) == time_steps:
+            pod_tensor[n,:,:] = pod_tensor_list
 
-    print(pod_data)
-    #print(pod_data.shape)
-    
-    return pod_data
+            if not final_pod_fe_df:
+                final_pod_fe_df = pod_fe_df
+            else:
+                final_pod_fe_df = final_pod_fe_df.union(pod_fe_df)
+        else:
+            n_samples = n_samples+1
+ 
+    final_pod_fe_df = final_pod_fe_df.select("Timestamp","pod_id",*features,"scaled_features")
+
+    return final_pod_fe_df, pod_tensor
 
     
 
