@@ -106,6 +106,8 @@ def container_autoencoder_ad_feature_engineering(input_container_features_df, in
     
     container_tensor = np.zeros((n_samples,time_steps,len(features)))
     final_container_fe_df = None
+    
+    input_container_processed_df = input_container_processed_df.persist(StorageLevel.MEMORY_ONLY)
 
     for n in range(n_samples):
         ##pick random df, and normalize
@@ -122,7 +124,7 @@ def container_autoencoder_ad_feature_engineering(input_container_features_df, in
         
         #tensor builder
         start = random.choice(range(container_fe_df.count()-time_steps))
-        container_tensor_df = container_fe_df.withColumn("rn", row_number().over(Window.orderBy("container_name_pod_id"))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
+        container_tensor_df = container_fe_df.withColumn("rn", row_number().over(Window.partitionBy("container_name_pod_id").orderBy("Timestamp"))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
         container_tensor_list = container_tensor_df.select("scaled_features").rdd.flatMap(list).collect()
         if len(container_tensor_list) == time_steps:
             container_tensor[n,:,:] = container_tensor_list
@@ -136,6 +138,8 @@ def container_autoencoder_ad_feature_engineering(input_container_features_df, in
             n_samples = n_samples+1
 
     final_container_fe_df = final_container_fe_df.select("Timestamp","container_name_pod_id",*features,"scaled_features")
+    
+    input_container_processed_df.unpersist()
 
     return final_container_fe_df, container_tensor
 
