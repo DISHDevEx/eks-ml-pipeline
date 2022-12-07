@@ -1,14 +1,16 @@
 import numpy as np
 import random
-from utilities import feature_processor, null_report
+from ..utilities import feature_processor, null_report
 from msspackages import Pyspark_data_ingestion, get_features
-from pyspark.sql.functions import col, count, rand, get_json_object
+from pyspark import StorageLevel
+from pyspark.sql import Window
+from pyspark.sql.functions import col, count, rand, row_number, get_json_object
 from pyspark.ml.feature import VectorAssembler, StandardScaler
+from pyspark.ml import Pipeline
 
+def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour, input_setup = "default"):
 
-def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour):
-
-    pod_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value ='Pod')
+    pod_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Pod')
     err, pod_df = pod_data.read()
     pod_df = pod_df.persist()
     pod_df = pod_df.select(*pod_df.columns,
@@ -58,35 +60,52 @@ def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_d
         
 
 
-def pod_autoencoder_ad_feature_engineering(input_features_df, input_processed_df):
+def pod_autoencoder_ad_feature_engineering(input_pod_features_df, input_pod_processed_df):
+    """
+    inputs
+    ------
+            input_pod_features_df: df
+            processed node features df
+            
+            input_pod_processed_df: df
+            preprocessing and filtered node df 
+    
+    outputs
+    -------
+            pod_tensor : np array for training the model
+            final_pod_fe_df: training data df for exposing it as data product
+            
+    """
 
-    model_parameters = input_features_df["model_parameters"]
-    features =  feature_processor.cleanup(input_features_df["feature_name"].to_list())
+    model_parameters = input_pod_features_df["model_parameters"]
+    features =  feature_processor.cleanup(input_pod_features_df["feature_name"].to_list())
     
     time_steps = model_parameters[0]["time_steps"]
     batch_size = model_parameters[0]["batch_size"]
     n_samples = batch_size * model_parameters[0]["sample_multiplier"]
     
+    pod_tensor = np.zeros((n_samples,time_steps,len(features)))
+    final_pod_fe_df = None
     
-    x_train = np.zeros((n_samples,time_steps,len(features)))
-    
-    pod_data = np.zeros((n_samples,time_steps,len(features)))
+    input_pod_processed_df.persist(StorageLevel.MEMORY_ONLY)
+
     for n in range(n_samples):
         ##pick random df, and normalize
-        random_instance_df= input_processed_df.select("pod_id").orderBy(rand()).limit(1)
-        pod_fe_df = input_processed_df[(input_processed_df["pod_id"] == random_instance_df.first()["pod_id"])][['Timestamp'] + features].select('*')
+        random_instance_id= random.choice(input_pod_processed_df.select("pod_id").rdd.flatMap(list).collect())
+        print(random_instance_id)
+        pod_fe_df = input_pod_processed_df[(input_pod_processed_df["pod_id"] == random_instance_id)][["Timestamp", "pod_id"] + features].select('*')
         pod_fe_df = pod_fe_df.sort("Timestamp")
-        
+        pod_fe_df = pod_fe_df.na.drop(subset=features)
+
         #scaler transformations
         assembler = VectorAssembler(inputCols=features, outputCol="vectorized_features")
-        pod_fe_df = assembler.transform(pod_fe_df)
         scaler = StandardScaler(inputCol = "vectorized_features", outputCol = "scaled_features", withMean=True, withStd=True)
-        pod_fe_df = scaler.fit(pod_fe_df).transform(pod_fe_df)
-        pod_fe_df.show(truncate=False)
-        
+        pipeline = Pipeline(stages=[assembler, scaler])
+        pod_fe_df = pipeline.fit(pod_fe_df).transform(pod_fe_df)
+
         #tensor builder
         start = random.choice(range(pod_fe_df.count()-time_steps))
-        pod_tensor_df = pod_fe_df.withColumn('rn', row_number().over(Window.orderBy('pod_id'))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
+        pod_tensor_df = pod_fe_df.withColumn('rn', row_number().over(Window.partitionBy("pod_id").orderBy("Timestamp"))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
         pod_tensor_list = pod_tensor_df.select("scaled_features").rdd.flatMap(list).collect()
         if len(pod_tensor_list) == time_steps:
             pod_tensor[n,:,:] = pod_tensor_list
@@ -97,17 +116,30 @@ def pod_autoencoder_ad_feature_engineering(input_features_df, input_processed_df
                 final_pod_fe_df = final_pod_fe_df.union(pod_fe_df)
         else:
             n_samples = n_samples+1
-            
-        print(f"***Sample #{n} is done***")
-
  
     final_pod_fe_df = final_pod_fe_df.select("Timestamp","pod_id",*features,"scaled_features")
+    
+    input_pod_processed_df.unpersist()
 
     return final_pod_fe_df, pod_tensor
 
     
 
 def pod_autoencoder_train_test_split(input_df):
+    
+    """
+    inputs
+    ------
+            input_df: df
+            processed/filtered input df from pre processing
+            
+    outputs
+    -------
+            pod_train : train df
+            pod_test: test df
+            
+    """
+    
     
     pod_train, pod_test = input_df.randomSplit(weights=[0.8,0.2], seed=200)
 
