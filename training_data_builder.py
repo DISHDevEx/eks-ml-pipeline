@@ -40,27 +40,38 @@ def node_training_data_builder():
 
     
 def pod_training_data_builder():
+    """
+    Output
+    ------
+        pod_training_data:df
+        training df to be stored in s3
+
+        pod_testing_data:df
+        testing df to be stores in s3
+
+        pod_training_tensor: np array
+        tensor stored in s3 for model training
+
+        pod_testing_tensor: np array
+        tensor stored in s3 for model testing
+
+    """
     
     #pre processing
     pod_features_data, pod_processed_data = pod_autoencoder_ad_preprocessing("pod_autoencoder_ad","11-30-2022","2022","10","10","10")
-    #pd.set_option('display.max_columns', None)  
-    print(pod_features_data.head())
-    print(pod_processed_data.show(truncate=False))
     
     #test, train split
     pod_train_data, pod_test_data = pod_autoencoder_train_test_split(pod_processed_data)
 
     #Train data feature engineering
     pod_training_data = pod_autoencoder_ad_feature_engineering(pod_features_data, pod_train_data)
-    #s3_operations.write_to_s3(node_training_data, s3_path)
-    print(pod_training_data.show(truncate=False))
  
     #Test data feature engineering
     pod_testing_data = pod_autoencoder_ad_feature_engineering(pod_features_data, pod_test_data)
-    #s3_operations.write_to_s3(node_testing_data, s3_path)
-    print(pod_testing_data.show(truncate=False))
-    
-    
+
+    return pod_training_data, pod_training_tensor, pod_testing_data, pod_testing_tensor
+
+
 def container_training_data_builder():
     """
     Output

@@ -10,6 +10,7 @@ def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_d
 
     pod_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value ='Pod')
     err, pod_df = pod_data.read()
+    pod_df = pod_df.persist()
     pod_df = pod_df.select(*pod_df.columns,
                            get_json_object(col("kubernetes"),"$.pod_id").alias("pod_id"),
                            col("pod_status"))
@@ -35,7 +36,7 @@ def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_d
         #Processed pod DF                                                      
         final_pod_df = cleaned_pod_df.filter(col("pod_id").isin(quality_filtered_pods["pod_id"]))
         final_pod_df = final_pod_df.sort("Timestamp")
-        final_pod_df.show(truncate=False)
+        #final_pod_df.show(truncate=False)
         
         # Running pods Only
         #final_pod_df = final_pod_df.filter(final_pod_df.pod_status == "Running")
@@ -48,7 +49,7 @@ def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_d
         
         #Null report
         null_report_df = null_report.report_generator(final_pod_df, processed_features)     
-        null_report_df.show(truncate=False)
+        #null_report_df.show(truncate=False)
         
         return features_df, final_pod_df
     else:
@@ -96,6 +97,9 @@ def pod_autoencoder_ad_feature_engineering(input_features_df, input_processed_df
                 final_pod_fe_df = final_pod_fe_df.union(pod_fe_df)
         else:
             n_samples = n_samples+1
+            
+        print(f"***Sample #{n} is done***")
+
  
     final_pod_fe_df = final_pod_fe_df.select("Timestamp","pod_id",*features,"scaled_features")
 
