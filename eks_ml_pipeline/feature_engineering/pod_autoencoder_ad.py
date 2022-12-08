@@ -75,11 +75,7 @@ def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_d
         #Processed pod DF                                                      
         final_pod_df = cleaned_pod_df.filter(col("pod_id").isin(quality_filtered_pods["pod_id"]))
         final_pod_df = final_pod_df.sort("Timestamp")
-        #final_pod_df.show(truncate=False)
-        
-        # Running pods Only
-        #final_pod_df = final_pod_df.filter(final_pod_df.pod_status == "Running")
-        
+                
         #Drop duplicates on Pod_ID and Timestamp and keep first
         final_pod_df = final_pod_df.dropDuplicates(['pod_id', 'Timestamp'])
         
@@ -88,7 +84,6 @@ def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_d
         
         #Null report
         null_report_df = null_report.report_generator(final_pod_df, processed_features)     
-        #null_report_df.show(truncate=False)
         
         return features_df, final_pod_df
     else:
