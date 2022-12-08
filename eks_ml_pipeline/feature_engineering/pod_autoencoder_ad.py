@@ -129,8 +129,8 @@ def pod_autoencoder_ad_feature_engineering(input_pod_features_df, input_pod_proc
     n = 0
     while n < n_samples:
         ##pick random df, and normalize
-        random_instance_id= random.choice(input_pod_processed_df.select("pod_id").rdd.flatMap(list).collect())
-        pod_fe_df = input_pod_processed_df[(input_pod_processed_df["pod_id"] == random_instance_id)][["Timestamp", "pod_id"] + features].select('*')
+        random_pod_id= random.choice(input_pod_processed_df.select("pod_id").rdd.flatMap(list).collect())
+        pod_fe_df = input_pod_processed_df[(input_pod_processed_df["pod_id"] == random_pod_id)][["Timestamp", "pod_id"] + features].select('*')
         pod_fe_df = pod_fe_df.sort("Timestamp")
         pod_fe_df = pod_fe_df.na.drop(subset=features)
 
