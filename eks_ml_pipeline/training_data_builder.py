@@ -57,17 +57,17 @@ def pod_training_data_builder():
     """
     
     #pre processing
-    pod_features_data, pod_processed_data = pod_autoencoder_ad_preprocessing("pod_autoencoder_ad","11-30-2022","2022","10","10","10")
+    pod_features_data, pod_processed_data = pod_autoencoder_ad_preprocessing("pod_autoencoder_ad","11-30-2022","2022","10","10","10","128gb")
     
     #test, train split
     pod_train_data, pod_test_data = pod_autoencoder_train_test_split(pod_processed_data)
 
     #Train data feature engineering
-    pod_training_data = pod_autoencoder_ad_feature_engineering(pod_features_data, pod_train_data)
+    pod_training_data, pod_training_tensor = pod_autoencoder_ad_feature_engineering(pod_features_data, pod_train_data)
  
     #Test data feature engineering
-    pod_testing_data = pod_autoencoder_ad_feature_engineering(pod_features_data, pod_test_data)
-
+    pod_testing_data, pod_testing_tensor = pod_autoencoder_ad_feature_engineering(pod_features_data, pod_test_data)
+    
     return pod_training_data, pod_training_tensor, pod_testing_data, pod_testing_tensor
 
 

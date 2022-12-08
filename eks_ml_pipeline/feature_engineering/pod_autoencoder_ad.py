@@ -142,8 +142,8 @@ def pod_autoencoder_ad_feature_engineering(input_pod_features_df, input_pod_proc
         
         #fix negative number bug 
         if pod_fe_df.count()-time_steps <= 0:
-            #print(f'Exception occured: pod_fe_df.count()-time_steps = {pod_fe_df.count()-time_steps}')
-            break
+            print(f'Exception occurred: pod_fe_df.count()-time_steps = {pod_fe_df.count()-time_steps}')
+            continue
 
         #tensor builder
         start = random.choice(range(pod_fe_df.count()-time_steps))
@@ -159,7 +159,8 @@ def pod_autoencoder_ad_feature_engineering(input_pod_features_df, input_pod_proc
             else:
                 final_pod_fe_df = final_pod_fe_df.union(pod_fe_df)
         else:
-            break
+            print(f'Exception occurred due to shape mismatch: len(pod_tensor_list) = {len(pod_tensor_list)}, time_steps = {time_steps}')
+            continue
             
         print(f'Finished with sample #{n}')
     
