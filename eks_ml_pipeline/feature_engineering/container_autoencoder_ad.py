@@ -1,7 +1,8 @@
 import numpy as np
 import random
-from utilities import feature_processor, null_report
+from ..utilities import feature_processor, null_report
 from msspackages import Pyspark_data_ingestion, get_features
+from pyspark import StorageLevel
 from pyspark.sql import Window
 from pyspark.sql.functions import get_json_object, col, count, rand, row_number, concat_ws
 from pyspark.ml.feature import VectorAssembler, StandardScaler
@@ -106,8 +107,11 @@ def container_autoencoder_ad_feature_engineering(input_container_features_df, in
     
     container_tensor = np.zeros((n_samples,time_steps,len(features)))
     final_container_fe_df = None
+    
+    input_container_processed_df = input_container_processed_df.persist(StorageLevel.MEMORY_ONLY)
 
-    for n in range(n_samples):
+    n = 0
+    while n < n_samples:
         ##pick random df, and normalize
         random_container_id= random.choice(input_container_processed_df.select("container_name_pod_id").rdd.flatMap(list).collect())
         container_fe_df = input_container_processed_df[(input_container_processed_df["container_name_pod_id"] == random_container_id)][["Timestamp","container_name_pod_id"] + features].select('*')
@@ -120,9 +124,15 @@ def container_autoencoder_ad_feature_engineering(input_container_features_df, in
         pipeline = Pipeline(stages=[assembler, scaler])
         container_fe_df = pipeline.fit(container_fe_df).transform(container_fe_df)
         
+        #fix negative number bug 
+        if container_fe_df.count()-time_steps <= 0:
+            print(f'Exception occurred: container_fe_df.count()-time_steps = {container_fe_df.count()-time_steps}')
+            continue
+
+        
         #tensor builder
         start = random.choice(range(container_fe_df.count()-time_steps))
-        container_tensor_df = container_fe_df.withColumn("rn", row_number().over(Window.orderBy("container_name_pod_id"))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
+        container_tensor_df = container_fe_df.withColumn("rn", row_number().over(Window.partitionBy("container_name_pod_id").orderBy("Timestamp"))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
         container_tensor_list = container_tensor_df.select("scaled_features").rdd.flatMap(list).collect()
         if len(container_tensor_list) == time_steps:
             container_tensor[n,:,:] = container_tensor_list
@@ -133,9 +143,16 @@ def container_autoencoder_ad_feature_engineering(input_container_features_df, in
                 final_container_fe_df = final_container_fe_df.union(container_fe_df)
 
         else:
-            n_samples = n_samples+1
+            print(f'Exception occurred due to shape mismatch: len(container_tensor_list) = {len(container_tensor_list)}, time_steps = {time_steps}')
+            continue
+            
+        print(f'Finished with sample #{n}')
+    
+        n += 1
 
     final_container_fe_df = final_container_fe_df.select("Timestamp","container_name_pod_id",*features,"scaled_features")
+    
+    input_container_processed_df.unpersist()
 
     return final_container_fe_df, container_tensor
 

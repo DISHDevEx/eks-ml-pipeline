@@ -1,7 +1,8 @@
 import numpy as np
 import random
-from utilities import feature_processor, null_report
+from ..utilities import feature_processor, null_report
 from msspackages import Pyspark_data_ingestion, get_features
+from pyspark import StorageLevel
 from pyspark.sql import Window
 from pyspark.sql.functions import col, count, rand, row_number
 from pyspark.ml.feature import VectorAssembler, StandardScaler
@@ -108,8 +109,11 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
     
     node_tensor = np.zeros((n_samples,time_steps,len(features)))
     final_node_fe_df = None
-
-    for n in range(n_samples):
+    
+    input_node_processed_df.persist(StorageLevel.MEMORY_ONLY)
+    
+    n = 0
+    while n < n_samples:
         ##pick random df, and normalize
         random_instance_id= random.choice(input_node_processed_df.select("InstanceId").rdd.flatMap(list).collect())
         node_fe_df = input_node_processed_df[(input_node_processed_df["InstanceId"] == random_instance_id)][["Timestamp", "InstanceId"] + features].select('*')
@@ -121,10 +125,15 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
         scaler = StandardScaler(inputCol = "vectorized_features", outputCol = "scaled_features", withMean=True, withStd=True)
         pipeline = Pipeline(stages=[assembler, scaler])
         node_fe_df = pipeline.fit(node_fe_df).transform(node_fe_df)
+        
+        #fix negative number bug 
+        if node_fe_df.count()-time_steps <= 0:
+            print(f'Exception occurred: node_fe_df.count()-time_steps = {node_fe_df.count()-time_steps}')
+            continue
 
         #tensor builder
         start = random.choice(range(node_fe_df.count()-time_steps))
-        node_tensor_df = node_fe_df.withColumn('rn', row_number().over(Window.orderBy('InstanceId'))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
+        node_tensor_df = node_fe_df.withColumn('rn', row_number().over(Window.partitionBy("InstanceId").orderBy("Timestamp"))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
         node_tensor_list = node_tensor_df.select("scaled_features").rdd.flatMap(list).collect()
         if len(node_tensor_list) == time_steps:
             node_tensor[n,:,:] = node_tensor_list
@@ -134,9 +143,16 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
             else:
                 final_node_fe_df = final_node_fe_df.union(node_fe_df)
         else:
-            n_samples = n_samples+1
+            print(f'Exception occurred due to shape mismatch: len(node_tensor_list) = {len(node_tensor_list)}, time_steps = {time_steps}')
+            continue
+            
+        print(f'Finished with sample #{n}')
+    
+        n += 1
  
     final_node_fe_df = final_node_fe_df.select("Timestamp","InstanceId",*features,"scaled_features")
+    
+    input_node_processed_df.unpersist()
 
     return final_node_fe_df, node_tensor
 

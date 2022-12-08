@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
-import keras
+from tensorflow import keras
 import tensorflow as tf
-from keras import layers
+from tensorflow.keras import layers
 from matplotlib import pyplot as plt
 
 """
@@ -100,7 +100,7 @@ class autoencoder_model_dish_5g():
             ]
         )
         
-        ##nn compile groups layers into a model; the loss here is MSE, optimizer is Adam, learning rate is predefined
+        ##nn compile groups layers into a model; the loss here is MAE, optimizer is Adam, learning rate is predefined
         self.nn.compile(optimizer=tf.keras.optimizers.Adam(lr=self.lr), loss="mae")
         self.nn.summary()
         
@@ -118,6 +118,24 @@ class autoencoder_model_dish_5g():
         anom_scores[anom_scores > 1.0] = 1.0
         return anom_scores
     
+    
+    def save_nn(self, filename):
+        """
+        @:param filename: name of file to save model
+            -saves nn to file
+        @:returns nothing 
+        """
+        tf.keras.models.save_model(self.nn, filename)
+    
+    def load_nn(self, filename):
+        """
+        @:param filename: name of file to save model
+        @:returns nothing 
+        """
+    
+        self.nn = tf.keras.models.load_model(filename)
+        #self.error_threshold = error_threshold
+        self.trained = True
 
     def train(self, x_train):
         """
@@ -159,7 +177,7 @@ class autoencoder_model_dish_5g():
             
             #set error threshold
             self.error_threshold = self.__calculate_threshold(train_mae[-int(len(train_mae) * 0.5):])
-            print("error_threshold",self.error_threshold)
+            
             self.trained = True
             
     def test(self, x_test):
@@ -177,8 +195,8 @@ class autoencoder_model_dish_5g():
             warnings.simplefilter("ignore")
             test_pred, test_err = self.__calculate_pred_and_err(x_test)
             residuals = np.abs(test_pred - x_test)
-            anomaly_scores = self.__calculate_anomaly_score(residuals , self.error_threshold)
-            return test_pred,residuals,anomaly_scores
+            #anomaly_scores = self.__calculate_anomaly_score(residuals , self.error_threshold)
+            return test_pred,residuals
         
     def customize_matplotlib(self, color="black", labelsize=16, fontsize="xx-large"):
         """
