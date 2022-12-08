@@ -125,10 +125,9 @@ def pod_autoencoder_ad_feature_engineering(input_pod_features_df, input_pod_proc
     final_pod_fe_df = None
     
     input_pod_processed_df.persist(StorageLevel.MEMORY_ONLY)
-    #for n in range(n_samples):
-    n = 0;
+    
+    n = 0
     while n < n_samples:
-        
         ##pick random df, and normalize
         random_instance_id= random.choice(input_pod_processed_df.select("pod_id").rdd.flatMap(list).collect())
         pod_fe_df = input_pod_processed_df[(input_pod_processed_df["pod_id"] == random_instance_id)][["Timestamp", "pod_id"] + features].select('*')
@@ -143,6 +142,7 @@ def pod_autoencoder_ad_feature_engineering(input_pod_features_df, input_pod_proc
         
         #fix negative number bug 
         if pod_fe_df.count()-time_steps <= 0:
+            #print(f'Exception occured: pod_fe_df.count()-time_steps = {pod_fe_df.count()-time_steps}')
             break
 
         #tensor builder
@@ -159,14 +159,16 @@ def pod_autoencoder_ad_feature_engineering(input_pod_features_df, input_pod_proc
             else:
                 final_pod_fe_df = final_pod_fe_df.union(pod_fe_df)
         else:
-            #n_samples = n_samples+1
             break
             
+        print(f'Finished with sample #{n}')
+    
         n += 1
  
     final_pod_fe_df = final_pod_fe_df.select("Timestamp","pod_id",*features,"scaled_features")
     
     input_pod_processed_df.unpersist()
+    
 
     return final_pod_fe_df, pod_tensor
 
