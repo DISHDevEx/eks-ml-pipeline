@@ -127,16 +127,14 @@ class autoencoder_model_dish_5g():
         """
         tf.keras.models.save_model(self.nn, filename)
     
-    def load_nn(self, filename, error_threshold):
+    def load_nn(self, filename):
         """
         @:param filename: name of file to save model
-        @:param error_threshold: error_threshold of nn loaded in 
-            -loads nn to file, and sets the class object error_threshold
         @:returns nothing 
         """
     
         self.nn = tf.keras.models.load_model(filename)
-        self.error_threshold = error_threshold
+        #self.error_threshold = error_threshold
         self.trained = True
 
     def train(self, x_train):
@@ -179,7 +177,7 @@ class autoencoder_model_dish_5g():
             
             #set error threshold
             self.error_threshold = self.__calculate_threshold(train_mae[-int(len(train_mae) * 0.5):])
-            print("error_threshold",self.error_threshold)
+            
             self.trained = True
             
     def test(self, x_test):
@@ -197,8 +195,8 @@ class autoencoder_model_dish_5g():
             warnings.simplefilter("ignore")
             test_pred, test_err = self.__calculate_pred_and_err(x_test)
             residuals = np.abs(test_pred - x_test)
-            anomaly_scores = self.__calculate_anomaly_score(residuals , self.error_threshold)
-            return test_pred,residuals,anomaly_scores
+            #anomaly_scores = self.__calculate_anomaly_score(residuals , self.error_threshold)
+            return test_pred,residuals
         
     def customize_matplotlib(self, color="black", labelsize=16, fontsize="xx-large"):
         """
