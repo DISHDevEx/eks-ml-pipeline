@@ -15,15 +15,15 @@ MSS Dish 5g - Pattern Detection
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """
 
-def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour, input_setup = "default"):
+def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
     """
     inputs
     ------
             feature_group_name: STRING
             json name to get the required features
             
-            feature_group_created_date: STRING
-            json created date to get the latest features 
+            feature_group_version: STRING
+            json version to get the latest features 
             
             input_year : STRING | Int
             the year from which to read data, leave empty for all years
@@ -49,7 +49,6 @@ def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_d
 
     pod_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Pod')
     err, pod_df = pod_data.read()
-    pod_df = pod_df.persist()
     pod_df = pod_df.select(*pod_df.columns,
                            get_json_object(col("kubernetes"),"$.pod_id").alias("pod_id"),
                            col("pod_status"))
@@ -57,7 +56,7 @@ def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_d
  
     if err == 'PASS':
         #get features
-        features_df = get_features(feature_group_name,feature_group_created_date)
+        features_df = get_features(feature_group_name,feature_group_version)
         features = features_df["feature_name"].to_list()
         
         processed_features = feature_processor.cleanup(features)
@@ -92,7 +91,7 @@ def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_d
         
 
 
-def pod_autoencoder_ad_feature_engineering(input_pod_features_df, input_pod_processed_df):
+def pod_autoencoder_ad_feature_engineering(input_data_type, input_pod_features_df, input_pod_processed_df):
     """
     inputs
     ------
@@ -114,7 +113,11 @@ def pod_autoencoder_ad_feature_engineering(input_pod_features_df, input_pod_proc
     
     time_steps = model_parameters[0]["time_steps"]
     batch_size = model_parameters[0]["batch_size"]
-    n_samples = batch_size * model_parameters[0]["sample_multiplier"]
+    if input_data_type == 'train':
+        n_samples = batch_size * model_parameters[0]["train_sample_multiplier"]
+    elif input_data_type == 'test':
+         n_samples = time_steps * model_parameters[0]["test_sample_multiplier"]
+        
     
     pod_tensor = np.zeros((n_samples,time_steps,len(features)))
     final_pod_fe_df = None
@@ -134,6 +137,8 @@ def pod_autoencoder_ad_feature_engineering(input_pod_features_df, input_pod_proc
         scaler = StandardScaler(inputCol = "vectorized_features", outputCol = "scaled_features", withMean=True, withStd=True)
         pipeline = Pipeline(stages=[assembler, scaler])
         pod_fe_df = pipeline.fit(pod_fe_df).transform(pod_fe_df)
+        pod_fe_df.persist(StorageLevel.MEMORY_ONLY)
+
         
         #fix negative number bug 
         if pod_fe_df.count()-time_steps <= 0:
@@ -158,6 +163,8 @@ def pod_autoencoder_ad_feature_engineering(input_pod_features_df, input_pod_proc
             continue
             
         print(f'Finished with sample #{n}')
+        
+        pod_fe_df.unpersist()
     
         n += 1
  
@@ -170,7 +177,7 @@ def pod_autoencoder_ad_feature_engineering(input_pod_features_df, input_pod_proc
 
     
 
-def pod_autoencoder_train_test_split(input_df):
+def pod_autoencoder_train_test_split(input_df, split_weights):
     
     """
     inputs
@@ -186,7 +193,7 @@ def pod_autoencoder_train_test_split(input_df):
     """
     
     
-    pod_train, pod_test = input_df.randomSplit(weights=[0.8,0.2], seed=200)
+    pod_train, pod_test = input_df.randomSplit(weights= split_weights, seed=200)
 
     return pod_train, pod_test
       
