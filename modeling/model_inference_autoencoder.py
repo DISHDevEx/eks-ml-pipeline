@@ -11,7 +11,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
-from autoencoder_model_dish_5g import Autoencoder_Model_Dish_5g
+from autoencoder_model_dish_5g import autoencoder_model_dish_5g
 
 from sklearn.model_selection import train_test_split
 
@@ -26,14 +26,14 @@ if __name__ == "__main__":
   
     
     ##global variable
-    timesteps = 12
-    time_steps = 12
-    batch_size = 6
+    timesteps = 20
+    time_steps = 20
+    batch_size = 36
     n_samples = batch_size*100
     features = ['node_cpu_utilization','node_memory_utilization','node_network_total_bytes']
 
-    model = Autoencoder_Model_Dish_5g(batch_size = batch_size, time_steps = time_steps)
-    model.load_nn('trained_AutoEncoder', 4.6828706218714915)
+    model = autoencoder_model_dish_5g(batch_size = batch_size, time_steps = time_steps, epochs = 250,nuerons=128,patience=10)
+    model.load_nn('trained_AutoEncoder')
     
     
     
@@ -86,10 +86,6 @@ if __name__ == "__main__":
     predictions_f2 = []
     predictions_f3 = []
 
-    anomaly_scoresf1 = []
-    anomaly_scoresf2 = []
-    anomaly_scoresf3 = []
-
     errors_f1 = []
     errors_f2 = []
     errors_f3 = []
@@ -100,16 +96,11 @@ if __name__ == "__main__":
             sample_topredict_on = test_df.iloc[i:i+timesteps]
             x_test = np.array(sample_topredict_on.to_numpy())
             x_test = x_test.reshape(1,-1,3)
-            preds,errs,anom_scores = model.test(x_test)
+            preds,errs = model.test(x_test)
 
             predictions_f1.append(np.array(preds[:,:,0]))
             predictions_f2.append(preds[:,:,1])
             predictions_f3.append(preds[:,:,2])
-
-            anomaly_scoresf1.append(np.array(anom_scores[:timesteps,:]))
-            anomaly_scoresf2.append(anom_scores[timesteps:timesteps+timesteps,:])
-            anomaly_scoresf3.append(anom_scores[timesteps+timesteps:timesteps+timesteps+timesteps,:])
-
 
             errors_f1.append(np.array(errs[:,:,0]))
             errors_f2.append(errs[:,:,1])

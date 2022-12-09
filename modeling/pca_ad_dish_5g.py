@@ -150,7 +150,7 @@ class pca_ad_dish_5g():
         residuals = trainX_slices_as_samples_ss - trainX_slices_as_samples_ss_decoded
         residuals_reshaped = residuals.reshape(-1,self.N,self.num_of_features)
         ed_errors = np.linalg.norm(residuals,
-                    ord =1, # MAE, as in the rules
+                    ord =1, # SAE, as in the rules
                     axis=1)
         
         return residuals_reshaped,ed_errors,self.encode_decode_maps

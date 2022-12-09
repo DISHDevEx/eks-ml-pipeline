@@ -11,7 +11,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
-from autoencoder_model_dish_5g import Autoencoder_Model_Dish_5g
+from autoencoder_model_dish_5g import autoencoder_model_dish_5g
 
 from sklearn.model_selection import train_test_split
 
@@ -20,9 +20,9 @@ import dill
 
 if __name__ == "__main__":
     ##global variable
-    timesteps = 12
-    time_steps = 12
-    batch_size = 6
+    timesteps = 20
+    time_steps = 20
+    batch_size = 36
     n_samples = batch_size*100
     features = ['node_cpu_utilization','node_memory_utilization','node_network_total_bytes']
 
@@ -61,9 +61,9 @@ if __name__ == "__main__":
 
     instance_dfs =[]
     for instance in training_df['InstanceId'].unique():
-        instance_dfs.append(training_df[training_df.InstanceId == instance].sort_values(by='Timestamp')\
-                            .reset_index(drop=True))
-
+        if(len(training_df[training_df.InstanceId == instance]) >60):
+            instance_dfs.append(training_df[training_df.InstanceId == instance].sort_values(by='Timestamp')\
+                                .reset_index(drop=True))
     import random 
 
     x_train = np.zeros((n_samples,time_steps,len(features)))
@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
 
         sample = np.zeros((n_samples,len(features)))
-        ##make sure length of df is atleast 40
+        ##make sure length of df is atleast timesteps
         first_time = random.choice(range(len(df)-time_steps))
         df.head()
         sample = df[features].iloc[first_time:first_time+time_steps]
@@ -89,8 +89,8 @@ if __name__ == "__main__":
 
     ##Shape for the input to our LSTM Autoencoder is [numberOfSamples, Timesteps, NumberofFeatures]
 
-    model = Autoencoder_Model_Dish_5g(batch_size = batch_size, time_steps = time_steps)
-    val_err = model.train(x_train)
+    model = autoencoder_model_dish_5g(time_steps = timesteps, batch_size = batch_size,  epochs = 10,nuerons=128, patience=10)
+    model.fit(x_train)
     
     model.save_nn('trained_AutoEncoder')
   
