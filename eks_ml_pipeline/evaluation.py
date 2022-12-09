@@ -1,5 +1,6 @@
 import numpy as np
 from models import autoencoder_model_dish_5g 
+from fastparquet import write
 
 def pod_autoencoder_testing(pod_testing_tensor, model_path = '/root/CodeCommit/trained_models/pod_autoencoder'):
     
@@ -23,3 +24,5 @@ if __name__ == "__main__":
     test_predictions, test_residuals = pod_autoencoder_testing(pod_testing_tensor)
     
     #save test_predictions and test_residuals in parquette format
+    write('/root/CodeCommit/data/test_predictions.parq', test_predictions)
+    write('/root/CodeCommit/data/test_residuals.parq', test_residuals)
