@@ -108,15 +108,15 @@ def pod_autoencoder_ad_feature_engineering(input_data_type, input_pod_features_d
             
     """
 
-    model_parameters = input_pod_features_df["model_parameters"]
+    model_parameters = input_pod_features_df["model_parameters"].iloc[0]
     features =  feature_processor.cleanup(input_pod_features_df["feature_name"].to_list())
     
-    time_steps = model_parameters[0]["time_steps"]
-    batch_size = model_parameters[0]["batch_size"]
+    time_steps = model_parameters["time_steps"]
+    batch_size = model_parameters["batch_size"]
     if input_data_type == 'train':
-        n_samples = batch_size * model_parameters[0]["train_sample_multiplier"]
+        n_samples = batch_size * model_parameters["train_sample_multiplier"]
     elif input_data_type == 'test':
-         n_samples = time_steps * model_parameters[0]["test_sample_multiplier"]
+         n_samples = time_steps * model_parameters["test_sample_multiplier"]
         
     
     pod_tensor = np.zeros((n_samples,time_steps,len(features)))
