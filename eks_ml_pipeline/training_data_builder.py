@@ -28,7 +28,7 @@ def node_training_data_builder():
     
     #test, train split
     node_train_split = node_features_data["model_parameters"].iloc[0]["split_ratio"]
-    node_test_split =  round(1 - node_features_data["model_parameters"].iloc[0]["split_ratio"],1)
+    node_test_split =  round(1 - node_train_split,2)
     node_train_data, node_test_data = node_autoencoder_train_test_split(node_processed_data, [node_train_split,node_test_split])
 
     #Train data feature engineering
@@ -63,7 +63,7 @@ def pod_training_data_builder():
     
     #test, train split
     pod_train_split = pod_features_data["model_parameters"].iloc[0]["split_ratio"]
-    pod_test_split =  round(1 - pod_features_data["model_parameters"].iloc[0]["split_ratio"],1)
+    pod_test_split =  round(1 - pod_train_split,2)
     pod_train_data, pod_test_data = pod_autoencoder_train_test_split(pod_processed_data, [pod_train_split,pod_test_split])
 
     #Train data feature engineering
@@ -99,7 +99,7 @@ def container_training_data_builder():
     
     #test, train split
     container_train_split = container_features_data["model_parameters"].iloc[0]["split_ratio"]
-    container_test_split =  round(1 - container_features_data["model_parameters"].iloc[0]["split_ratio"],1)
+    container_test_split =  round(1 - container_train_split,2)
     container_train_data, container_test_data = container_autoencoder_train_test_split(container_processed_data, [container_train_split,container_test_split])
 
     #Train data feature engineering
