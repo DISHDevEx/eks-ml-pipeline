@@ -91,7 +91,7 @@ def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_version, 
         
 
 
-def pod_autoencoder_ad_feature_engineering(input_data_type, input_pod_features_df, input_pod_processed_df):
+def pod_autoencoder_ad_feature_engineering(input_data_type, input_split_ratio, input_pod_features_df, input_pod_processed_df):
     """
     inputs
     ------
@@ -116,12 +116,11 @@ def pod_autoencoder_ad_feature_engineering(input_data_type, input_pod_features_d
     if input_data_type == 'train':
         n_samples = batch_size * model_parameters["train_sample_multiplier"]
     elif input_data_type == 'test':
-         n_samples = time_steps * model_parameters["test_sample_multiplier"]
-        
-    
+         n_samples = round((batch_size * model_parameters["train_sample_multiplier"]* input_split_ratio[1])/ input_split_ratio[0])
+
     pod_tensor = np.zeros((n_samples,time_steps,len(features)))
     final_pod_fe_df = None
-    
+
     input_pod_processed_df.persist(StorageLevel.MEMORY_ONLY)
     
     n = 0

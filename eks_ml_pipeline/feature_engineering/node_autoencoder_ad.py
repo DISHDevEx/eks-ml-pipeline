@@ -83,7 +83,7 @@ def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_version,
         return empty_df, empty_df
     
 
-def node_autoencoder_ad_feature_engineering(input_data_type, input_node_features_df, input_node_processed_df):
+def node_autoencoder_ad_feature_engineering(input_data_type, input_split_ratio, input_node_features_df, input_node_processed_df):
     """
     inputs
     ------
@@ -102,14 +102,15 @@ def node_autoencoder_ad_feature_engineering(input_data_type, input_node_features
 
     model_parameters = input_node_features_df["model_parameters"].iloc[0]
     features =  feature_processor.cleanup(input_node_features_df["feature_name"].to_list())
-    
+
     time_steps = model_parameters["time_steps"]
     batch_size = model_parameters["batch_size"]
+
     if input_data_type == 'train':
         n_samples = batch_size * model_parameters["train_sample_multiplier"]
     elif input_data_type == 'test':
-         n_samples = time_steps * model_parameters["test_sample_multiplier"]
-    
+        n_samples = round((batch_size * model_parameters["train_sample_multiplier"]* input_split_ratio[1])/ input_split_ratio[0])
+
     node_tensor = np.zeros((n_samples,time_steps,len(features)))
     final_node_fe_df = None
     

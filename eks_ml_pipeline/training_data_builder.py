@@ -27,13 +27,15 @@ def node_training_data_builder():
     node_features_data, node_processed_data = node_autoencoder_ad_preprocessing("node_autoencoder_ad","v0.0.1","2022","10","10","10","128gb")
     
     #test, train split
-    node_train_data, node_test_data = node_autoencoder_train_test_split(node_processed_data, [0.8,0.2])
+    node_train_split = node_features_data["model_parameters"].iloc[0]["split_ratio"]
+    node_test_split =  round(1 - node_features_data["model_parameters"].iloc[0]["split_ratio"],1)
+    node_train_data, node_test_data = node_autoencoder_train_test_split(node_processed_data, [node_train_split,node_test_split])
 
     #Train data feature engineering
-    node_training_data, node_training_tensor = node_autoencoder_ad_feature_engineering('train', node_features_data, node_train_data)
+    node_training_data, node_training_tensor = node_autoencoder_ad_feature_engineering('train', [node_train_split,node_test_split], node_features_data, node_train_data)
  
     #Test data feature engineering
-    node_testing_data, node_testing_tensor = node_autoencoder_ad_feature_engineering('test', node_features_data, node_test_data)
+    node_testing_data, node_testing_tensor = node_autoencoder_ad_feature_engineering('test', [node_train_split,node_test_split],  node_features_data, node_test_data)
     
     return node_training_data, node_training_tensor, node_testing_data, node_testing_tensor
 
@@ -60,14 +62,15 @@ def pod_training_data_builder():
     pod_features_data, pod_processed_data = pod_autoencoder_ad_preprocessing("pod_autoencoder_ad","v0.0.1","2022","10","10","10","128gb")
     
     #test, train split
-    
-    pod_train_data, pod_test_data = pod_autoencoder_train_test_split(pod_processed_data,[0.8,0.2])
+    pod_train_split = pod_features_data["model_parameters"].iloc[0]["split_ratio"]
+    pod_test_split =  round(1 - pod_features_data["model_parameters"].iloc[0]["split_ratio"],1)
+    pod_train_data, pod_test_data = pod_autoencoder_train_test_split(pod_processed_data, [pod_train_split,pod_test_split])
 
     #Train data feature engineering
-    pod_training_data, pod_training_tensor = pod_autoencoder_ad_feature_engineering('train', pod_features_data, pod_train_data)
+    pod_training_data, pod_training_tensor = pod_autoencoder_ad_feature_engineering('train', [pod_train_split,pod_test_split], pod_features_data, pod_train_data)
  
     #Test data feature engineering
-    pod_testing_data, pod_testing_tensor = pod_autoencoder_ad_feature_engineering('test', pod_features_data, pod_test_data)
+    pod_testing_data, pod_testing_tensor = pod_autoencoder_ad_feature_engineering('test', [pod_train_split,pod_test_split], pod_features_data, pod_test_data)
     
     return pod_training_data, pod_training_tensor, pod_testing_data, pod_testing_tensor
 
@@ -95,13 +98,15 @@ def container_training_data_builder():
     container_features_data, container_processed_data = container_autoencoder_ad_preprocessing("container_autoencoder_ad","v0.0.1","2022","10","10","10","128gb")
     
     #test, train split
-    container_train_data, container_test_data = container_autoencoder_train_test_split(container_processed_data,[0.8,0.2])
+    container_train_split = container_features_data["model_parameters"].iloc[0]["split_ratio"]
+    container_test_split =  round(1 - container_features_data["model_parameters"].iloc[0]["split_ratio"],1)
+    container_train_data, container_test_data = container_autoencoder_train_test_split(container_processed_data, [container_train_split,container_test_split])
 
     #Train data feature engineering
-    container_training_data, container_training_tensor = container_autoencoder_ad_feature_engineering('train', container_features_data, container_train_data)
+    container_training_data, container_training_tensor = container_autoencoder_ad_feature_engineering('train', [container_train_split,container_test_split], container_features_data, container_train_data)
  
     #Test data feature engineering
-    container_testing_data, container_testing_tensor = container_autoencoder_ad_feature_engineering('test', container_features_data, container_test_data)
+    container_testing_data, container_testing_tensor = container_autoencoder_ad_feature_engineering('test', [container_train_split,container_test_split], container_features_data, container_test_data)
     
     return container_training_data, container_training_tensor, container_testing_data, container_testing_tensor
     
