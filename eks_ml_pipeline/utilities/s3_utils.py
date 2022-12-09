@@ -20,10 +20,10 @@ def read_tensor(bucket_name,filename):
             tensor : numpy tensor
             
     """
-    print(f"reading tensor from: {bucket+filename}")
+    print(f"reading tensor from: {bucket_name+filename}")
     client = boto3.client('s3')
     bytes_ = BytesIO()
-    client.download_fileobj(Fileobj=bytes_, Bucket=bucket, Key=filename)
+    client.download_fileobj(Fileobj=bytes_, Bucket=bucket_name, Key=filename)
     bytes_.seek(0)
     tensor = np.load(bytes_, allow_pickle=True)
     
