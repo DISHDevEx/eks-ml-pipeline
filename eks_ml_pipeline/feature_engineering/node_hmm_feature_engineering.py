@@ -53,7 +53,7 @@ def node_hmm_preprocessing(feature_group_name, feature_group_created_date, input
         processed_features = feature_processor.cleanup(features)
     
         #filter inital node df based on request features
-        node_df = pyspark_node_df.select("Timestamp", "NodeName", *processed_features)
+        node_df = pyspark_node_df.select("Timestamp", "Instance_id", *processed_features)
         node_df = node_df.withColumn("Datetime",(col("Timestamp")/1000).cast("timestamp"))
         
         # Drop NA
@@ -61,12 +61,12 @@ def node_hmm_preprocessing(feature_group_name, feature_group_created_date, input
 
         
         #Quality(timestamp filtered) nodes
-        quality_filtered_node_df = cleaned_node_df.groupBy("NodeName").agg(count("Timestamp").alias("timestamp_count"))
+        quality_filtered_node_df = cleaned_node_df.groupBy("Instance_id").agg(count("Timestamp").alias("timestamp_count"))
         quality_filtered_nodes = quality_filtered_node_df.filter(col("timestamp_count").between(45,75))
         
 
         #Processed Node DF                                                      
-        processed_node_df = cleaned_node_df.filter(col("NodeName").isin(quality_filtered_nodes["NodeName"]))
+        processed_node_df = cleaned_node_df.filter(col("Instance_id").isin(quality_filtered_nodes["Instance_id"]))
         
         #Null report
         null_report_df = null_report.report_generator(processed_node_df, processed_features)     
@@ -107,8 +107,8 @@ def node_hmm_ad_feature_engineering(input_node_processed_df):
 
 
         ##pick random node
-        random_nodename = random.choice(input_df.select("NodeName").rdd.flatMap(list).collect())
-        node_df = input_df[(input_df["NodeName"] ==  random_nodename)][["Timestamp", "NodeName"] + features].select('*')
+        random_instance = random.choice(input_df.select("Instance_id").rdd.flatMap(list).collect())
+        node_df = input_df[(input_df["instance_id"] ==  random_instance)][["Timestamp", "Instance_id"] + features].select('*')
         node_df = node_df.sort("Timestamp")
         node_df = node_df.na.drop(subset=features)
 
@@ -118,7 +118,7 @@ def node_hmm_ad_feature_engineering(input_node_processed_df):
             continue
             
         #standardize data from the node
-        w = Window.partitionBy('NodeName')
+        w = Window.partitionBy('Instance_id')
         for c in features:
             node_df = (node_df.withColumn('mean', F.mean(c).over(w))
                 .withColumn('stddev', F.stddev(c).over(w))
