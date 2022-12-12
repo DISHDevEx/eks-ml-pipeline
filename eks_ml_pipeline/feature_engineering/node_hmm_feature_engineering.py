@@ -72,14 +72,14 @@ def node_hmm_preprocessing(feature_group_name, feature_group_created_date, input
         null_report_df = null_report.report_generator(processed_node_df, processed_features)     
         #null_report_df.show(truncate=False)
         
-        return  processed_node_df
+        return  features_df, processed_node_df
 
     else:
         empty_df = pd.DataFrame()
         return empty_df, empty_df
     
     
-def node_hmm_ad_feature_engineering(input_node_processed_df):
+def node_hmm_ad_feature_engineering(input_node_features_df, input_node_processed_df):
     """
     inputs
     ------
@@ -98,7 +98,13 @@ def node_hmm_ad_feature_engineering(input_node_processed_df):
 
     #scaler transformation
     # this function intends to normalize the node data by each node
-     
+    
+    model_parameters = input_node_features_df["model_parameters"].iloc[0]
+    features =  feature_processor.cleanup(input_node_features_df["feature_name"].to_list())
+    
+    weight = 2
+    time_steps = 12
+  
     
     n = 0
     samplesize = input_df.count*weight/time_step
@@ -148,15 +154,15 @@ def node_hmm_ad_feature_engineering(input_node_processed_df):
     #group by timestamp to take average value for the same timestamp
     final_df = final_df.groupBy("Timestamp").mean()
     
-    vecAssembler2 = VectorAssembler(inputCols=features, outputCol="features")
-    node_input = vecAssembler2.transform(final_df)
+    final_df = final_df.withColumnRenamed("avg(node_cpu_utilization)","node_cpu_utilization") \
+    .withColumnRenamed("avg(node_memory_utilization)","node_memory_utilization")
     
-    tensor_list = final.select("features").rdd.flatMap(list).collect()
+    final_df = final_df.select(*features)
     
    
     
     
-    return final_df,tensor_list
+    return final_df
     
     
 
