@@ -3,6 +3,8 @@ import boto3
 from io import BytesIO
 from msspackages import get_features
 from eks_ml_pipeline import read_tensor, uploadDirectory, autoencoder_model_dish_5g
+from eks_ml_pipeline import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
+
 
 """
 Contributed by Evgeniya Dontsova
@@ -59,7 +61,7 @@ def autoencoder_training(training_tensor,
 
 
 def autoencoder_training_pipeline(feature_group_name, feature_input_version,
-                                  data_bucketname, data_filename,
+                                  data_bucketname, train_data_filename, test_data_filename,
                                   save_model_local_path, model_bucketname,
                                   model_name, model_version):
     
@@ -75,8 +77,11 @@ def autoencoder_training_pipeline(feature_group_name, feature_input_version,
             data_bucketname: str
             s3 bucket name where training data is saved
             
-            data_filename: str
+            train_data_filename: str
             filename where training data is saved 
+                        
+            test_data_filename: str
+            filename where testing data is saved 
 
             save_model_local_path: str
             local path to save trained model 
@@ -102,7 +107,7 @@ def autoencoder_training_pipeline(feature_group_name, feature_input_version,
         
     ###Load training data: read from s3 bucket
     training_tensor = read_tensor(data_bucketname,
-                                  data_filename)
+                                  train_data_filename)
     
     ####Train autoencoder model
     autoencoder = autoencoder_training(training_tensor, 
@@ -117,92 +122,6 @@ def autoencoder_training_pipeline(feature_group_name, feature_input_version,
                     model_name = model_name,
                     version = model_version)
     
-
-####################################################
-###******** AUTOENCODER MODEL PARAMETERS******** ###
-####################################################
-
-def node_autoencoder_input():
-    
-    """
-    outputs
-    -------
-            list of parameters for node rec type
-            required by autoencoder model 
-            training pipeline
-            
-    """
-
-    
-    feature_group_name = "node_autoencoder_ad"
-    feature_input_version = "v0.0.1"  
-    data_bucketname = 'mss-shared'
-    data_filename = 'x_train_36k_sample.npy'
-    
-    save_model_local_path = "../node_autoencoder"
-    model_bucketname = 'emr-serverless-output-pd'
-    model_name = 'node_autoencoder_test'
-    model_version = 'v0.0.1'
-    
-    return [feature_group_name, feature_input_version,
-            data_bucketname, data_filename,
-            save_model_local_path, model_bucketname,
-            model_name, model_version]
-
-def pod_autoencoder_input():
-    
-    """
-    outputs
-    -------
-            list of parameters for pod rec type
-            required by autoencoder model 
-            training pipeline
-            
-    """
-
-    
-    feature_group_name = "pod_autoencoder_ad"
-    feature_input_version = "v0.0.1"  
-    data_bucketname = 'mss-shared'
-    data_filename = 'x_train_36k_sample.npy'
-    
-    save_model_local_path = "../pod_autoencoder"
-    model_bucketname = 'emr-serverless-output-pd'
-    model_name = 'pod_autoencoder_test'
-    model_version = 'v0.0.1'
-    
-    return [feature_group_name, feature_input_version,
-            data_bucketname, data_filename,
-            save_model_local_path, model_bucketname,
-            model_name, model_version]
-
-def container_autoencoder_input():
-    
-    """
-    outputs
-    -------
-            list of parameters for container rec type
-            required by autoencoder model 
-            training pipeline
-            
-    """
-
-    
-    feature_group_name = "container_autoencoder_ad"
-    feature_input_version = "v0.0.1"  
-    data_bucketname = 'mss-shared'
-    data_filename = 'x_train_36k_sample.npy'
-    
-    save_model_local_path = "../container_autoencoder"
-    model_bucketname = 'emr-serverless-output-pd'
-    model_name = 'container_autoencoder_test'
-    model_version = 'v0.0.1'
-    
-    return [feature_group_name, feature_input_version,
-            data_bucketname, data_filename,
-            save_model_local_path, model_bucketname,
-            model_name, model_version]
-
     
 if __name__ == "__main__":
     
