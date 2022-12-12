@@ -10,6 +10,7 @@ from .feature_engineering import container_autoencoder_train_test_split
 
 
 from .models import autoencoder_model_dish_5g
+from .models import pca_model_dish_5g
 
 from .utilities import cleanup
 from .utilities import report_generator
