@@ -2,7 +2,7 @@ import numpy as np
 import boto3
 from io import BytesIO
 from msspackages import get_features
-from eks_ml_pipeline import read_tensor,write_tensor,uploadDirectory, autoencoder_model_dish_5g, pca_ad_dish_5g
+from eks_ml_pipeline import read_tensor,write_tensor,uploadDirectory, autoencoder_model_dish_5g, pca_model_dish_5g
 from training_input_v1 import node_autoencoder_input,node_pca_input,pod_autoencoder_input,pod_pca_input,container_autoencoder_input,container_pca_input
 
 """
@@ -157,7 +157,7 @@ def pca_training(training_tensor,
     model_parameters = features_df["model_parameters"].iloc[0]
     
     #Initialize autoencoder model
-    pca = pca_ad_dish_5g(num_of_features =3, number_of_temporal_slices = 5, timesteps_per_slice = 4)
+    pca = pca_model_dish_5g(num_of_features =3, number_of_temporal_slices = 5, timesteps_per_slice = 4)
     
     #Train model
     pca.train(training_tensor)
