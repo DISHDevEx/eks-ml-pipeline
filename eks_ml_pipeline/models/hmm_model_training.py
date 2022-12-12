@@ -18,7 +18,7 @@ class hmm_model_dish():
     @: returns object of class
     '''
     
-    def __init__(self, train_valid_ratio=0.5, n_components = 9, covariance_type = 'full',n_iter = 1000,time_steps = 12):
+    def __init__(self, train_valid_ratio=0.9, n_components = 9, covariance_type = 'full',n_iter = 1000,time_steps = 12):
         
         # set the super init to make it available for inheritence among child classes
         super().__init__()
@@ -29,13 +29,19 @@ class hmm_model_dish():
         #init the validation ratio
         self.train_valid_ratio = train_valid_ratio
         
+        #define the threshold
+        self.threshold: float = 0.0
         
+        #define the result df
+        self.result_df = None
+    
+    ## define the training process
      
     def train(self, x_train) -> float:
         '''
         @:param x_train: takes training data into the model fitting
         
-        @:returns: na
+        @:returns: validation score, the mse trained on the validation dataset
         '''
         ## model start
         logging.info('Model training start')
@@ -50,7 +56,7 @@ class hmm_model_dish():
         train_samples = [np.random.multivariate_normal(self.model.means_[s], self.model.covars_[s]) \
                  for s in train_states]
         
-        #use state to preidtc traidf['values']
+        #use state to preidtc train_df['values']
 
         residual_cpu = x_train.T[0]-train_samples.T[0]
         residual_memory = x_train.T[1]-train_samples.T[1]
@@ -65,9 +71,16 @@ class hmm_model_dish():
 
         self.result_df = x_train.copy()
 
-        self.trained = True
         
-        validation_score = np.power(train_sample- x_train, 2).mean()
+        
+        valid_data = valid_df.values()
+        valid_states = self.model.predict(valid_data)
+        valid_samples = [np.random.multivariate_normal(self.model.means_[s], self.model.covars_[s]) \
+                 for s in valid_states]
+        
+        validation_score = np.power(valid_samples- valid_data, 2).mean()
+        
+        self.trained = True
 
         return validation_score
     
@@ -76,15 +89,31 @@ class hmm_model_dish():
         @:param x_test: test data
         @:returns test_pred,residuals,anomaly_scores vectors 
         """
-        logging.info("Autoencoder tests!")
+        if self.result_df is None:
+            print(f'Exception occurred: no train data input')
+            
+        logging.info("Hidden Markov Model test")
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            test_pred, test_err = self.__calculate_pred_and_err(x_test)
-            residuals = np.abs(test_pred - x_test)
-            anomaly_scores = self.__calculate_anomaly_score(residuals , self.error_threshold)
-            return test_pred,residuals,anomaly_scores
+            test_states = self.model.predict(x_test)
+            test_samples = [np.random.multivariate_normal(self.model.means_[s], self.model.covars_[s]) \
+                 for s in test_states]
+            
+            residuals =  x_test.values-test_samples
+            abs_error = np.abs(residuals)
+            is_anomals = abs_error > self.threshold
+            
+            temp_df = test_df.copy()
+            temp_df['predictions'] = samples
+            temp_df['is_anomaly'] = is_anomaly
+            temp_df['residuals'] = abs_error
+            
+            
+           
+            return temp_df
         
+
         
     
 
