@@ -167,7 +167,7 @@ class pca_ad_dish_5g():
         
         testX_slices_as_samples_ss = testX_slices_as_samples[:]
         
-                # initialize, since we have to do matmul by feature
+        # initialize, since we have to do matmul by feature
         testX_slices_as_samples_ss_encoded = np.zeros(shape = (self.timesteps_per_slice - self.n_modes_to_delete ,testX_slices_as_samples.shape[0],self.num_of_features ))
         testX_slices_as_samples_ss_decoded = np.zeros(shape = (testX_slices_as_samples.shape[0],self.timesteps_per_slice,self.num_of_features))
         
