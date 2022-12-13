@@ -45,6 +45,9 @@ def node_hmm_preprocessing(feature_group_name, feature_group_created_date, input
     spark = pod_data.get_spark()
     err, pod_df = pod_data.read()
     
+    model_parameters = input_node_features_df["model_parameters"].iloc[0]
+    hour_params = model_parameters["hour_params"]
+    
     if err == 'PASS':
         
         #get features
@@ -62,7 +65,7 @@ def node_hmm_preprocessing(feature_group_name, feature_group_created_date, input
         
         #Quality(timestamp filtered) nodes
         quality_filtered_node_df = cleaned_node_df.groupBy("Instance_id").agg(count("Timestamp").alias("timestamp_count"))
-        quality_filtered_nodes = quality_filtered_node_df.filter(col("timestamp_count").between(45,75))
+        quality_filtered_nodes = quality_filtered_node_df.filter(col("timestamp_count").between(45*hour_params,75*hour_params))
         
 
         #Processed Node DF                                                      
@@ -102,12 +105,12 @@ def node_hmm_ad_feature_engineering(input_node_features_df, input_node_processed
     model_parameters = input_node_features_df["model_parameters"].iloc[0]
     features =  feature_processor.cleanup(input_node_features_df["feature_name"].to_list())
     
-    weight = 2
-    time_steps = 12
-  
-    
+    time_steps = model_parameters["time_steps"]
+    hour_params = model_parameters["hour_params"]
+    weight = model_parameters["weight"]
+
     n = 0
-    samplesize = input_df.count*weight/time_step
+    samplesize = hour_params*1440*weight/time_steps
     final_df = None
     while n < samplesize:
 
@@ -152,14 +155,9 @@ def node_hmm_ad_feature_engineering(input_node_features_df, input_node_processed
 
     
     #group by timestamp to take average value for the same timestamp
-    final_df = final_df.groupBy("Timestamp").mean()
-    
-    final_df = final_df.withColumnRenamed("avg(node_cpu_utilization)","node_cpu_utilization") \
-    .withColumnRenamed("avg(node_memory_utilization)","node_memory_utilization")
-    
-    final_df = final_df.select(*features)
-    
-   
+        final_df.groupBy("Timestamp").agg(mean("scaled_features").alias("scaled_features")).show()
+
+
     
     
     return final_df
