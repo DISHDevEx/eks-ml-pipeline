@@ -102,7 +102,7 @@ def uploadDirectory(local_path, bucketname, model_name, version):
         for file in files:
             client = boto3.client('s3')
             client.upload_file(os.path.join(root, file), bucketname, model_name + '/' + version + '/models/' + file)
-
+    print(f"file uploaded too: {bucketname}/{model_name}/{version}/{models}/{file}")
 
 def write_parquet(df, bucket_name, model_name, version, model_data_type):
     """
@@ -163,7 +163,7 @@ def upload_zip(local_path, bucket_name, model_name, version, file):
     path = shutil.make_archive(local_path, 'zip', local_path)
     client = boto3.client('s3')
     client.upload_file(path, bucket_name, model_name + '/' + version + '/models/' + file + ".zip")
-    print("Zip file uploaded")
+    print(f"Zip file uploaded: {bucket_name}/{model_name}/{version}/models/{file}.zip")
 
 
 def download_zip(download_path, bucket_name, model_name, version, file):
