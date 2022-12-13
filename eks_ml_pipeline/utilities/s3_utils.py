@@ -4,6 +4,12 @@ from urllib.parse import urlparse
 import boto3
 import os
 
+"""
+Contributed by Evgeniya Dontsova and Vinayak Sharma
+MSS Dish 5g - Pattern Detection
+
+these model training functions will be used to train and save Anomaly Detection models
+"""
 
 def read_tensor(bucket_name,filename):
     """
