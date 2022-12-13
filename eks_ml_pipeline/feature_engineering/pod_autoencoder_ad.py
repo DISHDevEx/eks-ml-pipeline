@@ -56,8 +56,11 @@ def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_version, 
         #get features
         features_df = get_features(feature_group_name,feature_group_version)
         features = features_df["feature_name"].to_list()
-        
         processed_features = feature_processor.cleanup(features)
+        
+        model_parameters = features_df["model_parameters"].iloc[0]
+        time_steps = model_parameters["time_steps"]
+    
     
         #filter inital pod df based on request features
         pod_df = pod_df.select("Timestamp", "pod_id", "pod_status", *processed_features)
@@ -67,7 +70,7 @@ def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_version, 
         #Quality(timestamp filtered) pods
         cleaned_pod_df = cleaned_pod_df.filter(col("pod_status") == "Running")
         quality_filtered_pod_df = cleaned_pod_df.groupBy("pod_id").agg(count("Timestamp").alias("timestamp_count"))
-        quality_filtered_pods = quality_filtered_pod_df.filter(col("timestamp_count").between(45,75))
+        quality_filtered_pods = quality_filtered_pod_df.filter(col("timestamp_count") >= 2*time_steps)
 
         #Processed pod DF                                                      
         final_pod_df = cleaned_pod_df.filter(col("pod_id").isin(quality_filtered_pods["pod_id"]))
@@ -130,13 +133,8 @@ def pod_autoencoder_ad_feature_engineering(input_data_type, input_split_ratio, i
         random_pod_id = random.choice(input_pod_processed_df["pod_id"].unique())
         pod_fe_df = input_pod_processed_df.loc[(input_pod_processed_df["pod_id"] == random_pod_id)]
         pod_fe_df = pod_fe_df.sort_values(by='Timestamp').reset_index(drop=True)
-        
-        #scaler transformations
-        scaler = StandardScaler()
-        pod_fe_df[scaled_features] = scaler.fit_transform(pod_fe_df[features])
-        
         pod_fe_df_len = len(pod_fe_df)
-
+        
         #fix negative number bug 
         if pod_fe_df_len-time_steps <= 0:
             print(f'Exception occurred: pod_fe_df_len-time_steps = {pod_fe_df_len-time_steps}')
@@ -144,12 +142,17 @@ def pod_autoencoder_ad_feature_engineering(input_data_type, input_split_ratio, i
 
         #tensor builder
         start = random.choice(range(pod_fe_df_len-time_steps))
-        pod_tensor[n,:,:] = pod_fe_df[start:start+time_steps][scaled_features]
+        pod_fe_df = pod_fe_df[start:start+time_steps]
+        
+        #scaler transformations
+        scaler = StandardScaler()
+        pod_fe_df[scaled_features] = scaler.fit_transform(pod_fe_df[features])
+        pod_tensor[n,:,:] = pod_fe_df[scaled_features]
 
         if final_pod_fe_df.empty:
             final_pod_fe_df = pod_fe_df
         else:
-            final_pod_fe_df.append(pod_fe_df, ignore_index =True)
+            final_pod_fe_df = final_pod_fe_df.append(pod_fe_df, ignore_index =True)
 
         print(f'Finished with sample #{n}')
 
