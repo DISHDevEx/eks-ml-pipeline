@@ -126,23 +126,20 @@ def node_hmm_ad_feature_engineering(input_node_features_df, input_node_processed
             print(f'Exception occurred: not enough data')
             continue
             
-        #standardize data from the node
-        w = Window.partitionBy('Instance_id')
-        for c in features:
-            node_df = (node_df.withColumn('mean', F.mean(c).over(w))
-                .withColumn('stddev', F.stddev(c).over(w))
-                .withColumn(c, ((F.col(c) - F.col('mean')) / (F.col('stddev'))))
-                .drop('mean')
-                .drop('stddev'))
- 
+         #standardize data from the node
+        assembler = VectorAssembler(inputCols=features, outputCol="vectorized_features")
+        scaler = StandardScaler(inputCol = "vectorized_features", outputCol = "scaled_features", withMean=True, withStd=True)
+        pipeline = Pipeline(stages=[assembler, scaler])
+        node_df = pipeline.fit(node_df).transform(node_df)
 
         #pick random time slice of 12 timestamps from this node
         start = random.choice(range(node_df.count()-time_steps))
-        node_slice_df = node_df.withColumn('rn', row_number().over(Window.orderBy("Timestamp"))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select(["Timestamp"] + features)
-        node_slice_df = node_slice_df.select('Timestamp','node_cpu_utilization', 'node_memory_utilization')
+        node_slice_df = node_df.withColumn('rn', row_number().over(Window.orderBy("Timestamp"))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select(["Timestamp",'scaled_features'])
+        node_slice_df = node_slice_df.select('Timestamp','scaled_features')
 
-        
+ 
 
+       
         #fill the large dataset
         if not final_df:
             final_df = node_slice_df
@@ -155,7 +152,7 @@ def node_hmm_ad_feature_engineering(input_node_features_df, input_node_processed
 
     
     #group by timestamp to take average value for the same timestamp
-        final_df.groupBy("Timestamp").agg(mean("scaled_features").alias("scaled_features")).show()
+       final_df =  final_df.groupBy("Timestamp").agg(mean("scaled_features").alias("scaled_features"))
 
 
     
