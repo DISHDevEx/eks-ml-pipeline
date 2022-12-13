@@ -204,8 +204,8 @@ class autoencoder_model_dish_5g():
           
             variance_of_x_train = pca.fit(x_train[:,:,i]).explained_variance_.sum()
             variance_of_DoEx_train = pca.fit(train_set_predictions[:,:,i] ).explained_variance_.sum()
-            loss_of_variance = (variance_of_x_train - variance_of_DoEx_train)
-            loss_of_variance_by_feature.append(loss_of_variance)
+            variance_loss = (variance_of_x_train - variance_of_DoEx_train)
+            loss_of_variance_by_feature.append(variance_loss)
 
       
         return loss_of_variance_by_feature
