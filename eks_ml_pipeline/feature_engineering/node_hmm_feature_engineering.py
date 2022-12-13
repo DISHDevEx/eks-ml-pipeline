@@ -57,7 +57,9 @@ def node_hmm_preprocessing(feature_group_name, feature_group_created_date, input
     
         #filter inital node df based on request features
         node_df = pyspark_node_df.select("Timestamp", "Instance_id", *processed_features)
-        node_df = node_df.withColumn("Datetime",(col("Timestamp")/1000).cast("timestamp"))
+        
+        node_df = node_df.withColumn("Timestamp",(col("Timestamp")/1000).cast("integer"))
+        
         
         # Drop NA
         cleaned_node_df = node_df.na.drop(subset=processed_features)
@@ -121,7 +123,7 @@ def node_hmm_ad_feature_engineering(input_node_features_df, input_node_processed
         node_df = node_df.sort("Timestamp")
         node_df = node_df.na.drop(subset=features)
 
-        #fix negative number bug 
+        #fix negative number issue
         if node_df.count()-time_steps<= 0:
             print(f'Exception occurred: not enough data')
             continue
@@ -134,7 +136,12 @@ def node_hmm_ad_feature_engineering(input_node_features_df, input_node_processed
 
         #pick random time slice of 12 timestamps from this node
         start = random.choice(range(node_df.count()-time_steps))
-        node_slice_df = node_df.withColumn('rn', row_number().over(Window.orderBy("Timestamp"))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select(["Timestamp",'scaled_features'])
+        node_slice_df = node_df.withColumn('rn',   
+                                           row_number().over(Window.orderBy("Timestamp")))\
+                                        .filter(
+                            (col("rn") >= start) & (col("rn") < start+time_steps)
+                                                )
+                            .select(["Timestamp",'scaled_features'])
         node_slice_df = node_slice_df.select('Timestamp','scaled_features')
 
  
@@ -152,7 +159,8 @@ def node_hmm_ad_feature_engineering(input_node_features_df, input_node_processed
 
     
     #group by timestamp to take average value for the same timestamp
-       final_df =  final_df.groupBy("Timestamp").agg(mean("scaled_features").alias("scaled_features"))
+        final_df = final_df.sort("Timestamp")
+        final_df =  final_df.groupBy("Timestamp").agg(mean("scaled_features").alias("scaled_features"))
 
 
     
