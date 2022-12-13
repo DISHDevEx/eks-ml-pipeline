@@ -139,7 +139,7 @@ def container_autoencoder_ad_feature_engineering(input_data_type, input_split_ra
         if final_container_fe_df.empty:
             final_container_fe_df = container_fe_df
         else:
-            final_container_fe_df.append(container_fe_df, ignore_index =True)
+            final_container_fe_df = final_container_fe_df.append(container_fe_df, ignore_index =True)
 
         print(f'Finished with sample #{n}')
 

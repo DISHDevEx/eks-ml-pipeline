@@ -141,7 +141,7 @@ def node_autoencoder_ad_feature_engineering(input_data_type, input_split_ratio, 
         if final_node_fe_df.empty:
             final_node_fe_df = node_fe_df
         else:
-            final_node_fe_df.append(node_fe_df, ignore_index =True)
+            final_node_fe_df = final_node_fe_df.append(node_fe_df, ignore_index =True)
 
         print(f'Finished with sample #{n}')
 

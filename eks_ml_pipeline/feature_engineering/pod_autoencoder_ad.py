@@ -149,7 +149,7 @@ def pod_autoencoder_ad_feature_engineering(input_data_type, input_split_ratio, i
         if final_pod_fe_df.empty:
             final_pod_fe_df = pod_fe_df
         else:
-            final_pod_fe_df.append(pod_fe_df, ignore_index =True)
+            final_pod_fe_df = final_pod_fe_df.append(pod_fe_df, ignore_index =True)
 
         print(f'Finished with sample #{n}')
 
