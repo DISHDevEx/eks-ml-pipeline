@@ -193,5 +193,22 @@ class autoencoder_model_dish_5g():
             #anomaly_scores = self.__calculate_anomaly_score(residuals , self.error_threshold)
             return test_pred,residuals
         
+        
+    def fraction_of_variance_lost(self,x_train):
+    
+        pca = PCA(n_components=x_train.shape[1])
+        train_set_predictions,mae_loss = self.__calculate_pred_and_err(x_train)
+        
+        percentage_of_variance_lost = []
+        for i in range(3):
+            pca.fit(x_train[:,:,i]).explained_variance_.sum()
+            variance_of_x_train = pca.fit(x_train[:,:,i]).explained_variance_.sum()
+            variance_of_DoEx_train = pca.fit(train_set_predictions[:,:,i] ).explained_variance_.sum()
+            loss_of_variance = (variance_of_x_train - variance_of_DoEx_train)
+            percentage_of_variance_lost.append(loss_of_variance/variance_of_x_train)
+
+      
+        return percentage_of_variance_lost
+        
 
 
