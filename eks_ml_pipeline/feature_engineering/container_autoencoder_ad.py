@@ -1,11 +1,11 @@
 import numpy as np
+import pandas as pd
 import random
 from ..utilities import feature_processor, null_report
 from msspackages import Pyspark_data_ingestion, get_features
-from pyspark.sql import Window
-from pyspark.sql.functions import get_json_object, col, count, rand, row_number, concat_ws
-from pyspark.ml.feature import VectorAssembler, StandardScaler
-from pyspark.ml import Pipeline
+from pyspark.sql.functions import get_json_object, col, count, concat_ws
+from sklearn.preprocessing import StandardScaler
+
 
 """
 Contributed by David Cherney and Praveen Mada
@@ -14,15 +14,15 @@ MSS Dish 5g - Pattern Detection
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """
 
-def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour, input_setup = "default"):
+def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
     """
     inputs
     ------
             feature_group_name: STRING
             json name to get the required features
             
-            feature_group_created_date: STRING
-            json created date to get the latest features 
+            feature_group_version: STRING
+            json version to get the latest features 
             
             input_year : STRING | Int
             the year from which to read data, leave empty for all years
@@ -51,9 +51,12 @@ def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_cre
 
     if err == 'PASS':
         #get features
-        features_df = get_features(feature_group_name,feature_group_created_date)
+        features_df = get_features(feature_group_name,feature_group_version)
         features = features_df["feature_name"].to_list()
         processed_features = feature_processor.cleanup(features)
+        
+        model_parameters = features_df["model_parameters"].iloc[0]
+        time_steps = model_parameters["time_steps"]
     
         #filter inital container df based on request features
         container_df = pyspark_container_df.select("Timestamp", concat_ws("-", get_json_object(col("kubernetes"),"$.container_name"), get_json_object(col("kubernetes"),"$.pod_id")).alias("container_name_pod_id"), *processed_features)
@@ -65,13 +68,10 @@ def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_cre
         #Quality(timestamp filtered) nodes
         quality_filtered_container_df = cleaned_container_df.groupBy("container_name_pod_id").agg(count("Timestamp").alias("timestamp_count"))
         # to get data that is closer to 1min apart
-        quality_filtered_containers = quality_filtered_container_df.filter(col("timestamp_count").between(45,75))
+        quality_filtered_containers = quality_filtered_container_df.filter(col("timestamp_count") >= 2*time_steps)
         
         #Processed Container DF                                                      
         processed_container_df = cleaned_container_df.filter(col("container_name_pod_id").isin(quality_filtered_containers["container_name_pod_id"]))
-        
-        #Null report
-        null_report_df = null_report.report_generator(processed_container_df, processed_features)
         
         return features_df, processed_container_df
 
@@ -80,7 +80,7 @@ def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_cre
         return empty_df, empty_df
  
     
-def container_autoencoder_ad_feature_engineering(input_container_features_df, input_container_processed_df):
+def container_autoencoder_ad_feature_engineering(input_data_type, input_split_ratio, input_container_features_df, input_container_processed_df):
     """
     inputs
     ------
@@ -97,50 +97,62 @@ def container_autoencoder_ad_feature_engineering(input_container_features_df, in
             
     """
     
-    model_parameters = input_container_features_df["model_parameters"]
+    model_parameters = input_container_features_df["model_parameters"].iloc[0]
     features =  feature_processor.cleanup(input_container_features_df["feature_name"].to_list())
-    
-    time_steps = model_parameters[0]["time_steps"]
-    batch_size = model_parameters[0]["batch_size"]
-    n_samples = batch_size * model_parameters[0]["sample_multiplier"]
-    
-    container_tensor = np.zeros((n_samples,time_steps,len(features)))
-    final_container_fe_df = None
 
-    for n in range(n_samples):
-        ##pick random df, and normalize
-        random_container_id= random.choice(input_container_processed_df.select("container_name_pod_id").rdd.flatMap(list).collect())
-        container_fe_df = input_container_processed_df[(input_container_processed_df["container_name_pod_id"] == random_container_id)][["Timestamp","container_name_pod_id"] + features].select('*')
-        container_fe_df = container_fe_df.sort("Timestamp")
-        container_fe_df = container_fe_df.na.drop(subset=features)
+    time_steps = model_parameters["time_steps"]
+    batch_size = model_parameters["batch_size"]
+
+    if input_data_type == 'train':
+        n_samples = batch_size * model_parameters["train_sample_multiplier"]
+    elif input_data_type == 'test':
+         n_samples = round((batch_size * model_parameters["train_sample_multiplier"]* input_split_ratio[1])/ input_split_ratio[0])
+
+    container_tensor = np.zeros((n_samples,time_steps,len(features)))
+    final_container_fe_df = pd.DataFrame()
+    
+    scaled_features = []
+    for feature in features:
+        scaled_features = scaled_features + ["scaled_"+feature]
+
+    #To Pandas
+    input_container_processed_df = input_container_processed_df.toPandas()
+
+    n = 0
+    while n < n_samples:
+        random_container_id = random.choice(input_container_processed_df["container_name_pod_id"].unique())
+        container_fe_df = input_container_processed_df.loc[(input_container_processed_df["container_name_pod_id"] == random_container_id)]
+        container_fe_df = container_fe_df.sort_values(by='Timestamp').reset_index(drop=True)
+        container_fe_df_len = len(container_fe_df)
+        
+        #fix negative number bug 
+        if container_fe_df_len-time_steps <= 0:
+            print(f'Exception occurred: container_fe_df_len-time_steps = {container_fe_df_len-time_steps}')
+            continue
+
+        #tensor builder
+        start = random.choice(range(container_fe_df_len-time_steps))
+        container_fe_df = container_fe_df[start:start+time_steps]
         
         #scaler transformations
-        assembler = VectorAssembler(inputCols=features, outputCol="vectorized_features")
-        scaler = StandardScaler(inputCol = "vectorized_features", outputCol = "scaled_features", withMean=True, withStd=True)
-        pipeline = Pipeline(stages=[assembler, scaler])
-        container_fe_df = pipeline.fit(container_fe_df).transform(container_fe_df)
-        
-        #tensor builder
-        start = random.choice(range(container_fe_df.count()-time_steps))
-        container_tensor_df = container_fe_df.withColumn("rn", row_number().over(Window.orderBy("container_name_pod_id"))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
-        container_tensor_list = container_tensor_df.select("scaled_features").rdd.flatMap(list).collect()
-        if len(container_tensor_list) == time_steps:
-            container_tensor[n,:,:] = container_tensor_list
+        scaler = StandardScaler()
+        container_fe_df[scaled_features] = scaler.fit_transform(container_fe_df[features])
+        container_tensor[n,:,:] = container_fe_df[scaled_features]
 
-            if not final_container_fe_df:
-                final_container_fe_df = container_fe_df
-            else:
-                final_container_fe_df = final_container_fe_df.union(container_fe_df)
-
+        if final_container_fe_df.empty:
+            final_container_fe_df = container_fe_df
         else:
-            n_samples = n_samples+1
+            final_container_fe_df = final_container_fe_df.append(container_fe_df, ignore_index =True)
 
-    final_container_fe_df = final_container_fe_df.select("Timestamp","container_name_pod_id",*features,"scaled_features")
+        print(f'Finished with sample #{n}')
+
+        n +=1
+
 
     return final_container_fe_df, container_tensor
 
     
-def container_autoencoder_train_test_split(input_df):
+def container_autoencoder_train_test_split(input_df, split_weights):
     """
     inputs
     ------
@@ -154,6 +166,6 @@ def container_autoencoder_train_test_split(input_df):
             
     """
     
-    container_train, container_test = input_df.randomSplit(weights=[0.8,0.2], seed=200)
+    container_train, container_test = input_df.randomSplit(weights=split_weights, seed=200)
 
     return container_train, container_test

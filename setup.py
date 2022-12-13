@@ -9,7 +9,7 @@ setup(
     author= 'Hamza Khokhar, Praveen Mada',
     author_email='hamza.khokhar@dish.com, praveen.mada@dish.com',
     license='Dish Wireless',
-    packages=find_packages(include=['eks_ml_pipeline','eks_ml_pipeline.feature_engineering', 'eks_ml_pipeline.modeling', 'eks_ml_pipeline.utilities']),
+    packages=find_packages(include=['eks_ml_pipeline','eks_ml_pipeline.feature_engineering', 'eks_ml_pipeline.models', 'eks_ml_pipeline.utilities']),
     include_package_data=True,
     #entry_points = {'console_scripts': ['msspackages=msspackages.project_inital_setu:setup_runner']}
     #scripts=['msspackages/project_inital_setup/understanding_eks_setup.py'],
