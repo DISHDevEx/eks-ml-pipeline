@@ -1,12 +1,10 @@
 import numpy as np
+import pandas as pd
 import random
 from ..utilities import feature_processor, null_report
 from msspackages import Pyspark_data_ingestion, get_features
-from pyspark import StorageLevel
-from pyspark.sql import Window
-from pyspark.sql.functions import col, count, rand, row_number, get_json_object
-from pyspark.ml.feature import VectorAssembler, StandardScaler
-from pyspark.ml import Pipeline
+from pyspark.sql.functions import col, count, row_number, get_json_object
+from sklearn.preprocessing import StandardScaler
 
 """
 Contributed by Madhu Bandi, Evgeniya Dontsova and Praveen Mada
@@ -79,10 +77,8 @@ def pod_autoencoder_ad_preprocessing(feature_group_name, feature_group_version, 
         final_pod_df = final_pod_df.dropDuplicates(['pod_id', 'Timestamp'])
         
         #Drop rows with nans 
-        non_null_pod_df = final_pod_df.na.drop("all")
-        
-        #Null report
-        null_report_df = null_report.report_generator(final_pod_df, processed_features)     
+        final_pod_df = final_pod_df.na.drop("all")
+           
         
         return features_df, final_pod_df
     else:
@@ -119,58 +115,45 @@ def pod_autoencoder_ad_feature_engineering(input_data_type, input_split_ratio, i
          n_samples = round((batch_size * model_parameters["train_sample_multiplier"]* input_split_ratio[1])/ input_split_ratio[0])
 
     pod_tensor = np.zeros((n_samples,time_steps,len(features)))
-    final_pod_fe_df = None
+    final_pod_fe_df = pd.DataFrame()
+    
+    scaled_features = []
+    for feature in features:
+        scaled_features = scaled_features + ["scaled_"+feature]
 
-    input_pod_processed_df.persist(StorageLevel.MEMORY_ONLY)
+    #To Pandas
+    input_pod_processed_df = input_pod_processed_df.toPandas()
     
     n = 0
     while n < n_samples:
         ##pick random df, and normalize
-        random_pod_id= random.choice(input_pod_processed_df.select("pod_id").rdd.flatMap(list).collect())
-        pod_fe_df = input_pod_processed_df[(input_pod_processed_df["pod_id"] == random_pod_id)][["Timestamp", "pod_id"] + features].select('*')
-        pod_fe_df = pod_fe_df.sort("Timestamp")
-        pod_fe_df = pod_fe_df.na.drop(subset=features)
-
-        #scaler transformations
-        assembler = VectorAssembler(inputCols=features, outputCol="vectorized_features")
-        scaler = StandardScaler(inputCol = "vectorized_features", outputCol = "scaled_features", withMean=True, withStd=True)
-        pipeline = Pipeline(stages=[assembler, scaler])
-        pod_fe_df = pipeline.fit(pod_fe_df).transform(pod_fe_df)
-        pod_fe_df.persist(StorageLevel.MEMORY_ONLY)
-
+        random_pod_id = random.choice(input_pod_processed_df["pod_id"].unique())
+        pod_fe_df = input_pod_processed_df.loc[(input_pod_processed_df["pod_id"] == random_pod_id)]
+        pod_fe_df = pod_fe_df.sort_values(by='Timestamp').reset_index(drop=True)
         
+        #scaler transformations
+        scaler = StandardScaler()
+        pod_fe_df[scaled_features] = scaler.fit_transform(pod_fe_df[features])
+        
+        pod_fe_df_len = len(pod_fe_df)
+
         #fix negative number bug 
-        if pod_fe_df.count()-time_steps <= 0:
-            print(f'Exception occurred: pod_fe_df.count()-time_steps = {pod_fe_df.count()-time_steps}')
+        if pod_fe_df_len-time_steps <= 0:
+            print(f'Exception occurred: pod_fe_df_len-time_steps = {pod_fe_df_len-time_steps}')
             continue
 
         #tensor builder
-        start = random.choice(range(pod_fe_df.count()-time_steps))
-        pod_tensor_df = pod_fe_df.withColumn('rn', row_number().over(Window.partitionBy("pod_id").orderBy("Timestamp"))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
-        pod_tensor_list = pod_tensor_df.select("scaled_features").rdd.flatMap(list).collect()
-        
-        #fix shape mismatch bug
-        if len(pod_tensor_list) == time_steps:
-            pod_tensor[n,:,:] = pod_tensor_list
+        start = random.choice(range(pod_fe_df_len-time_steps))
+        pod_tensor[n,:,:] = pod_fe_df[start:start+time_steps][scaled_features]
 
-            if not final_pod_fe_df:
-                final_pod_fe_df = pod_fe_df
-            else:
-                final_pod_fe_df = final_pod_fe_df.union(pod_fe_df)
+        if final_pod_fe_df.empty:
+            final_pod_fe_df = pod_fe_df
         else:
-            print(f'Exception occurred due to shape mismatch: len(pod_tensor_list) = {len(pod_tensor_list)}, time_steps = {time_steps}')
-            continue
-            
+            final_pod_fe_df.append(pod_fe_df, ignore_index =True)
+
         print(f'Finished with sample #{n}')
-        
-        pod_fe_df.unpersist()
-    
-        n += 1
- 
-    final_pod_fe_df = final_pod_fe_df.select("Timestamp","pod_id",*features,"scaled_features")
-    
-    input_pod_processed_df.unpersist()
-    
+
+        n +=1
 
     return final_pod_fe_df, pod_tensor
 
