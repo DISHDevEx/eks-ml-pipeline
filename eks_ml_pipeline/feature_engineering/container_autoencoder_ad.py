@@ -54,6 +54,9 @@ def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_ver
         features_df = get_features(feature_group_name,feature_group_version)
         features = features_df["feature_name"].to_list()
         processed_features = feature_processor.cleanup(features)
+        
+        model_parameters = features_df["model_parameters"].iloc[0]
+        time_steps = model_parameters["time_steps"]
     
         #filter inital container df based on request features
         container_df = pyspark_container_df.select("Timestamp", concat_ws("-", get_json_object(col("kubernetes"),"$.container_name"), get_json_object(col("kubernetes"),"$.pod_id")).alias("container_name_pod_id"), *processed_features)
@@ -65,7 +68,7 @@ def container_autoencoder_ad_preprocessing(feature_group_name, feature_group_ver
         #Quality(timestamp filtered) nodes
         quality_filtered_container_df = cleaned_container_df.groupBy("container_name_pod_id").agg(count("Timestamp").alias("timestamp_count"))
         # to get data that is closer to 1min apart
-        quality_filtered_containers = quality_filtered_container_df.filter(col("timestamp_count").between(45,75))
+        quality_filtered_containers = quality_filtered_container_df.filter(col("timestamp_count") >= 2*time_steps)
         
         #Processed Container DF                                                      
         processed_container_df = cleaned_container_df.filter(col("container_name_pod_id").isin(quality_filtered_containers["container_name_pod_id"]))
@@ -120,21 +123,21 @@ def container_autoencoder_ad_feature_engineering(input_data_type, input_split_ra
         random_container_id = random.choice(input_container_processed_df["container_name_pod_id"].unique())
         container_fe_df = input_container_processed_df.loc[(input_container_processed_df["container_name_pod_id"] == random_container_id)]
         container_fe_df = container_fe_df.sort_values(by='Timestamp').reset_index(drop=True)
-        
-        #scaler transformations
-        scaler = StandardScaler()
-        container_fe_df[scaled_features] = scaler.fit_transform(container_fe_df[features])
-        
         container_fe_df_len = len(container_fe_df)
         
         #fix negative number bug 
         if container_fe_df_len-time_steps <= 0:
             print(f'Exception occurred: container_fe_df_len-time_steps = {container_fe_df_len-time_steps}')
             continue
-        
+
         #tensor builder
         start = random.choice(range(container_fe_df_len-time_steps))
-        container_tensor[n,:,:] = container_fe_df[start:start+time_steps][scaled_features]
+        container_fe_df = container_fe_df[start:start+time_steps]
+        
+        #scaler transformations
+        scaler = StandardScaler()
+        container_fe_df[scaled_features] = scaler.fit_transform(container_fe_df[features])
+        container_tensor[n,:,:] = container_fe_df[scaled_features]
 
         if final_container_fe_df.empty:
             final_container_fe_df = container_fe_df
