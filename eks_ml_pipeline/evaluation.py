@@ -1,8 +1,9 @@
 import numpy as np
 import tensorflow as tf
-import pyarrow.parquet as pq
-from eks_ml_pipeline import autoencoder_model_dish_5g, write_tensor, read_tensor
-from eks_ml_pipeline import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
+from utilities import write_tensor, read_tensor, uploadDirectory
+from training_input import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
+from training_input import node_pca_input, pod_pca_input, container_pca_input
+
 
 """
 Contributed by Evgeniya Dontsova
@@ -78,11 +79,15 @@ def autoencoder_testing_pipeline(data_bucketname, train_data_filename, test_data
 
 if __name__ == "__main__":
     
-    #Train node autoencoder model and save on s3
+    ###***Autoencoder***###
+
+    #Test node autoencoder model and save on s3
     autoencoder_testing_pipeline(*node_autoencoder_input()[2:])
     
-    #Train pod autoencoder model and save on s3
+    #Test pod autoencoder model and save on s3
     autoencoder_testing_pipeline(*pod_autoencoder_input()[2:])
 
-    #Train container autoencoder model and save on s3
+    #Test container autoencoder model and save on s3
     autoencoder_testing_pipeline(*container_autoencoder_input()[2:])
+    
+    ###***PCA***###
