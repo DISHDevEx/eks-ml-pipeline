@@ -18,6 +18,11 @@ from .utilities import write_tensor
 from .utilities import read_tensor
 from .utilities import uploadDirectory
 from .utilities import write_parquet
+from .utilities import download_zip
+from .utilities import upload_zip
+from .utilities import unzip
+from .utilities import pandas_dataframe_to_s3
+from .utilities import awswrangler_pandas_dataframe_to_s3
 
 
 from .training_data_builder import node_training_data_builder
