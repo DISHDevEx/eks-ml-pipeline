@@ -18,6 +18,7 @@ from .utilities import write_tensor
 from .utilities import read_tensor
 from .utilities import uploadDirectory
 from .utilities import write_parquet
+from .utilities import upload_zip
 
 
 from .training_data_builder import node_training_data_builder

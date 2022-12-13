@@ -3,6 +3,7 @@ import numpy as np
 from urllib.parse import urlparse
 import boto3
 import os
+import shutil
 
 """
 Contributed by Evgeniya Dontsova and Vinayak Sharma
@@ -136,3 +137,32 @@ def write_parquet(df,bucket_name,model_name,version,model_data_type):
             
     """
     df.write.mode('overwrite').parquet(f's3a://{bucket_name}/{model_name}/{version}/data/{model_data_type}/')
+    
+def upload_zip(local_path, bucket_name, model_name, version, file):
+    """
+    inputs
+    ------
+            local_path: string
+            local path to folder NOT file to upload the folder to s3
+
+            bucket_name: STRING
+            s3 bucket name to write the folder
+
+            model_name: STRING
+            model name to create a folder within the bucket for model versioning
+
+            version: STRING
+            format: v#.#.#
+            version will be used versioning
+
+
+    outputs
+    -------
+            prints that the upload has completed
+
+    """
+    path = shutil.make_archive(local_path, 'zip', local_path)
+    client = boto3.client('s3')
+    client.upload_file(path, bucket_name, model_name + '/' + version + '/models/' + file + ".zip")
+    print("Zip file uploaded")
+

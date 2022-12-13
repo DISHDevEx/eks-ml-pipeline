@@ -5,3 +5,4 @@ from .s3_utils import write_tensor
 from .s3_utils import read_tensor
 from .s3_utils import uploadDirectory
 from .s3_utils import write_parquet
+from .s3_utils import upload_zip

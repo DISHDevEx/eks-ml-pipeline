@@ -11,15 +11,15 @@ def node_autoencoder_input():
 
     
     feature_group_name = "node_autoencoder_ad"
-    feature_input_version = "v0.0.1"  
-    data_bucketname = 'mss-shared'
-    train_data_filename = 'x_train_36k_sample.npy'
-    test_data_filename = 'x_train_36k_sample.npy'
+    feature_input_version = "v0.0.2"  
+    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    train_data_filename = 'node_autoencoder_ad/v0.0.2/data/node_autoencoder_ad_node_training_tensor'
+    test_data_filename = 'node_autoencoder_ad/v0.0.2/data/node_autoencoder_ad_node_training_tensor'
     
     save_model_local_path = "../../node_autoencoder"
-    model_bucketname = 'emr-serverless-output-pd'
-    model_name = 'node_autoencoder_test'
-    model_version = 'v0.0.1'
+    model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    model_name = 'node_autoencoder_ad'
+    model_version = 'v0.0.2'
     
     return [feature_group_name, feature_input_version,
             data_bucketname, train_data_filename, test_data_filename,

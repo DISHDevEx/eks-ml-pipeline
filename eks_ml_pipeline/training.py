@@ -2,7 +2,7 @@ import numpy as np
 import boto3
 from io import BytesIO
 from msspackages import get_features
-from utilities import write_tensor, read_tensor, uploadDirectory
+from utilities import write_tensor, read_tensor,upload_zip
 from models import autoencoder_model_dish_5g, pca_model_dish_5g
 from training_input import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
 from training_input import node_pca_input, pod_pca_input, container_pca_input
@@ -119,10 +119,12 @@ def autoencoder_training_pipeline(feature_group_name, feature_input_version,
 
 
     ####Save model object to s3 bucket
-    uploadDirectory(local_path = save_model_local_path,
-                    bucketname = model_bucketname,
-                    model_name = model_name,
-                    version = model_version)
+    upload_zip(local_path = save_model_local_path,
+               bucket_name = model_bucketname,
+               model_name = model_name,
+               version = model_version, 
+               file = model_name + model_version)
+    
 
     
 def pca_training(training_tensor, 
@@ -242,19 +244,19 @@ if __name__ == "__main__":
     #Train node autoencoder model and save on s3
     autoencoder_training_pipeline(*node_autoencoder_input())
     
-    #Train pod autoencoder model and save on s3
-    autoencoder_training_pipeline(*pod_autoencoder_input())
+#     #Train pod autoencoder model and save on s3
+#     autoencoder_training_pipeline(*pod_autoencoder_input())
 
-    #Train container autoencoder model and save on s3
-    autoencoder_training_pipeline(*container_autoencoder_input())
+#     #Train container autoencoder model and save on s3
+#     autoencoder_training_pipeline(*container_autoencoder_input())
     
-    ###***PCA***###
+#     ###***PCA***###
     
-    #Train node pca model and save on s3
-    pca_training_pipeline(*node_pca_input())
+#     #Train node pca model and save on s3
+#     pca_training_pipeline(*node_pca_input())
     
-    #Train pod pca model and save on s3
-    pca_training_pipeline(*pod_pca_input())
+#     #Train pod pca model and save on s3
+#     pca_training_pipeline(*pod_pca_input())
 
-    #Train container pca model and save on s3
-    pca_training_pipeline(*container_pca_input())
+#     #Train container pca model and save on s3
+#     pca_training_pipeline(*container_pca_input())
