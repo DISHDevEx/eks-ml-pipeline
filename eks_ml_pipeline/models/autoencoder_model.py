@@ -194,7 +194,7 @@ class autoencoder_model_dish_5g():
             return test_pred,residuals
         
         
-    def loss_of_varaince(self,x_train):
+    def loss_of_variance(self,x_train):
     
         pca = PCA(n_components=x_train.shape[1])
         train_set_predictions,mae_loss = self.__calculate_pred_and_err(x_train)
