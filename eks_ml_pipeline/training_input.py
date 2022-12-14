@@ -53,9 +53,9 @@ def node_pca_input():
     test_data_filename = "testing_2022_9_29"
 
     save_model_local_path = "../../node_pca.npy"
-    model_bucketname = 'emr-serverless-output-pd'
-    model_name = 'node_autoencoder_test'
-    model_version = 'v0.0.1'
+    model_bucketname = "emr-serverless-output-pd"
+    model_name = "node_pca_ad"
+    model_version = "v0.0.1"
 
     return [feature_group_name, feature_input_version,
             data_bucketname, train_data_filename,test_data_filename,

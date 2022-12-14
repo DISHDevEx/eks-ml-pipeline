@@ -119,7 +119,7 @@ def pca_testing_pipeline(data_bucketname, train_data_filename, test_data_filenam
                                   model_data_type =  "training_2022_9_29")
     
     #Load trained model
-    pca = pca_model_dish_5g(num_of_features = 3, number_of_temporal_slices = 5, timesteps_per_slice = 4)
+    pca = pca_model_dish_5g(num_of_features = 3, timesteps_per_slice = 20)
     pca.load_in_vs(save_model_local_path)
     
     #Make predictions
