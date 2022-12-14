@@ -39,7 +39,7 @@ def read_tensor(bucket_name, model_name,version, model_data_type):
     return tensor
 
 
-def write_tensor(tensor, bucket_name, model_name, version, model_data_type):
+def write_tensor(tensor, bucket_name, model_name, version, flag, file_name):
     """
     inputs
     ------
@@ -69,9 +69,15 @@ def write_tensor(tensor, bucket_name, model_name, version, model_data_type):
     np.save(bytes_, tensor, allow_pickle=True)
     bytes_.seek(0)
     # client.put_object(Body=a, Bucket=bucket, Key='array.npy')
-    client.upload_fileobj(Fileobj=bytes_, Bucket=bucket_name,
-                         Key=f'{model_name}/{version}/data/tensors/{model_data_type}.npy')
-    path = f'{bucket_name}/{model_name}/{version}/data/tensors/{model_data_type}.npy'
+    
+    if flag == "data":
+        client.upload_fileobj(Fileobj=bytes_, Bucket=bucket_name,
+                             Key=f'{model_name}/{version}/data/tensors/{file_name}.npy')
+        path = f'{bucket_name}/{model_name}/{version}/data/tensors/{file_name}.npy'
+    if flag == "model":
+        client.upload_fileobj(Fileobj=bytes_, Bucket=bucket_name,
+                             Key=f'{model_name}/{version}/model/{file_name}.npy')
+        path = f'{bucket_name}/{model_name}/{version}/model/{file_name}.npy'
     return path
 
 
