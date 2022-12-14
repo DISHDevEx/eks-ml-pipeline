@@ -192,9 +192,3 @@ class autoencoder_model_dish_5g():
             residuals = np.abs(test_pred - x_test)
             #anomaly_scores = self.__calculate_anomaly_score(residuals , self.error_threshold)
             return test_pred,residuals
-        
-        
-
-        
-
-
