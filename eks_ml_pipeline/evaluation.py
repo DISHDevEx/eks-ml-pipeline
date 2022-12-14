@@ -123,8 +123,8 @@ def pca_testing_pipeline(feature_group_name, feature_input_version,
                                   version = model_version,
                                   file_name =  test_data_filename)
     
-    #Load trained model #model_parameters["time_steps"]
-    pca = pca_model_dish_5g(num_of_features = 3, timesteps_per_slice =20)
+    #Load trained model 
+    pca = pca_model_dish_5g(num_of_features = 3, timesteps_per_slice = model_parameters["time_steps"])
     pca.load_in_vs(save_model_local_path)
     
     #Make predictions
