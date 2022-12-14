@@ -7,7 +7,7 @@ import shutil
 import zipfile
 
 
-def read_tensor(bucket_name, model_name,version, model_data_type):
+def read_tensor(bucket_name, model_name, version, model_data_type):
     """
     inputs
     ------
