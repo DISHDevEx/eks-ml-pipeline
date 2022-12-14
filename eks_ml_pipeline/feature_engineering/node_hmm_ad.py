@@ -1,7 +1,7 @@
 
 import numpy as np
 import random
-from utilities import feature_processor, null_report
+from ..utilities import feature_processor, null_report
 from msspackages import Pyspark_data_ingestion, get_features
 from pyspark.sql.functions import col, count, rand, get_json_object
 from pyspark.ml.feature import  StandardScaler
@@ -9,7 +9,7 @@ from pyspark.sql import Window
 from pyspark.sql import functions as F
 from pyspark.ml import Pipeline
 
-def node_hmm_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour):
+def node_hmm_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour):
     """
     inputs
     ------
@@ -136,17 +136,9 @@ def node_hmm_ad_feature_engineering(input_node_features_df, input_node_processed
 
         #pick random time slice of 12 timestamps from this node
         start = random.choice(range(node_df.count()-time_steps))
-        node_slice_df = node_df.withColumn('rn',   
-                                           row_number().over(Window.orderBy("Timestamp")))\
-                                        .filter(
-                            (col("rn") >= start) & (col("rn") < start+time_steps)
-                                                )
-                            .select(["Timestamp",'scaled_features'])
+        node_slice_df = node_df.withColumn('rn', row_number().over(Window.orderBy("Timestamp"))).filter((col("rn") >= start) & (col("rn") < start+time_steps))
         node_slice_df = node_slice_df.select('Timestamp','scaled_features')
 
- 
-
-       
         #fill the large dataset
         if not final_df:
             final_df = node_slice_df

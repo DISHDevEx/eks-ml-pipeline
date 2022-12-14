@@ -1,11 +1,10 @@
 import numpy as np
+import pandas as pd
 import random
 from ..utilities import feature_processor, null_report
 from msspackages import Pyspark_data_ingestion, get_features
-from pyspark.sql import Window
-from pyspark.sql.functions import col, count, rand, row_number
-from pyspark.ml.feature import VectorAssembler, StandardScaler
-from pyspark.ml import Pipeline
+from pyspark.sql.functions import col, count
+from sklearn.preprocessing import StandardScaler
 
 """
 Contributed by Vinayak Sharma and Praveen Mada
@@ -15,15 +14,15 @@ this feature engineering functions will help us run bach jobs that builds traini
 """
 
 
-def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_date, input_year, input_month, input_day, input_hour, input_setup = "default"):
+def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
     """
     inputs
     ------
             feature_group_name: STRING
             json name to get the required features
             
-            feature_group_created_date: STRING
-            json created date to get the latest features 
+            feature_group_version: STRING
+            json version to get the latest features 
             
             input_year : STRING | Int
             the year from which to read data, leave empty for all years
@@ -53,10 +52,13 @@ def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_
     if err == 'PASS':
 
         #get features
-        features_df = get_features(feature_group_name,feature_group_created_date)
+        features_df = get_features(feature_group_name,feature_group_version)
         features = features_df["feature_name"].to_list()
         processed_features = feature_processor.cleanup(features)
-    
+        
+        model_parameters = features_df["model_parameters"].iloc[0]
+        time_steps = model_parameters["time_steps"]
+
         #filter inital node df based on request features
         node_df = pyspark_node_df.select("Timestamp", "InstanceId", *processed_features)
         node_df = node_df.withColumn("Timestamp",(col("Timestamp")/1000).cast("timestamp"))
@@ -67,13 +69,10 @@ def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_
         #Quality(timestamp filtered) nodes
         quality_filtered_node_df = cleaned_node_df.groupBy("InstanceId").agg(count("Timestamp").alias("timestamp_count"))
         # to get data that is closer to 1min apart
-        quality_filtered_nodes = quality_filtered_node_df.filter(col("timestamp_count").between(45,75))
+        quality_filtered_nodes = quality_filtered_node_df.filter(col("timestamp_count") >= 2*time_steps)
         
         #Processed Node DF                                                      
         processed_node_df = cleaned_node_df.filter(col("InstanceId").isin(quality_filtered_nodes["InstanceId"]))
-        
-        #Null report
-        null_report_df = null_report.report_generator(processed_node_df, processed_features)
         
         return features_df, processed_node_df
 
@@ -82,7 +81,7 @@ def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_created_
         return empty_df, empty_df
     
 
-def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_processed_df):
+def node_autoencoder_ad_feature_engineering(input_data_type, input_split_ratio, input_node_features_df, input_node_processed_df):
     """
     inputs
     ------
@@ -99,49 +98,62 @@ def node_autoencoder_ad_feature_engineering(input_node_features_df, input_node_p
             
     """
 
-    model_parameters = input_node_features_df["model_parameters"]
+    model_parameters = input_node_features_df["model_parameters"].iloc[0]
     features =  feature_processor.cleanup(input_node_features_df["feature_name"].to_list())
-    
-    time_steps = model_parameters[0]["time_steps"]
-    batch_size = model_parameters[0]["batch_size"]
-    n_samples = batch_size * model_parameters[0]["sample_multiplier"]
-    
+
+    time_steps = model_parameters["time_steps"]
+    batch_size = model_parameters["batch_size"]
+
+    if input_data_type == 'train':
+        n_samples = batch_size * model_parameters["train_sample_multiplier"]
+    elif input_data_type == 'test':
+        n_samples = round((batch_size * model_parameters["train_sample_multiplier"]* input_split_ratio[1])/ input_split_ratio[0])
+
     node_tensor = np.zeros((n_samples,time_steps,len(features)))
-    final_node_fe_df = None
+    final_node_fe_df = pd.DataFrame()
+    
+    scaled_features = []
+    for feature in features:
+        scaled_features = scaled_features + ["scaled_"+feature]
 
-    for n in range(n_samples):
+    #To Pandas
+    input_node_processed_df = input_node_processed_df.toPandas() 
+    
+    n = 0
+    while n < n_samples:
         ##pick random df, and normalize
-        random_instance_id= random.choice(input_node_processed_df.select("InstanceId").rdd.flatMap(list).collect())
-        node_fe_df = input_node_processed_df[(input_node_processed_df["InstanceId"] == random_instance_id)][["Timestamp", "InstanceId"] + features].select('*')
-        node_fe_df = node_fe_df.sort("Timestamp")
-        node_fe_df = node_fe_df.na.drop(subset=features)
-
-        #scaler transformations
-        assembler = VectorAssembler(inputCols=features, outputCol="vectorized_features")
-        scaler = StandardScaler(inputCol = "vectorized_features", outputCol = "scaled_features", withMean=True, withStd=True)
-        pipeline = Pipeline(stages=[assembler, scaler])
-        node_fe_df = pipeline.fit(node_fe_df).transform(node_fe_df)
-
+        random_instance_id = random.choice(input_node_processed_df["InstanceId"].unique())
+        node_fe_df = input_node_processed_df.loc[(input_node_processed_df["InstanceId"] == random_instance_id)]
+        node_fe_df = node_fe_df.sort_values(by='Timestamp').reset_index(drop=True)
+        node_fe_df_len = len(node_fe_df)
+        
+        #fix negative number bug 
+        if node_fe_df_len-time_steps <= 0:
+            print(f'Exception occurred: node_fe_df_len-time_steps = {node_fe_df_len-time_steps}')
+            continue
+        
         #tensor builder
-        start = random.choice(range(node_fe_df.count()-time_steps))
-        node_tensor_df = node_fe_df.withColumn('rn', row_number().over(Window.orderBy('InstanceId'))).filter((col("rn") >= start) & (col("rn") < start+time_steps)).select("scaled_features")
-        node_tensor_list = node_tensor_df.select("scaled_features").rdd.flatMap(list).collect()
-        if len(node_tensor_list) == time_steps:
-            node_tensor[n,:,:] = node_tensor_list
+        start = random.choice(range(node_fe_df_len-time_steps))
+        node_fe_df = node_fe_df[start:start+time_steps]
+        
+        #scaler transformations
+        scaler = StandardScaler()
+        node_fe_df[scaled_features] = scaler.fit_transform(node_fe_df[features])
+        node_tensor[n,:,:] = node_fe_df[scaled_features]
 
-            if not final_node_fe_df:
-                final_node_fe_df = node_fe_df
-            else:
-                final_node_fe_df = final_node_fe_df.union(node_fe_df)
+        if final_node_fe_df.empty:
+            final_node_fe_df = node_fe_df
         else:
-            n_samples = n_samples+1
- 
-    final_node_fe_df = final_node_fe_df.select("Timestamp","InstanceId",*features,"scaled_features")
+            final_node_fe_df = final_node_fe_df.append(node_fe_df, ignore_index =True)
+
+        print(f'Finished with sample #{n}')
+
+        n +=1
 
     return final_node_fe_df, node_tensor
 
 
-def node_autoencoder_train_test_split(input_df):
+def node_autoencoder_train_test_split(input_df, split_weights):
     """
     inputs
     ------
@@ -155,7 +167,7 @@ def node_autoencoder_train_test_split(input_df):
             
     """
     
-    node_train, node_test = input_df.randomSplit(weights=[0.8,0.2], seed=200)
+    node_train, node_test = input_df.randomSplit(weights=split_weights, seed=200)
 
     return node_train, node_test
     
