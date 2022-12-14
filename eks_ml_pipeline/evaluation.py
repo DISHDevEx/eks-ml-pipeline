@@ -69,10 +69,10 @@ def autoencoder_testing_pipeline(data_bucketname, train_data_filename, test_data
     test_residuals = np.abs(test_predictions - testing_tensor)
     
     #Write test_predictions tensor
-    write_tensor(test_predictions,model_bucketname,model_name,model_version,"model", "test_predictions")
+    write_tensor(test_predictions,model_bucketname,model_name,model_version,"model", "test_predictions_"+model_name+test_data_filename)
     
     #Write test_residuals tensor
-    write_tensor(test_residuals,model_bucketname,model_name,model_version,"model","test_residuals")
+    write_tensor(test_residuals,model_bucketname,model_name,model_version,"model","test_residuals_"+model_name+test_data_filename)
     
     return test_predictions, test_residuals
 
