@@ -64,6 +64,10 @@ def autoencoder_testing_pipeline(data_bucketname, train_data_filename, test_data
     #Calculate residuals for testing data == anomaly score
     test_residuals = np.abs(test_predictions - testing_tensor)
     
+    print("\n*** Autoencoder residulas/anomaly score ***\n")
+    print(test_residuals)
+    print("\n*******************************************\n")
+
     #Write test_predictions tensor
     write_tensor(test_predictions, model_bucketname, 
                  model_name, model_version, 
@@ -73,7 +77,7 @@ def autoencoder_testing_pipeline(data_bucketname, train_data_filename, test_data
     write_tensor(test_residuals, model_bucketname, 
                  model_name, model_version, 
                  filename = 'test_residuals.npy')
-    
+        
     return test_predictions, test_residuals
     
 
