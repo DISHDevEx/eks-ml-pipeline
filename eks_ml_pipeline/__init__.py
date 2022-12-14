@@ -15,7 +15,6 @@ from .models import pca_model_dish_5g
 from .utilities import cleanup
 from .utilities import report_generator
 from .utilities import write_tensor
-from .utilities import write_tensor_file
 from .utilities import read_tensor
 from .utilities import uploadDirectory
 from .utilities import write_parquet

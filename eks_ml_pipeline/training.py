@@ -111,7 +111,7 @@ def autoencoder_training_pipeline(feature_group_name, feature_input_version,
     training_tensor = read_tensor(bucket_name = data_bucketname,
                                   model_name = model_name,
                                   version = model_version,
-                                  model_data_type =  train_data_filename)
+                                  file_name =  train_data_filename)
     
     ####Train autoencoder model
     autoencoder = autoencoder_training(training_tensor, 
@@ -162,8 +162,8 @@ def pca_training(training_tensor,
     features_df = get_features(feature_group_name, feature_input_version)
     model_parameters = features_df["model_parameters"].iloc[0]
     
-    #Initialize pca model
-    pca = pca_model_dish_5g(num_of_features = 3, timesteps_per_slice = model_parameters["time_steps"])
+    #Initialize pca model 
+    pca = pca_model_dish_5g(num_of_features = 3, timesteps_per_slice = model_parameters["time_steps"] )
     
     #Train model
     pca.fit(training_tensor)
@@ -218,11 +218,12 @@ def pca_training_pipeline(feature_group_name, feature_input_version,
     """    
         
 
+    
     ###Load training data: read from s3 bucket
     training_tensor = read_tensor(bucket_name = data_bucketname,
                                   model_name = model_name,
                                   version = model_version,
-                                  model_data_type =  train_data_filename)
+                                  file_name =  train_data_filename)
 
     ####Train autoencoder model
     pca = pca_training(training_tensor, 
@@ -238,15 +239,16 @@ def pca_training_pipeline(feature_group_name, feature_input_version,
                     bucket_name = model_bucketname,
                     model_name = model_name,
                     version = model_version,
-                    filename = model_name + model_version)
+                    flag = "model",
+                    file_name = model_name + model_version)
 
     
 if __name__ == "__main__":
     
     ###***Autoencoder***###
     
-#     #Train node autoencoder model and save on s3
-#     autoencoder_training_pipeline(*node_autoencoder_input())
+    #Train node autoencoder model and save on s3
+    autoencoder_training_pipeline(*node_autoencoder_input())
     
 #     #Train pod autoencoder model and save on s3
 #     autoencoder_training_pipeline(*pod_autoencoder_input())
@@ -256,8 +258,8 @@ if __name__ == "__main__":
     
 #     ###***PCA***###
     
-    #Train node pca model and save on s3
-    pca_training_pipeline(*node_pca_input())
+#     #Train node pca model and save on s3
+#     pca_training_pipeline(*node_pca_input())
     
 #     #Train pod pca model and save on s3
 #     pca_training_pipeline(*pod_pca_input())

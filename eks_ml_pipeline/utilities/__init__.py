@@ -3,7 +3,6 @@ from .null_report import report_generator
 
 from .s3_utils import write_tensor
 from .s3_utils import read_tensor
-from .s3_utils import write_tensor_file
 from .s3_utils import uploadDirectory
 from .s3_utils import write_parquet
 from .s3_utils import download_zip

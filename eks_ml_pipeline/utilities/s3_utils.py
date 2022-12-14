@@ -7,7 +7,7 @@ import shutil
 import zipfile
 
 
-def read_tensor(bucket_name, model_name,version, model_data_type):
+def read_tensor(bucket_name, model_name,version, file_name):
     """
     inputs
     ------
@@ -29,16 +29,14 @@ def read_tensor(bucket_name, model_name,version, model_data_type):
             tensor : numpy tensor
 
     """
-    print(f"reading tensor from: {bucket_name}/{model_name}/{version}/data/tensors/{model_data_type}.npy")
+    print(f"reading tensor from: {bucket_name}/{model_name}/{version}/data/tensors/{file_name}.npy")
     client = boto3.client('s3')
     bytes_ = BytesIO()
-    client.download_fileobj(Fileobj=bytes_, Bucket=bucket_name, Key=f'{model_name}/{version}/data/tensors/{model_data_type}.npy')
+    client.download_fileobj(Fileobj=bytes_, Bucket=bucket_name, Key=f'{model_name}/{version}/data/tensors/{file_name}.npy')
     bytes_.seek(0)
     tensor = np.load(bytes_, allow_pickle=True)
 
     return tensor
-
-
 
 
 def write_tensor(tensor, bucket_name, model_name, version, flag, file_name):
@@ -78,8 +76,8 @@ def write_tensor(tensor, bucket_name, model_name, version, flag, file_name):
         path = f'{bucket_name}/{model_name}/{version}/data/tensors/{file_name}.npy'
     if flag == "model":
         client.upload_fileobj(Fileobj=bytes_, Bucket=bucket_name,
-                             Key=f'{model_name}/{version}/model/{file_name}.npy')
-        path = f'{bucket_name}/{model_name}/{version}/model/{file_name}.npy'
+                             Key=f'{model_name}/{version}/models/{file_name}.npy')
+        path = f'{bucket_name}/{model_name}/{version}/models/{file_name}.npy'
     return path
 
 

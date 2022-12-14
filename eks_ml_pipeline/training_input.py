@@ -21,13 +21,13 @@ def node_autoencoder_input():
     
     feature_group_name = "node_autoencoder_ad"
     feature_input_version = "v0.0.2"  
-    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    data_bucketname = 'mss-shared'
+    train_data_filename = "testing_dummy"
+    test_data_filename = "testing_dummy"
     
-    train_data_filename = "training_2022_9_29"
-    test_data_filename = "testing_2022_9_29"
     ##always save these 1 level out
     save_model_local_path = "../../node_autoencoder"
-    model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    model_bucketname = 'mss-shared'
     model_name = 'node_autoencoder_ad'
     model_version = 'v0.0.2'
     
@@ -41,19 +41,19 @@ def node_pca_input():
     outputs
     -------
             list of parameters for node rec type
-            required by autoencoder model 
+            required by pca model 
             training pipeline
             
     """
     ##generate pipeline input params for pca
     feature_group_name = "node_pca_ad"
     feature_input_version = "v0.0.1"  
-    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
-    train_data_filename = "training_2022_9_29"
-    test_data_filename = "testing_2022_9_29"
+    data_bucketname = 'mss-shared'
+    train_data_filename = "testing_dummy"
+    test_data_filename = "testing_dummy"
 
     save_model_local_path = "../../node_pca.npy"
-    model_bucketname = "emr-serverless-output-pd"
+    model_bucketname = "mss-shared"
     model_name = "node_pca_ad"
     model_version = "v0.0.1"
 
@@ -95,7 +95,7 @@ def pod_pca_input():
     outputs
     -------
             list of parameters for pod rec type
-            required by autoencoder model 
+            required by pca model 
             training pipeline
             
     """
@@ -150,7 +150,7 @@ def container_pca_input():
     outputs
     -------
             list of parameters for container rec type
-            required by model 
+            required by pca model 
             training pipeline
             
     """
