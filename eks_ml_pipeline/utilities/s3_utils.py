@@ -7,7 +7,7 @@ import shutil
 import zipfile
 
 
-def read_tensor(bucket_name, model_name, version, model_data_type):
+def read_tensor(bucket_name, model_name,version, file_name):
     """
     inputs
     ------
@@ -29,17 +29,17 @@ def read_tensor(bucket_name, model_name, version, model_data_type):
             tensor : numpy tensor
 
     """
-    print(f"reading tensor from: {bucket_name}/{model_name}/{version}/data/tensors/{model_data_type}.npy")
+    print(f"reading tensor from: {bucket_name}/{model_name}/{version}/data/tensors/{file_name}.npy")
     client = boto3.client('s3')
     bytes_ = BytesIO()
-    client.download_fileobj(Fileobj=bytes_, Bucket=bucket_name, Key=f'{model_name}/{version}/data/tensors/{model_data_type}.npy')
+    client.download_fileobj(Fileobj=bytes_, Bucket=bucket_name, Key=f'{model_name}/{version}/data/tensors/{file_name}.npy')
     bytes_.seek(0)
     tensor = np.load(bytes_, allow_pickle=True)
 
     return tensor
 
 
-def write_tensor(tensor, bucket_name, model_name, version, model_data_type):
+def write_tensor(tensor, bucket_name, model_name, version, flag, file_name):
     """
     inputs
     ------
@@ -69,9 +69,15 @@ def write_tensor(tensor, bucket_name, model_name, version, model_data_type):
     np.save(bytes_, tensor, allow_pickle=True)
     bytes_.seek(0)
     # client.put_object(Body=a, Bucket=bucket, Key='array.npy')
-    client.upload_fileobj(Fileobj=bytes_, Bucket=bucket_name,
-                         Key=f'{model_name}/{version}/data/tensors/{model_data_type}.npy')
-    path = f'{bucket_name}/{model_name}/{version}/data/tensors/{model_data_type}.npy'
+    
+    if flag == "data":
+        client.upload_fileobj(Fileobj=bytes_, Bucket=bucket_name,
+                             Key=f'{model_name}/{version}/data/tensors/{file_name}.npy')
+        path = f'{bucket_name}/{model_name}/{version}/data/tensors/{file_name}.npy'
+    if flag == "model":
+        client.upload_fileobj(Fileobj=bytes_, Bucket=bucket_name,
+                             Key=f'{model_name}/{version}/models/{file_name}.npy')
+        path = f'{bucket_name}/{model_name}/{version}/models/{file_name}.npy'
     return path
 
 
@@ -134,8 +140,8 @@ def write_parquet(df, bucket_name, model_name, version, model_data_type):
             prints that the upload has completed
 
     """
-    df.write.mode('overwrite').parquet(f's3a://{bucket_name}/{model_name}/{version}/data/pyspark/{model_data_type}/')
 
+    df.write.mode('overwrite').parquet(f's3a://{bucket_name}/{model_name}/{version}/data/pyspark/{model_data_type}/')
 
 def upload_zip(local_path, bucket_name, model_name, version, file):
     """
@@ -195,6 +201,7 @@ def download_zip(download_path, bucket_name, model_name, version, file):
         client.download_fileobj(bucket_name, model_name + '/' + version + '/models/' + file +".zip", f)
     print("zip file downloaded to : ")
 
+    
 def unzip(path_to_zip, extract_location):
     """
     inputs
@@ -287,3 +294,4 @@ def awswrangler_pandas_dataframe_to_s3(input_datafame, bucket_name, model_name, 
     import awswrangler as wr
     wr.s3.to_parquet(input_datafame,path=f"s3://{bucket_name}/{model_name}/{version}/data/pandas_df/{model_data_type}.parquet")
     return print("sucess")
+
