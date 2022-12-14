@@ -32,6 +32,12 @@ class hmm_model_dish():
         #define the threshold
         self.threshold: float = 0.0
         
+        #define the state number
+        self.n_components = 9
+        
+        #define the covariance_type
+        self,covariance_type = 'fulll'
+        
         #define the result df
         self.result_df = None
     
@@ -105,9 +111,10 @@ class hmm_model_dish():
             is_anomals = abs_error > self.threshold
             
             temp_df = test_df.copy()
-            temp_df['predictions'] = samples
-            temp_df['is_anomaly'] = is_anomaly
-            temp_df['residuals'] = abs_error
+            temp_ df = temp_df.withColumn('predictions',samples)
+            
+            temp_df = temp_df.withColumn('is_anomaly' ,is_anomaly)
+            temp_df = temp_df.withColumn('residuals',abs_error)
             
             
            
