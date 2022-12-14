@@ -1,6 +1,5 @@
 
 from sklearn.decomposition import PCA
-from models import autoencoder_model_dish_5g 
 def loss_of_variance(x_train,x_train_predictions):
     
     
