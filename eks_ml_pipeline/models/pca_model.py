@@ -105,7 +105,7 @@ class pca_model_dish_5g():
                                            )[:]
         return rank3_sliced, rank4_sliced
 
-    def train(self, x_train):
+    def fit(self, x_train):
         """
         @:param x_train: training data 
         Takes training set and:

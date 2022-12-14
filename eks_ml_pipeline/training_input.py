@@ -1,3 +1,12 @@
+"""
+Contributed by Evgeniya Dontsova and Vinayak Sharma
+MSS Dish 5g - Pattern Detection
+
+these are the parameters to our pipeline
+
+
+"""
+
 def node_autoencoder_input():
     
     """
@@ -13,9 +22,10 @@ def node_autoencoder_input():
     feature_group_name = "node_autoencoder_ad"
     feature_input_version = "v0.0.2"  
     data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
-    train_data_filename = 'node_autoencoder_ad/v0.0.2/data/node_autoencoder_ad_node_training_tensor'
-    test_data_filename = 'node_autoencoder_ad/v0.0.2/data/node_autoencoder_ad_node_training_tensor'
     
+    train_data_filename = "training_2022_9_29"
+    test_data_filename = "testing_2022_9_29"
+    ##always save these 1 level out
     save_model_local_path = "../../node_autoencoder"
     model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     model_name = 'node_autoencoder_ad'
@@ -38,13 +48,13 @@ def node_pca_input():
     ##generate pipeline input params for pca
     feature_group_name = "node_pca_ad"
     feature_input_version = "v0.0.1"  
-    data_bucketname = 'mss-shared'
-    train_data_filename = 'x_train_36k_sample.npy'
-    test_data_filename = 'x_train_36k_sample.npy'
+    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    train_data_filename = "training_2022_9_29"
+    test_data_filename = "testing_2022_9_29"
 
     save_model_local_path = "../../node_pca.npy"
     model_bucketname = 'emr-serverless-output-pd'
-    model_name = 'node_pca_test'
+    model_name = 'node_autoencoder_test'
     model_version = 'v0.0.1'
 
     return [feature_group_name, feature_input_version,

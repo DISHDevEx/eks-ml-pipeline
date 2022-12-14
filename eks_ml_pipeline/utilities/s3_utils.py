@@ -39,6 +39,44 @@ def read_tensor(bucket_name, model_name,version, model_data_type):
     return tensor
 
 
+
+
+
+def write_tensor_file(tensor, bucket_name, path, file_name):
+    """
+    inputs
+    ------
+            tensor: numpy array
+            numpy array stored in a python variable
+
+            bucket_name: STRING
+            s3 bucket name to write the tensor
+
+            model_name: STRING
+            model name to create a folder within the bucket for model versioning
+
+            version: STRING
+            format: v#.#.#
+            version will be used versioning
+
+            model_data_type: string
+            This is the string to test weather its training or testing data
+    outputs
+    -------
+            path : string
+            path where will the tensor is stored in s3
+
+    """
+    client = boto3.client('s3')
+    bytes_ = BytesIO()
+    np.save(bytes_, tensor, allow_pickle=True)
+    bytes_.seek(0)
+    # client.put_object(Body=a, Bucket=bucket, Key='array.npy')
+    client.upload_fileobj(Fileobj=bytes_, Bucket=bucket_name,
+                         Key=f'{path}/{file_name}.npy')
+    print(f'uploaded to: {bucket_name}/{path}/{file_name}.npy')
+    return path
+
 def write_tensor(tensor, bucket_name, model_name, version, model_data_type):
     """
     inputs
