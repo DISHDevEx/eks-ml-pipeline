@@ -132,10 +132,10 @@ def pca_testing_pipeline(feature_group_name, feature_input_version,
  
     
     #Write test_predictions tensor
-    write_tensor(test_predictions,model_bucketname,model_name,model_version,"model", "test_predictions")
+    write_tensor(test_predictions,model_bucketname,model_name,model_version,"model", "test_predictions_"+model_name+test_data_filename)
     
     #Write test_residuals tensor
-    write_tensor(test_residuals,model_bucketname,model_name,model_version,"model","test_residuals")
+    write_tensor(test_residuals,model_bucketname,model_name,model_version,"model","test_residuals_"+model_name+test_data_filename)
     
     return test_predictions, test_residuals    
 
@@ -143,8 +143,8 @@ if __name__ == "__main__":
     
     ###***Autoencoder***###
 
-    #Test node autoencoder model and save on s3
-    autoencoder_testing_pipeline(*node_autoencoder_input()[2:])
+#     #Test node autoencoder model and save on s3
+#     autoencoder_testing_pipeline(*node_autoencoder_input()[2:])
     
 #     #Test pod autoencoder model and save on s3
 #     autoencoder_testing_pipeline(*pod_autoencoder_input()[2:])
@@ -152,13 +152,13 @@ if __name__ == "__main__":
 #     #Test container autoencoder model and save on s3
 #     autoencoder_testing_pipeline(*container_autoencoder_input()[2:])
     
-    ###***PCA***###
+    ##***PCA***###
     
-#     #Test node pca model and save on s3
-#     pca_testing_pipeline(*node_pca_input())
+    #Test node pca model and save on s3
+    pca_testing_pipeline(*node_pca_input())
     
-#     #Test pod pca model and save on s3
-#     pca_testing_pipeline(*pod_pca_input())
+    #Test pod pca model and save on s3
+    pca_testing_pipeline(*pod_pca_input())
 
-#     #Test container pca model and save on s3
-#     pca_testing_pipeline(*container_pca_input())
+    #Test container pca model and save on s3
+    pca_testing_pipeline(*container_pca_input())

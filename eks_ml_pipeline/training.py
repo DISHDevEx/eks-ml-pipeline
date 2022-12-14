@@ -240,7 +240,7 @@ def pca_training_pipeline(feature_group_name, feature_input_version,
                     model_name = model_name,
                     version = model_version,
                     flag = "model",
-                    file_name = model_name + model_version)
+                    file_name = model_name + model_version + train_data_filename)
 
     
 if __name__ == "__main__":
@@ -250,19 +250,19 @@ if __name__ == "__main__":
     #Train node autoencoder model and save on s3
     autoencoder_training_pipeline(*node_autoencoder_input())
     
-#     #Train pod autoencoder model and save on s3
-#     autoencoder_training_pipeline(*pod_autoencoder_input())
+    #Train pod autoencoder model and save on s3
+    autoencoder_training_pipeline(*pod_autoencoder_input())
 
-#     #Train container autoencoder model and save on s3
-#     autoencoder_training_pipeline(*container_autoencoder_input())
+    #Train container autoencoder model and save on s3
+    autoencoder_training_pipeline(*container_autoencoder_input())
     
-#     ###***PCA***###
+    ###***PCA***###
     
-#     #Train node pca model and save on s3
-#     pca_training_pipeline(*node_pca_input())
+    #Train node pca model and save on s3
+    pca_training_pipeline(*node_pca_input())
     
-#     #Train pod pca model and save on s3
-#     pca_training_pipeline(*pod_pca_input())
+    #Train pod pca model and save on s3
+    pca_training_pipeline(*pod_pca_input())
 
-#     #Train container pca model and save on s3
-#     pca_training_pipeline(*container_pca_input())
+    #Train container pca model and save on s3
+    pca_training_pipeline(*container_pca_input())

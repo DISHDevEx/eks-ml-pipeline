@@ -22,8 +22,8 @@ def node_autoencoder_input():
     feature_group_name = "node_autoencoder_ad"
     feature_input_version = "v0.0.2"  
     data_bucketname = 'mss-shared'
-    train_data_filename = "testing_dummy"
-    test_data_filename = "testing_dummy"
+    train_data_filename = "aeDummyData"
+    test_data_filename = "aeDummyData"
     
     ##always save these 1 level out
     save_model_local_path = "../../node_autoencoder"
@@ -49,8 +49,8 @@ def node_pca_input():
     feature_group_name = "node_pca_ad"
     feature_input_version = "v0.0.1"  
     data_bucketname = 'mss-shared'
-    train_data_filename = "testing_dummy"
-    test_data_filename = "testing_dummy"
+    train_data_filename = "pcaDummyData"
+    test_data_filename = "pcaDummyData"
 
     save_model_local_path = "../../node_pca.npy"
     model_bucketname = "mss-shared"
@@ -75,15 +75,15 @@ def pod_autoencoder_input():
 
     
     feature_group_name = "pod_autoencoder_ad"
-    feature_input_version = "v0.0.1"  
+    feature_input_version = "v0.0.2"  
     data_bucketname = 'mss-shared'
-    train_data_filename = 'x_train_36k_sample.npy'
-    test_data_filename = 'x_train_36k_sample.npy'
+    train_data_filename = 'aeDummyData'
+    test_data_filename = 'aeDummyData'
     
     save_model_local_path = "../../pod_autoencoder"
-    model_bucketname = 'emr-serverless-output-pd'
-    model_name = 'pod_autoencoder_test'
-    model_version = 'v0.0.1'
+    model_bucketname = 'mss-shared'
+    model_name = 'pod_autoencoder_ad'
+    model_version = 'v0.0.2'
     
     return [feature_group_name, feature_input_version,
             data_bucketname, train_data_filename, test_data_filename,
@@ -103,12 +103,12 @@ def pod_pca_input():
     feature_group_name = "pod_pca_ad"
     feature_input_version = "v0.0.1"  
     data_bucketname = 'mss-shared'
-    train_data_filename = 'x_train_36k_sample.npy'
-    test_data_filename = 'x_train_36k_sample.npy'
+    train_data_filename = 'pcaDummyData'
+    test_data_filename = 'pcaDummyData'
 
     save_model_local_path = "../../pod_pca.npy"
-    model_bucketname = 'emr-serverless-output-pd'
-    model_name = 'pod_pca_test'
+    model_bucketname = 'mss-shared'
+    model_name = 'pod_pca_ad'
     model_version = 'v0.0.1'
 
     return [feature_group_name, feature_input_version,
@@ -130,15 +130,15 @@ def container_autoencoder_input():
 
     
     feature_group_name = "container_autoencoder_ad"
-    feature_input_version = "v0.0.1"  
+    feature_input_version = "v0.0.2"  
     data_bucketname = 'mss-shared'
-    train_data_filename = 'x_train_36k_sample.npy'
-    test_data_filename = 'x_train_36k_sample.npy'
+    train_data_filename = 'aeDummyData'
+    test_data_filename = 'aeDummyData'
     
     save_model_local_path = "../../container_autoencoder"
-    model_bucketname = 'emr-serverless-output-pd'
-    model_name = 'container_autoencoder_test'
-    model_version = 'v0.0.1'
+    model_bucketname = 'mss-shared'
+    model_name = 'container_autoencoder_ad'
+    model_version = 'v0.0.2'
     
     return [feature_group_name, feature_input_version,
             data_bucketname, train_data_filename, test_data_filename,
@@ -158,12 +158,12 @@ def container_pca_input():
     feature_group_name = "container_pca_ad"
     feature_input_version = "v0.0.1"  
     data_bucketname = 'mss-shared'
-    train_data_filename = 'x_train_36k_sample.npy'
-    test_data_filename = 'x_train_36k_sample.npy'
+    train_data_filename = 'pcaDummyData'
+    test_data_filename = 'pcaDummyData'
 
     save_model_local_path = "../../container_pca.npy"
-    model_bucketname = 'emr-serverless-output-pd'
-    model_name = 'container_pca_test'
+    model_bucketname = 'mss-shared'
+    model_name = 'container_pca_ad'
     model_version = 'v0.0.1'
 
     return [feature_group_name, feature_input_version,
