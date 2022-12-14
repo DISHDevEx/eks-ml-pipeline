@@ -141,16 +141,16 @@ def pca_testing_pipeline(feature_group_name, feature_input_version,
 
 if __name__ == "__main__":
     
-    ###***Autoencoder***###
+    ##***Autoencoder***###
 
-#     #Test node autoencoder model and save on s3
-#     autoencoder_testing_pipeline(*node_autoencoder_input()[2:])
+    #Test node autoencoder model and save on s3
+    autoencoder_testing_pipeline(*node_autoencoder_input()[2:])
     
-#     #Test pod autoencoder model and save on s3
-#     autoencoder_testing_pipeline(*pod_autoencoder_input()[2:])
+    #Test pod autoencoder model and save on s3
+    autoencoder_testing_pipeline(*pod_autoencoder_input()[2:])
 
-#     #Test container autoencoder model and save on s3
-#     autoencoder_testing_pipeline(*container_autoencoder_input()[2:])
+    #Test container autoencoder model and save on s3
+    autoencoder_testing_pipeline(*container_autoencoder_input()[2:])
     
     ##***PCA***###
     
