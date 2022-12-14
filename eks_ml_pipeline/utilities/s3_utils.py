@@ -41,8 +41,7 @@ def read_tensor(bucket_name, model_name,version, model_data_type):
 
 
 
-
-def write_tensor_file(tensor, bucket_name, path, file_name):
+def write_tensor(tensor, bucket_name, model_name, version, flag, file_name):
     """
     inputs
     ------
@@ -72,44 +71,15 @@ def write_tensor_file(tensor, bucket_name, path, file_name):
     np.save(bytes_, tensor, allow_pickle=True)
     bytes_.seek(0)
     # client.put_object(Body=a, Bucket=bucket, Key='array.npy')
-    client.upload_fileobj(Fileobj=bytes_, Bucket=bucket_name,
-                         Key=f'{path}/{file_name}.npy')
-    print(f'uploaded to: {bucket_name}/{path}/{file_name}.npy')
-    return path
-
-def write_tensor(tensor, bucket_name, model_name, version, model_data_type):
-    """
-    inputs
-    ------
-            tensor: numpy array
-            numpy array stored in a python variable
-
-            bucket_name: STRING
-            s3 bucket name to write the tensor
-
-            model_name: STRING
-            model name to create a folder within the bucket for model versioning
-
-            version: STRING
-            format: v#.#.#
-            version will be used versioning
-
-            model_data_type: string
-            This is the string to test weather its training or testing data
-    outputs
-    -------
-            path : string
-            path where will the tensor is stored in s3
-
-    """
-    client = boto3.client('s3')
-    bytes_ = BytesIO()
-    np.save(bytes_, tensor, allow_pickle=True)
-    bytes_.seek(0)
-    # client.put_object(Body=a, Bucket=bucket, Key='array.npy')
-    client.upload_fileobj(Fileobj=bytes_, Bucket=bucket_name,
-                         Key=f'{model_name}/{version}/data/tensors/{model_data_type}.npy')
-    path = f'{bucket_name}/{model_name}/{version}/data/tensors/{model_data_type}.npy'
+    
+    if flag == "data":
+        client.upload_fileobj(Fileobj=bytes_, Bucket=bucket_name,
+                             Key=f'{model_name}/{version}/data/tensors/{file_name}.npy')
+        path = f'{bucket_name}/{model_name}/{version}/data/tensors/{file_name}.npy'
+    if flag == "model":
+        client.upload_fileobj(Fileobj=bytes_, Bucket=bucket_name,
+                             Key=f'{model_name}/{version}/model/{file_name}.npy')
+        path = f'{bucket_name}/{model_name}/{version}/model/{file_name}.npy'
     return path
 
 
@@ -233,6 +203,7 @@ def download_zip(download_path, bucket_name, model_name, version, file):
         client.download_fileobj(bucket_name, model_name + '/' + version + '/models/' + file +".zip", f)
     print("zip file downloaded to : ")
 
+    
 def unzip(path_to_zip, extract_location):
     """
     inputs

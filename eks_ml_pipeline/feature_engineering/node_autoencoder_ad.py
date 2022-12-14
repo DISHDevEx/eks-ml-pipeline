@@ -55,7 +55,10 @@ def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_version,
         features_df = get_features(feature_group_name,feature_group_version)
         features = features_df["feature_name"].to_list()
         processed_features = feature_processor.cleanup(features)
-    
+        
+        model_parameters = features_df["model_parameters"].iloc[0]
+        time_steps = model_parameters["time_steps"]
+
         #filter inital node df based on request features
         node_df = pyspark_node_df.select("Timestamp", "InstanceId", *processed_features)
         node_df = node_df.withColumn("Timestamp",(col("Timestamp")/1000).cast("timestamp"))
@@ -66,7 +69,7 @@ def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_version,
         #Quality(timestamp filtered) nodes
         quality_filtered_node_df = cleaned_node_df.groupBy("InstanceId").agg(count("Timestamp").alias("timestamp_count"))
         # to get data that is closer to 1min apart
-        quality_filtered_nodes = quality_filtered_node_df.filter(col("timestamp_count").between(45,75))
+        quality_filtered_nodes = quality_filtered_node_df.filter(col("timestamp_count") >= 2*time_steps)
         
         #Processed Node DF                                                      
         processed_node_df = cleaned_node_df.filter(col("InstanceId").isin(quality_filtered_nodes["InstanceId"]))
@@ -122,11 +125,6 @@ def node_autoencoder_ad_feature_engineering(input_data_type, input_split_ratio, 
         random_instance_id = random.choice(input_node_processed_df["InstanceId"].unique())
         node_fe_df = input_node_processed_df.loc[(input_node_processed_df["InstanceId"] == random_instance_id)]
         node_fe_df = node_fe_df.sort_values(by='Timestamp').reset_index(drop=True)
-        
-        #scaler transformations
-        scaler = StandardScaler()
-        node_fe_df[scaled_features] = scaler.fit_transform(node_fe_df[features])
-        
         node_fe_df_len = len(node_fe_df)
         
         #fix negative number bug 
@@ -136,12 +134,17 @@ def node_autoencoder_ad_feature_engineering(input_data_type, input_split_ratio, 
         
         #tensor builder
         start = random.choice(range(node_fe_df_len-time_steps))
-        node_tensor[n,:,:] = node_fe_df[start:start+time_steps][scaled_features]
+        node_fe_df = node_fe_df[start:start+time_steps]
+        
+        #scaler transformations
+        scaler = StandardScaler()
+        node_fe_df[scaled_features] = scaler.fit_transform(node_fe_df[features])
+        node_tensor[n,:,:] = node_fe_df[scaled_features]
 
         if final_node_fe_df.empty:
             final_node_fe_df = node_fe_df
         else:
-            final_node_fe_df.append(node_fe_df, ignore_index =True)
+            final_node_fe_df = final_node_fe_df.append(node_fe_df, ignore_index =True)
 
         print(f'Finished with sample #{n}')
 
