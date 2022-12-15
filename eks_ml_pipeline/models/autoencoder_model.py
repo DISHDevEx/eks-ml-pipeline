@@ -195,4 +195,3 @@ class autoencoder_model_dish_5g():
         
         
         
-        
