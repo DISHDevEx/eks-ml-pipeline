@@ -5,6 +5,32 @@ import awswrangler as wr
 
 
 def inference_data_builder(input_year, input_month,  input_day, input_hour, rec_type, input_setup):
+    
+    """
+    inputs
+    ------
+            input_year : STRING | Int
+            the year from which to read data, leave empty for all years
+
+            input_month : STRING | Int
+            the month from which to read data, leave empty for all months
+
+            input_day : STRING | Int
+            the day from which to read data, leave empty for all days
+
+            input_hour: STRING | Int
+            the hour from which to read data, leave empty for all hours
+            
+            rec_type: STRING
+            uses schema for rec type when building pyspark df
+            
+            input_setup: STRING 
+            kernel config
+    
+    outputs
+    -------
+            writes parquet to specific s3 path
+    """
 
     if input_hour == -1:
         file_name = f'{rec_type}/{rec_type}_{input_year}_{input_month}_{input_day}'

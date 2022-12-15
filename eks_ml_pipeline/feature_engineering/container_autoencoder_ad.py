@@ -117,39 +117,41 @@ def container_autoencoder_ad_feature_engineering(input_data_type, input_split_ra
 
     #To Pandas
     input_container_processed_df = input_container_processed_df.toPandas()
+    print("pyspark df converted to pandas df")
+    
+    num_cores = multiprocessing.cpu_count()
+    print(num_cores)
+    container_tensor = Parallel(n_jobs=num_cores, prefer="processes")(delayed(container_tensor_builder)(input_container_processed_df, time_steps, scaled_features, features, n) for n in range(20))
+    
+    return container_tensor
 
-    n = 0
-    while n < n_samples:
+
+def container_tensor_builder(input_container_processed_df, time_steps, scaled_features, features, n):
+
+    ##pick random df, and normalize
+    while True:
         random_container_id = random.choice(input_container_processed_df["container_name_pod_id"].unique())
         container_fe_df = input_container_processed_df.loc[(input_container_processed_df["container_name_pod_id"] == random_container_id)]
-        container_fe_df = container_fe_df.sort_values(by='Timestamp').reset_index(drop=True)
         container_fe_df_len = len(container_fe_df)
         
-        #fix negative number bug 
-        if container_fe_df_len-time_steps <= 0:
+        #smaller df check 
+        if container_fe_df_len >= time_steps:
             print(f'Exception occurred: container_fe_df_len-time_steps = {container_fe_df_len-time_steps}')
-            continue
+            break
 
-        #tensor builder
-        start = random.choice(range(container_fe_df_len-time_steps))
-        container_fe_df = container_fe_df[start:start+time_steps]
-        
-        #scaler transformations
-        scaler = StandardScaler()
-        container_fe_df[scaled_features] = scaler.fit_transform(container_fe_df[features])
-        container_tensor[n,:,:] = container_fe_df[scaled_features]
+    #tensor builder
+    container_fe_df = container_fe_df.sort_values(by='Timestamp').reset_index(drop=True)
+    start = random.choice(range(container_fe_df_len-time_steps))
+    container_fe_df = container_fe_df[start:start+time_steps]
 
-        if final_container_fe_df.empty:
-            final_container_fe_df = container_fe_df
-        else:
-            final_container_fe_df = final_container_fe_df.append(container_fe_df, ignore_index =True)
+    #scaler transformations
+    scaler = StandardScaler()
+    container_fe_df[scaled_features] = scaler.fit_transform(container_fe_df[features])
+    container_tensor[n,:,:] = container_fe_df[scaled_features]
 
-        print(f'Finished with sample #{n}')
+    print(f'Finished with sample #{n}')
 
-        n +=1
-
-
-    return final_container_fe_df, container_tensor
+    return container_tensor
 
     
 def container_autoencoder_train_test_split(input_df, split_weights):

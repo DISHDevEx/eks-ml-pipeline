@@ -1,10 +1,13 @@
 import numpy as np
 import pandas as pd
 import random
+import multiprocessing
 from ..utilities import feature_processor, null_report
 from msspackages import Pyspark_data_ingestion, get_features
 from pyspark.sql.functions import col, count, row_number, get_json_object
 from sklearn.preprocessing import StandardScaler
+from joblib import Parallel, delayed
+
 
 """
 Contributed by Madhu Bandi, Evgeniya Dontsova and Praveen Mada
@@ -126,41 +129,44 @@ def pod_autoencoder_ad_feature_engineering(input_data_type, input_split_ratio, i
 
     #To Pandas
     input_pod_processed_df = input_pod_processed_df.toPandas()
+    print("pyspark df converted to pandas df")
     
-    n = 0
-    while n < n_samples:
-        ##pick random df, and normalize
+    
+    num_cores = multiprocessing.cpu_count()
+    print(num_cores)
+    pod_df_list = Parallel(n_jobs=num_cores, prefer="processes")(delayed(pod_tensor_builder)(input_pod_processed_df, time_steps, scaled_features, features, n) for n in range(600))
+
+    return pod_df_list
+
+
+
+def pod_tensor_builder(input_pod_processed_df, time_steps, scaled_features, features, n):
+
+    ##pick random df, and normalize
+    while True:
         random_pod_id = random.choice(input_pod_processed_df["pod_id"].unique())
         pod_fe_df = input_pod_processed_df.loc[(input_pod_processed_df["pod_id"] == random_pod_id)]
-        pod_fe_df = pod_fe_df.sort_values(by='Timestamp').reset_index(drop=True)
         pod_fe_df_len = len(pod_fe_df)
-        
-        #fix negative number bug 
-        if pod_fe_df_len-time_steps <= 0:
+        #smaller df check 
+        if pod_fe_df_len >= time_steps:
             print(f'Exception occurred: pod_fe_df_len-time_steps = {pod_fe_df_len-time_steps}')
-            continue
+            break
 
-        #tensor builder
-        start = random.choice(range(pod_fe_df_len-time_steps))
-        pod_fe_df = pod_fe_df[start:start+time_steps]
-        
-        #scaler transformations
-        scaler = StandardScaler()
-        pod_fe_df[scaled_features] = scaler.fit_transform(pod_fe_df[features])
-        pod_tensor[n,:,:] = pod_fe_df[scaled_features]
+    #tensor builder
+    pod_fe_df = pod_fe_df.sort_values(by='Timestamp').reset_index(drop=True)
+    start = random.choice(range(pod_fe_df_len-time_steps))
+    pod_fe_df = pod_fe_df[start:start+time_steps]
 
-        if final_pod_fe_df.empty:
-            final_pod_fe_df = pod_fe_df
-        else:
-            final_pod_fe_df = final_pod_fe_df.append(pod_fe_df, ignore_index =True)
+    #scaler transformations
+    scaler = StandardScaler()
+    pod_fe_df[scaled_features] = scaler.fit_transform(pod_fe_df[features])
+    #pod_tensor[n,:,:] = pod_fe_df[scaled_features]
 
-        print(f'Finished with sample #{n}')
+    print(f'Finished with sample #{n}')
 
-        n +=1
-
-    return final_pod_fe_df, pod_tensor
-
+    return pod_fe_df
     
+      
 
 def pod_autoencoder_train_test_split(input_df, split_weights):
     
