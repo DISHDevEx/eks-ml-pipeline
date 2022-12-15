@@ -78,6 +78,9 @@ def write_tensor(tensor, bucket_name, model_name, version, flag, file_name):
         client.upload_fileobj(Fileobj=bytes_, Bucket=bucket_name,
                              Key=f'{model_name}/{version}/models/{file_name}.npy')
         path = f'{bucket_name}/{model_name}/{version}/models/{file_name}.npy'
+        
+    print(f"writing tensor to: {bucket_name}/{model_name}/{version}/data/tensors/{file_name}.npy")
+
     return path
 
 

@@ -71,16 +71,22 @@ def autoencoder_testing_pipeline(data_bucketname, train_data_filename, test_data
     print("\n*** Autoencoder residulas/anomaly score ***\n")
     print(test_residuals)
     print("\n*******************************************\n")
+    
+    file_name = ('_').join(['input_tensor', test_data_filename])
 
     #Write test_predictions tensor
-    write_tensor(test_predictions,model_bucketname,model_name,model_version,"model", "test_predictions_"+model_name+test_data_filename)
+    write_tensor(test_predictions,
+                 model_bucketname,
+                 model_name,
+                 model_version,
+                 "data", "predictions_" + file_name)
     
     #Write test_residuals tensor
     write_tensor(test_residuals,
                  model_bucketname,
                  model_name,
                  model_version,
-                 "model","test_residuals_" + model_name + test_data_filename)
+                 "data","residuals_" + file_name)
     
     return test_predictions, test_residuals
 
@@ -137,13 +143,23 @@ def pca_testing_pipeline(feature_group_name, feature_input_version,
     
     #Make predictions
     test_predictions,test_residuals = pca.test(testing_tensor)
- 
+    
+    file_name = ('_').join(['input_tensor', test_data_filename])
+
     
     #Write test_predictions tensor
-    write_tensor(test_predictions,model_bucketname,model_name,model_version,"model", "test_predictions_"+model_name+test_data_filename)
+    write_tensor(test_predictions,
+                 model_bucketname,
+                 model_name,
+                 model_version,
+                 "data", "predictions_" + file_name)
     
     #Write test_residuals tensor
-    write_tensor(test_residuals,model_bucketname,model_name,model_version,"model","test_residuals_"+model_name+test_data_filename)
+    write_tensor(test_residuals,
+                 model_bucketname,
+                 model_name,
+                 model_version,
+                 "data", "residuals_" + file_name)
     
     return test_predictions, test_residuals    
 
