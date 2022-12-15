@@ -23,6 +23,7 @@ from .utilities import download_zip
 from .utilities import unzip
 from .utilities import pandas_dataframe_to_s3
 from .utilities import awswrangler_pandas_dataframe_to_s3
+from .utilities import write_onnx
 
 from .training_data_builder import node_training_data_builder
 from .training_data_builder import pod_training_data_builder

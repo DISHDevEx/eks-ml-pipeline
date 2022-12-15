@@ -1,8 +1,9 @@
 import numpy as np
 import boto3
+import tf2onnx
 from io import BytesIO
 from msspackages import get_features
-from utilities import write_tensor, read_tensor,upload_zip
+from utilities import write_tensor, read_tensor, upload_zip, write_onnx
 from models import autoencoder_model_dish_5g, pca_model_dish_5g
 from training_input import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
 from training_input import node_pca_input, pod_pca_input, container_pca_input
@@ -126,8 +127,17 @@ def autoencoder_training_pipeline(feature_group_name, feature_input_version,
                version = model_version, 
                file = model_name + model_version + train_data_filename)
     
-
+    #Save model locally in .onnx format 
+    model_proto, external_tensor_storage = tf2onnx.convert.from_keras(autoencoder.nn,
+                                                                      output_path = '../../' + model_name + ".onnx")
+    ####Save onnx model object to s3 bucket    
+    write_onnx(local_path = '../../' + model_name + ".onnx", 
+               bucket_name = model_bucketname, 
+               model_name = model_name, 
+               version = model_version, 
+               file = '_'.join([model_name, model_version, train_data_filename]))
     
+
 def pca_training(training_tensor, 
                  feature_group_name, 
                  feature_input_version, 
@@ -235,7 +245,7 @@ def pca_training_pipeline(feature_group_name, feature_input_version,
                     model_name = model_name,
                     version = model_version,
                     flag = "model",
-                    file_name = model_name + model_version + train_data_filename)
+                    file_name = '_'.join([model_name, model_version, train_data_filename]))
 
     
 if __name__ == "__main__":

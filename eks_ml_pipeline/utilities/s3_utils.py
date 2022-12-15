@@ -298,3 +298,29 @@ def awswrangler_pandas_dataframe_to_s3(input_datafame, bucket_name, model_name, 
     wr.s3.to_parquet(input_datafame,path=f"s3://{bucket_name}/{model_name}/{version}/data/pandas_df/{model_data_type}.parquet")
     return print("sucess")
 
+def write_onnx(local_path, bucket_name, model_name, version, file):
+    """
+    inputs
+    ------
+            local_path: string
+            local path to folder NOT file to upload the folder to s3
+
+            bucket_name: STRING
+            s3 bucket name to write the folder
+
+            model_name: STRING
+            model name to create a folder within the bucket for model versioning
+
+            version: STRING
+            format: v#.#.#
+            version will be used versioning
+
+
+    outputs
+    -------
+            prints that the upload has completed
+
+    """
+    client = boto3.client('s3')
+    client.upload_file(local_path, bucket_name, model_name + '/' + version + '/models/' + file + ".onnx")
+    print(f"Zip file uploaded: {bucket_name}/{model_name}/{version}/models/{file}.onnx")
