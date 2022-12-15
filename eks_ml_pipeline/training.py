@@ -125,7 +125,7 @@ def autoencoder_training_pipeline(feature_group_name, feature_input_version,
                bucket_name = model_bucketname,
                model_name = model_name,
                version = model_version, 
-               file = model_name + model_version + train_data_filename)
+               file_name = '_'.join([model_name, model_version, train_data_filename]))
     
     #Save model locally in .onnx format 
     model_proto, external_tensor_storage = tf2onnx.convert.from_keras(autoencoder.nn,
@@ -135,7 +135,9 @@ def autoencoder_training_pipeline(feature_group_name, feature_input_version,
                bucket_name = model_bucketname, 
                model_name = model_name, 
                version = model_version, 
-               file = '_'.join([model_name, model_version, train_data_filename]))
+               file_name = '_'.join([model_name, model_version, train_data_filename]))
+    
+    return autoencoder
     
 
 def pca_training(training_tensor, 

@@ -79,7 +79,7 @@ def autoencoder_testing_pipeline(feature_group_name, feature_input_version,
     test_residuals = np.abs(test_predictions - testing_tensor)
     
     print("\n*** Autoencoder residulas/anomaly score ***\n")
-    print(test_residuals)
+    print(test_residuals[0,:,:])
     print("\n*******************************************\n")
     
     file_name = ('_').join(['input_tensor', test_data_filename])
