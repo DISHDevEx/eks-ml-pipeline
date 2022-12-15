@@ -2,7 +2,7 @@ import numpy as np
 import boto3
 from io import BytesIO
 from msspackages import get_features
-from utilities import write_tensor, read_tensor, uploadDirectory
+from utilities import write_tensor, read_tensor,upload_zip
 from models import autoencoder_model_dish_5g, pca_model_dish_5g
 from training_input import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
 from training_input import node_pca_input, pod_pca_input, container_pca_input
@@ -51,7 +51,7 @@ def autoencoder_training(training_tensor,
     
     #Initialize autoencoder model
     autoencoder = autoencoder_model_dish_5g(time_steps=model_parameters["time_steps"], 
-                                            batch_size=model_parameters["batch_size"], epochs=1)
+                                            batch_size=model_parameters["batch_size"], epochs=250)
     
     #Train model
     autoencoder.fit(training_tensor)
@@ -108,8 +108,10 @@ def autoencoder_training_pipeline(feature_group_name, feature_input_version,
 
         
     ###Load training data: read from s3 bucket
-    training_tensor = read_tensor(data_bucketname,
-                                  train_data_filename)
+    training_tensor = read_tensor(bucket_name = data_bucketname,
+                                  model_name = model_name,
+                                  version = model_version,
+                                  file_name =  train_data_filename)
     
     ####Train autoencoder model
     autoencoder = autoencoder_training(training_tensor, 
@@ -119,10 +121,12 @@ def autoencoder_training_pipeline(feature_group_name, feature_input_version,
 
 
     ####Save model object to s3 bucket
-    uploadDirectory(local_path = save_model_local_path,
-                    bucketname = model_bucketname,
-                    model_name = model_name,
-                    version = model_version)
+    upload_zip(local_path = save_model_local_path,
+               bucket_name = model_bucketname,
+               model_name = model_name,
+               version = model_version, 
+               file = model_name + model_version + train_data_filename)
+    
 
     
 def pca_training(training_tensor, 
@@ -158,11 +162,11 @@ def pca_training(training_tensor,
     features_df = get_features(feature_group_name, feature_input_version)
     model_parameters = features_df["model_parameters"].iloc[0]
     
-    #Initialize autoencoder model
-    pca = pca_model_dish_5g(num_of_features = 3, number_of_temporal_slices = 5, timesteps_per_slice = 4)
+    #Initialize pca model 
+    pca = pca_model_dish_5g(num_of_features = 3, timesteps_per_slice = model_parameters["time_steps"] )
     
     #Train model
-    pca.train(training_tensor)
+    pca.fit(training_tensor)
     
     #Save model
     pca.save_vs(save_model_local_path)
@@ -214,9 +218,12 @@ def pca_training_pipeline(feature_group_name, feature_input_version,
     """    
         
 
+    
     ###Load training data: read from s3 bucket
-    training_tensor = read_tensor(data_bucketname,
-                      train_data_filename)
+    training_tensor = read_tensor(bucket_name = data_bucketname,
+                                  model_name = model_name,
+                                  version = model_version,
+                                  file_name =  train_data_filename)
 
     ####Train autoencoder model
     pca = pca_training(training_tensor, 
@@ -232,7 +239,8 @@ def pca_training_pipeline(feature_group_name, feature_input_version,
                     bucket_name = model_bucketname,
                     model_name = model_name,
                     version = model_version,
-                    filename = model_name + model_version)
+                    flag = "model",
+                    file_name = model_name + model_version + train_data_filename)
 
     
 if __name__ == "__main__":
