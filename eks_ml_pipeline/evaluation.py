@@ -15,13 +15,20 @@ this model testing functions will be used to test Anomaly Detection models and s
 """
 
 
-def autoencoder_testing_pipeline(data_bucketname, train_data_filename, test_data_filename,
+def autoencoder_testing_pipeline(feature_group_name, feature_input_version,
+                                 data_bucketname, train_data_filename, test_data_filename,
                                  save_model_local_path, model_bucketname,
                                  model_name, model_version):
     
     """
     inputs
     ------
+            feature_group_name: str
+            json name to get the required features
+            
+            feature_input_version: str
+            json version to get the latest features 
+
             data_bucketname: str
             s3 bucket name where training data is saved
             
@@ -47,8 +54,11 @@ def autoencoder_testing_pipeline(data_bucketname, train_data_filename, test_data
     
     outputs
     -------
-            autoencoder: keras model object
-            trained keras model
+            test_predictions: np.array
+            model predictions
+            
+            test_residuals: np.array
+            model residuals
             
     """
 
@@ -98,6 +108,12 @@ def pca_testing_pipeline(feature_group_name, feature_input_version,
     """
     inputs
     ------
+            feature_group_name: str
+            json name to get the required features
+            
+            feature_input_version: str
+            json version to get the latest features 
+
             data_bucketname: str
             s3 bucket name where training data is saved
             
@@ -123,11 +139,16 @@ def pca_testing_pipeline(feature_group_name, feature_input_version,
     
     outputs
     -------
-            reconstructions and residuals
+            test_predictions: np.array
+            model predictions
+            
+            test_residuals: np.array
+            model residuals
             
     """
     
     features_df = get_features(feature_group_name, feature_input_version)
+    features = features_df["feature_name"].to_list()
     model_parameters = features_df["model_parameters"].iloc[0]
 
     
@@ -138,7 +159,7 @@ def pca_testing_pipeline(feature_group_name, feature_input_version,
                                   file_name =  test_data_filename)
     
     #Load trained model 
-    pca = pca_model_dish_5g(num_of_features = 3, timesteps_per_slice = model_parameters["time_steps"])
+    pca = pca_model_dish_5g(num_of_features = len(features), timesteps_per_slice = model_parameters["time_steps"])
     pca.load_in_vs(save_model_local_path)
     
     #Make predictions
@@ -168,13 +189,13 @@ if __name__ == "__main__":
     ##***Autoencoder***###
 
     #Test node autoencoder model and save on s3
-    autoencoder_testing_pipeline(*node_autoencoder_input()[2:])
+    autoencoder_testing_pipeline(*node_autoencoder_input())
     
     #Test pod autoencoder model and save on s3
-    autoencoder_testing_pipeline(*pod_autoencoder_input()[2:])
+    autoencoder_testing_pipeline(*pod_autoencoder_input())
 
     #Test container autoencoder model and save on s3
-    autoencoder_testing_pipeline(*container_autoencoder_input()[2:])
+    autoencoder_testing_pipeline(*container_autoencoder_input())
     
     ##***PCA***###
     

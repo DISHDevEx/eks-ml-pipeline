@@ -40,7 +40,7 @@ def autoencoder_training(training_tensor,
     
     outputs
     -------
-            autoencoder: keras model object
+            autoencoder: autoencoder_model_dish_5g class object
             trained keras model
             
     """
@@ -51,7 +51,7 @@ def autoencoder_training(training_tensor,
     
     #Initialize autoencoder model
     autoencoder = autoencoder_model_dish_5g(time_steps=model_parameters["time_steps"], 
-                                            batch_size=model_parameters["batch_size"], epochs=250)
+                                            batch_size=model_parameters["batch_size"], epochs=1)
     
     #Train model
     autoencoder.fit(training_tensor)
@@ -101,8 +101,7 @@ def autoencoder_training_pipeline(feature_group_name, feature_input_version,
     
     outputs
     -------
-            autoencoder: keras model object
-            trained keras model
+            trained autoencoder model
             
     """
 
@@ -154,16 +153,16 @@ def pca_training(training_tensor,
     outputs
     -------
             pca: pca_dish_5g class object
-            trained keras model
             
     """
 
     
     features_df = get_features(feature_group_name, feature_input_version)
+    features = features_df["feature_name"].to_list()
     model_parameters = features_df["model_parameters"].iloc[0]
     
     #Initialize pca model 
-    pca = pca_model_dish_5g(num_of_features = 3, timesteps_per_slice = model_parameters["time_steps"] )
+    pca = pca_model_dish_5g(num_of_features = len(features), timesteps_per_slice = model_parameters["time_steps"] )
     
     #Train model
     pca.fit(training_tensor)
@@ -180,10 +179,7 @@ def pca_training_pipeline(feature_group_name, feature_input_version,
                           model_name, model_version):
     """
     inputs
-    ------
-            model_name:str
-            name of the model being trained in this pipeline
-            
+    ------            
             feature_group_name: str
             json name to get the required features
             
@@ -212,8 +208,7 @@ def pca_training_pipeline(feature_group_name, feature_input_version,
     
     outputs
     -------
-            autoencoder: keras model object
-            trained keras model
+            trained pca model
             
     """    
         
