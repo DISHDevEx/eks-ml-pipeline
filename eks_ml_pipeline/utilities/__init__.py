@@ -11,4 +11,3 @@ from .s3_utils import unzip
 from .s3_utils import pandas_dataframe_to_s3
 from .s3_utils import awswrangler_pandas_dataframe_to_s3
 
-from .variance_loss import loss_of_variance
