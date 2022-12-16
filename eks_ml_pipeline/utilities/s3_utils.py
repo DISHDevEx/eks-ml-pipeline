@@ -323,4 +323,4 @@ def write_onnx(local_path, bucket_name, model_name, version, file_name):
     """
     client = boto3.client('s3')
     client.upload_file(local_path, bucket_name, model_name + '/' + version + '/models/' + file_name + ".onnx")
-    print(f"Zip file uploaded: {bucket_name}/{model_name}/{version}/models/{file}.onnx")
+    print(f"Zip file uploaded: {bucket_name}/{model_name}/{version}/models/{file_name}.onnx")
