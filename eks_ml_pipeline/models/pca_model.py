@@ -35,7 +35,7 @@ class pca_model_dish_5g():
     ## timesteps_per_slice is 
     ## train_valid_ratio indicates the training and validation split crafted from the training set. IE the input dataset will be split for training and validation
     
-    def __init__(self,num_of_features =3, number_of_temporal_slices = 3, timesteps_per_slice = 4, n_modes_to_delete=1):
+    def __init__(self,num_of_features =3, number_of_temporal_slices = 1, timesteps_per_slice = 25, n_modes_to_delete=1):
         
         ## super().__init__() allows for inheritence amongst child classes
         super().__init__()
@@ -105,7 +105,7 @@ class pca_model_dish_5g():
                                            )[:]
         return rank3_sliced, rank4_sliced
 
-    def train(self, x_train):
+    def fit(self, x_train):
         """
         @:param x_train: training data 
         Takes training set and:
