@@ -2,14 +2,7 @@ import logging
 import warnings
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
-# from tensorflow import keras
-# import tensorflow as tf
-# from tensorflow.keras import layers
-from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
-from datetime import timedelta
 from sklearn.preprocessing import StandardScaler
 from numpy import save
 from numpy import load
@@ -48,7 +41,6 @@ class pca_model_dish_5g():
             
         ##set timesteps
         self.timesteps_per_slice = timesteps_per_slice
-        
         self.N = number_of_temporal_slices * timesteps_per_slice
         
         ##create a results df
@@ -68,7 +60,7 @@ class pca_model_dish_5g():
         
         self.ss = StandardScaler()
         
-    def load_in_vs(self,vs):
+    def load_vs(self,vs):
         """
         @:param vs: file path with model weights
         Takes model weights and:
@@ -91,7 +83,7 @@ class pca_model_dish_5g():
         @:param samples: training data or data set with shape [samples,ts,features]
         Takes training set and:
             - reshapes it with two time approach
-        @:returns a rank3 sliced and rank4 sliced tensor 
+        @:returns r3 and r4 where r4 is a slicing of the input with shape [samples, H,T,F]  and r3 is a concatenation of r4 over axis 1 to stack the slices, and so is of shape [samples*H , T, F]
         """
         rank4_sliced = samples.reshape(samples.shape[0],
                                        self.number_of_temporal_slices,
@@ -112,32 +104,32 @@ class pca_model_dish_5g():
             - fits the model
         @:returns residuals,ed_errors,self.encode_decode_maps
         """
+        
         ##log that the autoencoder model training has begun
-        logging.info("Autoencoder model training started")
+        logging.info("PCA model training started")
         
-        trainX_slices_as_samples, trainX_sliced  =  self.two_time_slice(x_train)
+        if( self.number_of_temporal_slices >1 ):
+            trainX_slices_as_samples, trainX_sliced  =  self.two_time_slice(x_train)  
+        else: trainX_slices_as_samples = x_train
         
-        # initializing, just for shape. The [:] is needed to have a copy instead of a view
+        ### initializing, just for shape###
         trainX_slices_as_samples_ss = trainX_slices_as_samples[:] 
-        # initialize, since I have to do matmult by component
         trainX_slices_as_samples_ss_encoded = np.zeros(shape = (self.timesteps_per_slice - self.n_modes_to_delete ,trainX_slices_as_samples.shape[0],self.num_of_features ))
         trainX_slices_as_samples_ss_decoded = np.zeros(shape = (trainX_slices_as_samples.shape[0],self.timesteps_per_slice,self.num_of_features))
         
-        # one feature at a time:
+        
+        ### apply standard scalar one feature at a time:###
         for i in range(self.num_of_features):
             trainX_slices_as_samples_ss[:,:,i] = self.ss.fit_transform(trainX_slices_as_samples[:,:,i]) 
             
-        # a list, one component for each feature, with Principal Vectors in a matrix V 
-        vs = []
+        ### Apply PCA and get the principle vectors for each feature ###
+        vs = [] # vs is a list, one component for each feature, with Principal Vectors in a matrix V 
         pca = PCA(n_components = self.timesteps_per_slice)
         for i in range(self.num_of_features):
             pca.fit(trainX_slices_as_samples_ss[:,:,i]) # fits vectors across (n_samples, n_features)
             vs.append(pca.components_) # orthonormal basis of sample space in order of variance explained
          
         self.vs = vs
-        
-        ##create the encode decode maps
-        self.encode_decode_maps = [np.matmul( vs[i][:-self.n_modes_to_delete,:].T, vs[i][:-self.n_modes_to_delete,:] ) for i in range(self.num_of_features) ]
  
         ##encode and decode using pca
         for i in range(self.num_of_features):
@@ -148,12 +140,11 @@ class pca_model_dish_5g():
 
         # calculate residuals and errors
         residuals = trainX_slices_as_samples_ss - trainX_slices_as_samples_ss_decoded
-        residuals_reshaped = residuals.reshape(-1,self.N,self.num_of_features)
         ed_errors = np.linalg.norm(residuals,
-                    ord =1, # MAE, as in the rules
+                    ord =1, 
                     axis=1)
         
-        return residuals_reshaped,ed_errors,self.encode_decode_maps
+        return residuals,ed_errors,self.vs
 
     def test(self, x_test):
         """
@@ -161,13 +152,18 @@ class pca_model_dish_5g():
         
         -apply inferencing
         
-        @:returns decoding,residuals
+        @:returns reconstructions,residuals
         """
-        testX_slices_as_samples, testX_sliced = self.two_time_slice(x_test)
+        ##two time slicing conditional check
+        if( self.number_of_temporal_slices >1 ):
+            trainX_slices_as_samples, trainX_sliced  =  self.two_time_slice(x_train)  
+        else: trainX_slices_as_samples = x_train
         
+
+        
+        
+        # initialize, since we have to do matmul by feature
         testX_slices_as_samples_ss = testX_slices_as_samples[:]
-        
-                # initialize, since we have to do matmul by feature
         testX_slices_as_samples_ss_encoded = np.zeros(shape = (self.timesteps_per_slice - self.n_modes_to_delete ,testX_slices_as_samples.shape[0],self.num_of_features ))
         testX_slices_as_samples_ss_decoded = np.zeros(shape = (testX_slices_as_samples.shape[0],self.timesteps_per_slice,self.num_of_features))
         
@@ -184,8 +180,6 @@ class pca_model_dish_5g():
             
         residuals = testX_slices_as_samples_ss - testX_slices_as_samples_ss_decoded
         
-        residuals_reshaped = residuals.reshape(-1,self.N,self.num_of_features)
+       
         
-        testX_slices_as_samples_ss_decoded_reshaped = testX_slices_as_samples_ss_decoded.reshape(-1,self.N,self.num_of_features)
-        
-        return testX_slices_as_samples_ss_decoded_reshaped,residuals_reshaped
+        return testX_slices_as_samples_ss_decoded,residuals_reshaped
