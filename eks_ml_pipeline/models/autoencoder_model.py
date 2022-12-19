@@ -7,7 +7,6 @@ from sklearn.preprocessing import MinMaxScaler
 from tensorflow import keras
 import tensorflow as tf
 from tensorflow.keras import layers
-from matplotlib import pyplot as plt
 
 """
 Contributed by Vinayak Sharma and David Cherney
@@ -174,6 +173,9 @@ class autoencoder_model_dish_5g():
             self.error_threshold = self.__calculate_threshold(train_mae[-int(len(train_mae) * 0.5):])
             
             self.trained = True
+            
+            ##return reconstructions and mae
+            return train_predictions, train_mae
             
     def test(self, x_test):
         """

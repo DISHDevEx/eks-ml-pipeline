@@ -1,7 +1,5 @@
 import logging
-import warnings
 import numpy as np
-import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from numpy import save
@@ -41,7 +39,6 @@ class pca_model_dish_5g():
             
         ##set timesteps
         self.timesteps_per_slice = timesteps_per_slice
-        self.N = number_of_temporal_slices * timesteps_per_slice
         
         ##create a results df
         self.results = None
@@ -55,19 +52,16 @@ class pca_model_dish_5g():
         ## CREATE the vectors for saving
         self.vs = None
         
-        ##create encode and decode for 
-        self.encode_decode_maps = None
-        
         self.ss = StandardScaler()
         
-    def load_vs(self,vs):
+    def load_vs(self,filename = 'vs.npy'):
         """
         @:param vs: file path with model weights
         Takes model weights and:
             - loads them
         @:returns nothing
         """
-        self.vs = load(vs)
+        self.vs = load(filename)
         
     def save_vs(self, filename = 'vs.npy'):
         """
@@ -102,12 +96,12 @@ class pca_model_dish_5g():
         @:param x_train: training data 
         Takes training set and:
             - fits the model
-        @:returns residuals,ed_errors,self.encode_decode_maps
+        @:returns residuals,ed_errors,vs
         """
-        
-        ##log that the autoencoder model training has begun
+        ##log that the pca model training has begun##
         logging.info("PCA model training started")
         
+        ##conditional temporal slicing check##
         if( self.number_of_temporal_slices >1 ):
             trainX_slices_as_samples, trainX_sliced  =  self.two_time_slice(x_train)  
         else: trainX_slices_as_samples = x_train
@@ -131,19 +125,19 @@ class pca_model_dish_5g():
          
         self.vs = vs
  
-        ##encode and decode using pca
+        ##encode and decode using pca##
         for i in range(self.num_of_features):
             trainX_slices_as_samples_ss_encoded[:,:,i] = np.matmul(vs[i][:-self.n_modes_to_delete,:], 
                                                           trainX_slices_as_samples_ss[:,:,i].T)
             trainX_slices_as_samples_ss_decoded[:,:,i] = np.matmul(vs[i][:-self.n_modes_to_delete,:].T, 
                                                           trainX_slices_as_samples_ss_encoded[:,:,i]).T
 
-        # calculate residuals and errors
+        ##calculate residuals and errors##
         residuals = trainX_slices_as_samples_ss - trainX_slices_as_samples_ss_decoded
-        ed_errors = np.linalg.norm(residuals,
-                    ord =1, 
-                    axis=1)
-        
+        ed_errors = np.mean(np.absolute(residuals),
+                               axis =1, # across timestamps
+                           )
+        #return residuals, errors, and vs
         return residuals,ed_errors,self.vs
 
     def test(self, x_test):
@@ -154,24 +148,24 @@ class pca_model_dish_5g():
         
         @:returns reconstructions,residuals
         """
-        ##two time slicing conditional check
+        ##log that the pca model training has begun##
+        logging.info("PCA model testing started")
+        
+        ##two time slicing conditional check##
         if( self.number_of_temporal_slices >1 ):
-            trainX_slices_as_samples, trainX_sliced  =  self.two_time_slice(x_train)  
-        else: trainX_slices_as_samples = x_train
-        
+            testX_slices_as_samples, testX_sliced  =  self.two_time_slice(x_train)  
+        else: testX_slices_as_samples = x_test
 
-        
-        
-        # initialize, since we have to do matmul by feature
+        ### init for shape ##
         testX_slices_as_samples_ss = testX_slices_as_samples[:]
         testX_slices_as_samples_ss_encoded = np.zeros(shape = (self.timesteps_per_slice - self.n_modes_to_delete ,testX_slices_as_samples.shape[0],self.num_of_features ))
         testX_slices_as_samples_ss_decoded = np.zeros(shape = (testX_slices_as_samples.shape[0],self.timesteps_per_slice,self.num_of_features))
         
-        ##apply standard scaler
+        ##apply standard scaler###
         for i in range(self.num_of_features):
             testX_slices_as_samples_ss[:,:,i] = self.ss.fit_transform(testX_slices_as_samples[:,:,i])
     
-        ##encode and decode using pca
+        ##encode and decode using pca##
         for i in range(self.num_of_features):
             testX_slices_as_samples_ss_encoded[:,:,i] = np.matmul(self.vs[i][:-self.n_modes_to_delete,:], 
                                                           testX_slices_as_samples_ss[:,:,i].T)
@@ -181,5 +175,5 @@ class pca_model_dish_5g():
         residuals = testX_slices_as_samples_ss - testX_slices_as_samples_ss_decoded
         
        
-        
-        return testX_slices_as_samples_ss_decoded,residuals_reshaped
+        #return reconstructions and residuals
+        return testX_slices_as_samples_ss_decoded,residuals
