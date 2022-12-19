@@ -24,6 +24,7 @@ from .utilities import unzip
 from .utilities import pandas_dataframe_to_s3
 from .utilities import awswrangler_pandas_dataframe_to_s3
 from .utilities import write_onnx
+from .utilities import loss_of_variance
 
 
 from .training_data_builder import node_training_data_builder
