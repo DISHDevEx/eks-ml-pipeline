@@ -7,6 +7,7 @@ from sklearn.preprocessing import MinMaxScaler
 from tensorflow import keras
 import tensorflow as tf
 from tensorflow.keras import layers
+from matplotlib import pyplot as plt
 
 """
 Contributed by Vinayak Sharma and David Cherney
