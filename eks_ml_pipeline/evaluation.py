@@ -160,7 +160,7 @@ def pca_testing_pipeline(feature_group_name, feature_input_version,
     
     #Load trained model 
     pca = pca_model_dish_5g(num_of_features = len(features), timesteps_per_slice = model_parameters["time_steps"])
-    pca.load_in_vs(save_model_local_path)
+    pca.load_vs(save_model_local_path)
     
     #Make predictions
     test_predictions,test_residuals = pca.test(testing_tensor)
