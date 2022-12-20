@@ -39,14 +39,16 @@ def node_hmm_ad_preprocessing(feature_group_name, feature_group_created_date, in
             processed_node_df: preprocessed dataframe
             
     """
-
-
-    node_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value ='Node',setup='128gb')
-    spark = pod_data.get_spark()
-    err, pod_df = pod_data.read()
     
-    model_parameters = input_node_features_df["model_parameters"].iloc[0]
-    hour_params = model_parameters["hour_params"]
+    node_data = Pyspark_data_ingestion(
+        year = input_year,
+        month = input_month, 
+        day = input_day, 
+        hour = input_hour, 
+        filter_column_value ='Node',
+        setup='128gb')
+    spark = node_data.get_spark()
+    err, node_df = node_data.read()
     
     if err == 'PASS':
         
