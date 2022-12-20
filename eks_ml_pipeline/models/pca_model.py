@@ -18,13 +18,14 @@ class pca_model_dish_5g():
     """
     @:constructor num_of_features, number_of_temporal_slices, timesteps_per_slice, n_modes_to_delete
     
+        num_of_features is the number of features per sample
+        number of temporal slices is a hyperparameter that comes from the Two Time Theory
+        timesteps_per_slice is time steps per a temporal slice
+        train_valid_ratio indicates the training and validation split crafted from the training set. IE the input dataset will be split for training and validation
+    
     @:returns object of class 
     """
-    ## num_of_features, number_of_temporal_slices, timesteps_per_slice, n_modes_to_delete
-    ## num_of_features is the number of features per sample
-    ## number of temporal slices is a hyperparameter that comes from the Two Time Theory
-    ## timesteps_per_slice is 
-    ## train_valid_ratio indicates the training and validation split crafted from the training set. IE the input dataset will be split for training and validation
+
     
     def __init__(self,num_of_features =3, number_of_temporal_slices = 1, timesteps_per_slice = 25, n_modes_to_delete=1):
         

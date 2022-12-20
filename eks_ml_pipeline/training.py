@@ -252,16 +252,16 @@ def pca_training_pipeline(feature_group_name, feature_input_version,
     
 if __name__ == "__main__":
     
-    ###***Autoencoder***###
+#     ###***Autoencoder***###
     
-    #Train node autoencoder model and save on s3
-    autoencoder_training_pipeline(*node_autoencoder_input())
+#     #Train node autoencoder model and save on s3
+#     autoencoder_training_pipeline(*node_autoencoder_input())
     
-    #Train pod autoencoder model and save on s3
-    autoencoder_training_pipeline(*pod_autoencoder_input())
+#     #Train pod autoencoder model and save on s3
+#     autoencoder_training_pipeline(*pod_autoencoder_input())
 
-    #Train container autoencoder model and save on s3
-    autoencoder_training_pipeline(*container_autoencoder_input())
+#     #Train container autoencoder model and save on s3
+#     autoencoder_training_pipeline(*container_autoencoder_input())
     
     ###***PCA***###
     

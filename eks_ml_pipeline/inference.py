@@ -188,16 +188,16 @@ def inference_pipeline(inference_input_parameters,
 
 if __name__ == "__main__":
     
-    ##***Autoencoder***###
+#     ##***Autoencoder***###
 
-    #Inference for node autoencoder model
-    inference_pipeline(node_inference_input(), node_autoencoder_input(), autoencoder_testing_pipeline)
+#     #Inference for node autoencoder model
+#     inference_pipeline(node_inference_input(), node_autoencoder_input(), autoencoder_testing_pipeline)
     
-    #Inference for pod autoencoder model
-    inference_pipeline(pod_inference_input(), pod_autoencoder_input(), autoencoder_testing_pipeline)
+#     #Inference for pod autoencoder model
+#     inference_pipeline(pod_inference_input(), pod_autoencoder_input(), autoencoder_testing_pipeline)
 
-    #Inference for container autoencoder model
-    inference_pipeline(container_inference_input(), container_autoencoder_input(), autoencoder_testing_pipeline)
+#     #Inference for container autoencoder model
+#     inference_pipeline(container_inference_input(), container_autoencoder_input(), autoencoder_testing_pipeline)
     
     ###***PCA***###
     
