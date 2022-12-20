@@ -28,7 +28,7 @@ class EMRServerless:
 
     def create_application(self, name: str, release_label: str, wait: bool = True):
         """
-        Create a new application with the provided name and release_label - the application needs to be started after.
+        Creates a new application with the provided name and release_label - the application needs to be started after.
         """
         if self.application_id is not None:
             raise Exception(
@@ -45,10 +45,11 @@ class EMRServerless:
             response = self.client.get_application(applicationId=self.application_id)
             app_ready = response.get("application").get("state") == "CREATED"
 
-    def start_application(self, wait: bool = True) -> None:
+    def start_application(self, application_id, wait: bool = True) -> None:
         """
         Start the application - by default, wait until the application is started.
         """
+        self.application_id = application_id
         
         if self.application_id is None:
             raise Exception(
@@ -82,11 +83,12 @@ class EMRServerless:
     def run_spark_job(
         self,
         script_location: str,
-        job_role_arn: str,
         application_id: str,
         arguments: list(),
         s3_bucket_name: str,
         zipped_env_path:str,
+        job_role_arn: str = None,
+        custom_spark_config: str = None,
         wait: bool = True,
     ) -> str:
         """
@@ -95,28 +97,36 @@ class EMRServerless:
         By default, spark-submit parameters are hard-coded and logs are sent to the provided s3_bucket_name.
         This method is blocking by default until the job is complete.
         """
+        
+        if job_role_arn==None:
+            job_role_arn = 'arn:aws:iam::064047601590:role/hamza-emr-serverless-role'
+        
+        if custom_spark_config==None:
+            custom_spark_config=''
+        
         response = self.client.start_job_run(
             applicationId=application_id,
             executionRoleArn=job_role_arn,
             jobDriver={
                 "sparkSubmit": {
                     "entryPoint": script_location,
-                    "sparkSubmitParameters": f"--conf spark.archives={zipped_env_path}#environment --conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=./environment/bin/python --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=./environment/bin/python --conf spark.executorEnv.PYSPARK_PYTHON=./environment/bin/python",
+                    "sparkSubmitParameters": f"--conf spark.archives={zipped_env_path}#environment --conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=./environment/bin/python --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=./environment/bin/python --conf spark.executorEnv.PYSPARK_PYTHON=./environment/bin/python {custom_spark_config}",
                 }
             },
             configurationOverrides={
                 "monitoringConfiguration": {
                     "s3MonitoringConfiguration": {
-                        "logUri": "s3://emr-serverless-output-pd/logs/"
+                        "logUri": f"s3://{s3_bucket_name}/logs/"
                     }
                 }
             },
         )
         self.job_run_id = response.get("jobRunId")
+        print(self.job_run_id)
 
         job_done = False
         while wait and not job_done:
-            jr_response = self.get_job_run(job_run_id)
+            jr_response = self.get_job_run()
             job_done = jr_response.get("state") in [
                 "SUCCESS",
                 "FAILED",
@@ -124,7 +134,7 @@ class EMRServerless:
                 "CANCELLED",
             ]
 
-        return job_run_id
+        return self.job_run_id
 
     def get_job_run(self) -> dict:
         response = self.client.get_job_run(
@@ -154,7 +164,7 @@ def parse_args():
         "required named arguments"
     )  # Workaround to display hyphen-prefixed args under a "required arguments" group
     required_named.add_argument(
-        "--job-role-arn", help="EMR Serverless IAM Job Role ARN", required=True
+        "--job-role-arn", help="EMR Serverless IAM Job Role ARN", required=False
     )
     required_named.add_argument(
         "--applicationId",
@@ -166,6 +176,22 @@ def parse_args():
         help="Amazon S3 Bucket to use for logs and job output",
         required=True,
     )
+    required_named.add_argument(
+        "--entry-point",
+        help="Amazon S3 Bucket to use for logs and job output",
+        required=True,
+    )
+    required_named.add_argument(
+        "--zipped-env",
+        help="Amazon S3 path for dependencies in zipped file",
+        required=True,
+    )
+    required_named.add_argument(
+        "--custom-spark-config",
+        help="Amazon S3 path for dependencies in zipped file",
+        required=False,
+    )
+
     return parser.parse_args()
 
 
@@ -175,12 +201,16 @@ if __name__ == "__main__":
     serverless_job_role_arn = args.job_role_arn
     application_id = args.applicationId
     s3_bucket_name = args.s3_bucket
+    emr_emtry_point = args.entry_point
+    zipped_env_path = args.zipped_env
+    custom_spark_config = args.custom_spark_config
     
 
     # Create and start a new EMRServerless Spark Application
     emr_serverless = EMRServerless()
 
     print("Starting EMR Serverless Spark App")
+    ## uncomment below line of code if you want to create a new application
     #emr_serverless.create_application("pd-autoencoder-test-emr-cli", "emr-6.6.0")
     emr_serverless.start_application(application_id)
     print(emr_serverless)
@@ -188,17 +218,18 @@ if __name__ == "__main__":
     # Run (and wait for) a Spark job
     print("Submitting new Spark job")
     job_run_id = emr_serverless.run_spark_job(
-        script_location="s3://emr-serverless-output-pd/code/pyspark/pd-autoencoder-ad/s3_test_emr.py",
+        script_location=emr_emtry_point,
         job_role_arn=serverless_job_role_arn,
         application_id = application_id,
         arguments=[f"s3://{s3_bucket_name}/emr-serverless/output"],
         s3_bucket_name=s3_bucket_name,
+        zipped_env_path = zipped_env_path,
+        custom_spark_config = custom_spark_config,
     )
-    job_status = emr_serverless.get_job_run(job_run_id)
+    job_status = emr_serverless.get_job_run()
     print(f"Job finished: {job_run_id}, status is: {job_status.get('state')}")
 
     # Fetch and print the logs
-    spark_driver_logs = emr_serverless.fetch_driver_log(s3_bucket_name, job_run_id)
-    print("File output from stdout.gz:\n----\n", spark_driver_logs, "\n----")
+    spark_driver_logs = emr_serverless.fetch_driver_log(s3_bucket_name)
 
-    print("Done! 👋")
+    print("Done!")
