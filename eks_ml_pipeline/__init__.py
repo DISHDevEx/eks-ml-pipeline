@@ -43,3 +43,4 @@ from .inference_input import node_inference_input
 from .inference_input import pod_inference_input
 from .inference_input import container_inference_input
 
+from .emr_serverless import EMRServerless

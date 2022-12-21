@@ -175,6 +175,9 @@ class autoencoder_model_dish_5g():
             
             self.trained = True
             
+            ##return reconstructions and mae
+            return train_predictions, train_mae
+            
     def test(self, x_test):
         """
         @:param x_test: test data. Must be of shape [ samples, timesteps, features]
