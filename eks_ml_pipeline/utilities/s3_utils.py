@@ -324,3 +324,32 @@ def write_onnx(local_path, bucket_name, model_name, version, file_name):
     client = boto3.client('s3')
     client.upload_file(local_path, bucket_name, model_name + '/' + version + '/models/' + file_name + ".onnx")
     print(f"Zip file uploaded: {bucket_name}/{model_name}/{version}/models/{file_name}.onnx")
+
+
+def read_parquet_to_pandas_df(bucket_name, model_name, version, file_name):
+    """
+    inputs
+    ------
+            bucket_name: STRING
+            s3 bucket name to write the folder
+
+            model_name: STRING
+            model name to create a folder within the bucket for model versioning
+
+            version: STRING
+            format: v#.#.#
+            version will be used versioning
+
+
+    outputs
+    -------
+            df: pandas dataframe
+
+    """
+    # Read the parquet file
+    buffer = io.BytesIO()
+    s3 = boto3.resource('s3')
+    object = s3.Object(bucket_name,f'{model_name}/{version}/data/pandas_df/{file_name}.parquet')
+    object.download_fileobj(buffer)
+    df = pd.read_parquet(buffer)
+    return df
