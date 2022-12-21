@@ -44,6 +44,7 @@ class EMRServerless:
         while wait and not app_ready:
             response = self.client.get_application(applicationId=self.application_id)
             app_ready = response.get("application").get("state") == "CREATED"
+        return self.application_id
 
     def start_application(self, application_id, wait: bool = True) -> None:
         """
@@ -63,22 +64,34 @@ class EMRServerless:
             response = self.client.get_application(applicationId=self.application_id)
             app_started = response.get("application").get("state") == "STARTED"
 
-    def stop_application(self, wait: bool = True) -> None:
+    def stop_application(self, application_id=None, wait: bool = True) -> None:
         """
         Stop the application - by default, wait until the application is stopped.
         """
-        self.client.stop_application(applicationId=self.application_id)
+        if application_id is None:
+            self.client.stop_application(applicationId=self.application_id)
+        else:
+            self.client.stop_application(applicationId=application_id)    
 
         app_stopped = False
         while wait and not app_stopped:
-            response = self.client.get_application(applicationId=self.application_id)
+            if application_id is None:
+                response = self.client.get_application(applicationId=self.application_id)
+            else:
+                response = self.client.get_application(applicationId=application_id)
             app_stopped = response.get("application").get("state") == "STOPPED"
+            
+        print(f"Successfully stopped app")
 
-    def delete_application(self) -> None:
+    def delete_application(self, application_id=None) -> None:
         """
         Delete the application - it must be stopped first.
         """
-        self.client.delete_application(applicationId=self.application_id)
+        if application_id is None:
+            self.client.delete_application(applicationId=self.application_id)
+        else:
+            self.client.delete_application(applicationId=application_id)
+        print("Successfully deleted app")
 
     def run_spark_job(
         self,
@@ -144,10 +157,16 @@ class EMRServerless:
         )
         return response.get("jobRun")
 
-    def cancel_job_run(self) -> dict:
-        response = self.client.cancel_job_run(
-            applicationId=self.application_id, jobRunId=self.job_run_id
-        )
+    def cancel_job_run(self, job_run_id=None) -> dict:
+        if job_run_id is None:
+            response = self.client.cancel_job_run(
+                applicationId=self.application_id, jobRunId=self.job_run_id
+            )
+        else:
+            response = self.client.cancel_job_run(
+                applicationId=self.application_id, jobRunId=job_run_id
+            )
+        print('Successfully canceled job')
         return response.get("jobRun")
     
     def fetch_driver_log(
