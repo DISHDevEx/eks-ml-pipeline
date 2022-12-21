@@ -122,17 +122,19 @@ class EMRServerless:
             },
         )
         self.job_run_id = response.get("jobRunId")
-        print(self.job_run_id)
+        print(f"job id : {self.job_run_id}")
 
-        job_done = False
-        while wait and not job_done:
-            jr_response = self.get_job_run()
-            job_done = jr_response.get("state") in [
-                "SUCCESS",
-                "FAILED",
-                "CANCELLING",
-                "CANCELLED",
-            ]
+        ## Commenting out below lines to allow flexibility to cancel jobs if needed
+        ## Feel free to uncomment them as per requirement
+        # job_done = False
+        # while wait and not job_done:
+        #     jr_response = self.get_job_run()
+        #     job_done = jr_response.get("state") in [
+        #         "SUCCESS",
+        #         "FAILED",
+        #         "CANCELLING",
+        #         "CANCELLED",
+        #     ]
 
         return self.job_run_id
 
@@ -142,6 +144,12 @@ class EMRServerless:
         )
         return response.get("jobRun")
 
+    def cancel_job_run(self) -> dict:
+        response = self.client.cancel_job_run(
+            applicationId=self.application_id, jobRunId=self.job_run_id
+        )
+        return response.get("jobRun")
+    
     def fetch_driver_log(
         self, s3_bucket_name: str, log_type: str = "stdout"
     ) -> str:
@@ -173,22 +181,22 @@ def parse_args():
     )
     required_named.add_argument(
         "--s3-bucket",
-        help="Amazon S3 Bucket to use for logs and job output",
+        help="S3 Bucket to use for logs and job output",
         required=True,
     )
     required_named.add_argument(
         "--entry-point",
-        help="Amazon S3 Bucket to use for logs and job output",
+        help="Entry point to EMR serverless",
         required=True,
     )
     required_named.add_argument(
         "--zipped-env",
-        help="Amazon S3 path for dependencies in zipped file",
+        help="Path to the custom spark and python environemnt to use, with all the dependencies installed",
         required=True,
     )
     required_named.add_argument(
         "--custom-spark-config",
-        help="Amazon S3 path for dependencies in zipped file",
+        help="Custom spark config",
         required=False,
     )
 
