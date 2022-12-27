@@ -1,15 +1,16 @@
 import numpy as np 
 import pandas as pd
+import awswrangler as wr
 import ast
 from pandas import json_normalize
 import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
-from msspackages import get_features
+from msspackages import Pyspark_data_ingestion, get_features
 from utilities import write_tensor, read_tensor
-from training_input import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
-from training_input import node_pca_input, pod_pca_input, container_pca_input
-from inference_input import node_inference_input, pod_inference_input, container_inference_input
+from inputs import training_input, inference_input
 from evaluation import autoencoder_testing_pipeline, pca_testing_pipeline
+
+    
 
 """
 Contributed by Evgeniya Dontsova
@@ -51,6 +52,51 @@ def read_raw_data(raw_data_s3_path):
     print(f"\nreading raw data from: {raw_data_s3_path}\n")
 
     return df
+
+
+def inference_data_builder(input_year, input_month,  input_day, input_hour, rec_type, input_setup):
+    
+    """
+    inputs
+    ------
+            input_year : STRING | Int
+            the year from which to read data, leave empty for all years
+
+            input_month : STRING | Int
+            the month from which to read data, leave empty for all months
+
+            input_day : STRING | Int
+            the day from which to read data, leave empty for all days
+
+            input_hour: STRING | Int
+            the hour from which to read data, leave empty for all hours
+            
+            rec_type: STRING
+            uses schema for rec type when building pyspark df
+            
+            input_setup: STRING 
+            kernel config
+    
+    outputs
+    -------
+            writes parquet to specific s3 path
+    """
+
+    if input_hour == -1:
+        file_name = f'{rec_type}/{rec_type}_{input_year}_{input_month}_{input_day}'
+    elif input_day == -1:
+        file_name = f'{rec_type}/{rec_type}_{input_year}_{input_month}'
+    else:
+        file_name = f'{rec_type}/{rec_type}_{input_year}_{input_month}_{input_day}_{input_hour}'
+    
+    pyspark_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value = rec_type)
+    err, pyspark_df = pyspark_data.read()
+    
+    if err == 'PASS':
+        print(err)
+        pyspark_df = pyspark_df.toPandas()
+        wr.s3.to_parquet(pyspark_df, path=f"s3://dish-5g.core.pd.g.dp.eks.logs.e/inference_data/{file_name}.parquet")
+
 
 def build_processed_data(inference_input_parameters,
                          training_input_parameters):
@@ -152,6 +198,7 @@ def build_processed_data(inference_input_parameters,
         print(f"Exception occured: no unique values for {sampling_column} column.")
 
     return training_input_parameters
+
 
 def inference_pipeline(inference_input_parameters,
                        training_input_parameters,

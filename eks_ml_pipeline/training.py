@@ -5,8 +5,7 @@ from io import BytesIO
 from msspackages import get_features
 from utilities import write_tensor, read_tensor, upload_zip, write_onnx
 from models import autoencoder_model_dish_5g, pca_model_dish_5g
-from training_input import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
-from training_input import node_pca_input, pod_pca_input, container_pca_input
+from inputs import training_input
 
 
 """

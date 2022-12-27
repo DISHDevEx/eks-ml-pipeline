@@ -1,10 +1,14 @@
 import numpy as np
 import pandas as pd
 import random
-from ..utilities import feature_processor, null_report, multiprocessing_runner
-from msspackages import Pyspark_data_ingestion, get_features
+import multiprocessing
+from functools import partial
 from pyspark.sql.functions import col, count
 from sklearn.preprocessing import StandardScaler
+from ..utilities import feature_processor, null_report, s3_utils
+from ..inputs import feature_engineering_input
+from msspackages import Pyspark_data_ingestion, get_features
+
 
 """
 Contributed by Vinayak Sharma and Praveen Mada
@@ -14,14 +18,34 @@ this feature engineering functions will help us run bach jobs that builds traini
 """
 
 
-def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
+
+def node_train_test_split(input_df, split_weights):
     """
     inputs
     ------
-            feature_group_name: STRING
+            input_df: df
+            processed/filtered input df from pre processing
+            
+    outputs
+    -------
+            node_train : train df
+            node_test: test df
+            
+    """
+    
+    node_train, node_test = input_df.randomSplit(weights=split_weights, seed=200)
+
+    return node_train, node_test
+
+
+def node_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
+    """
+    inputs
+    ------
+            input_feature_group_name: STRING
             json name to get the required features
             
-            feature_group_version: STRING
+            input_feature_group_version: STRING
             json version to get the latest features 
             
             input_year : STRING | Int
@@ -52,7 +76,7 @@ def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_version,
     if err == 'PASS':
 
         #get features
-        features_df = get_features(feature_group_name,feature_group_version)
+        features_df = get_features(input_feature_group_name,input_feature_group_version)
         features = features_df["feature_name"].to_list()
         processed_features = feature_processor.cleanup(features)
         
@@ -80,7 +104,8 @@ def node_autoencoder_ad_preprocessing(feature_group_name, feature_group_version,
         empty_df = pd.DataFrame()
         return empty_df, empty_df
 
-def node_autoencoder_ad_feature_engineering(instance_id, input_df, input_features, input_scaled_features, input_time_steps):
+
+def node_ad_fe(instance_id, input_df, input_features, input_scaled_features, input_time_steps):
     """
     inputs
     ------
@@ -121,26 +146,7 @@ def node_autoencoder_ad_feature_engineering(instance_id, input_df, input_feature
     return node_fe_df
 
 
-def node_autoencoder_train_test_split(input_df, split_weights):
-    """
-    inputs
-    ------
-            input_df: df
-            processed/filtered input df from pre processing
-            
-    outputs
-    -------
-            node_train : train df
-            node_test: test df
-            
-    """
-    
-    node_train, node_test = input_df.randomSplit(weights=split_weights, seed=200)
-
-    return node_train, node_test
-
-
-def node_autoencoder_list_generator(input_data_type, input_split_ratio, input_node_processed_df, input_node_features_df):
+def node_fe_list_generator(input_data_type, input_split_ratio, input_node_processed_df, input_node_features_df):
     """
     inputs
     ------
@@ -180,65 +186,75 @@ def node_autoencoder_list_generator(input_data_type, input_split_ratio, input_no
     return node_list, input_node_df
 
 
-def node_autoencoder_fe_runner():
-    %%time
-from eks_ml_pipeline import node_autoencoder_ad_preprocessing, node_autoencoder_ad_feature_engineering, node_autoencoder_train_test_split, node_autoencoder_list_generator
-from eks_ml_pipeline import write_tensor, awswrangler_pandas_dataframe_to_s3, read_parquet_to_pandas_df
-import pandas as pd
-import numpy as np
-import multiprocessing
-from functools import partial
+def node_fe_runner(feature_group_name, feature_version,
+            partition_year, partition_month, partition_day,
+            partition_hour, spark_config_setup,
+            bucket):
+    
+    ##building file name dynamically
+    if partition_hour == -1:
+        file_name = f'{partition_year}_{partition_month}_{partition_day}'
+    elif partition_day == -1:
+        file_name = f'{partition_year}_{partition_month}'
+    else:
+        file_name = f'{partition_year}_{partition_month}_{partition_day}_{partition_hour}'
+    
+    #pre processing
+    node_features_data, node_processed_data = node_ad_preprocessing(feature_group_name, feature_version, partition_year, partition_month, partition_day, partition_hour, spark_config_setup)
+    
+    #parsing model parameters
+    scaled_features = []
+    model_parameters = node_features_data["model_parameters"].iloc[0]
+    features =  feature_processor.cleanup(node_features_data["feature_name"].to_list())
+    time_steps = model_parameters["time_steps"]
+    for feature in features:
+        scaled_features = scaled_features + ["scaled_"+feature]
 
-#pre processing
-node_features_data, node_processed_data = node_autoencoder_ad_preprocessing("node_autoencoder_ad","v0.0.2","2022","9","29",-1,"384gb")
+    #test, train split
+    node_train_split = node_features_data["model_parameters"].iloc[0]["split_ratio"]
+    node_test_split =  round(1 - node_train_split,2)
+    node_train_data, node_test_data = node_train_test_split(node_processed_data, [node_train_split,node_test_split])
 
-#test, train split
-node_train_split = node_features_data["model_parameters"].iloc[0]["split_ratio"]
-node_test_split =  round(1 - node_train_split,2)
-node_train_data, node_test_data = node_autoencoder_train_test_split(node_processed_data, [node_train_split,node_test_split])
+    #converting pyspark df's to pandas df
+    node_train_data = node_train_data.toPandas()
+    node_test_data = node_test_data.toPandas()
 
-#converting pyspark df's to pandas df
-node_train_data = node_train_data.toPandas()
-node_test_data = node_test_data.toPandas()
+    #writing df's to s3 bucket
+    awswrangler_pandas_dataframe_to_s3(node_train_data, bucket , feature_group_name, feature_version, f'raw_training_{file_name}')
+    awswrangler_pandas_dataframe_to_s3(node_test_data, bucket , feature_group_name, feature_version, f'raw_testing_{file_name}')
 
-#writing df's to s3 bucket
-awswrangler_pandas_dataframe_to_s3(node_train_data,  "dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "raw_training_2022_9_29")
-awswrangler_pandas_dataframe_to_s3(node_test_data,  "dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "raw_testing_2022_9_29")
+    #reading df's from s3 bucket
+    node_train_data = read_parquet_to_pandas_df(bucket , feature_group_name, feature_version, f'raw_training_{file_name}')
+    node_test_data = read_parquet_to_pandas_df(bucket , feature_group_name, feature_version, f'raw_testing_{file_name}')
 
-#reading df's from s3 bucket
-node_train_data = read_parquet_to_pandas_df("dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "raw_training_2022_9_29")
-node_test_data = read_parquet_to_pandas_df("dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "raw_testing_2022_9_29")
+    #generating random selected list of node id's
+    selected_node_train_list, processed_node_train_data = node_fe_list_generator( 'train', [node_train_split,node_test_split], node_train_data, node_features_data)
+    selected_node_test_list, processed_node_test_data = node_fe_list_generator( 'test', [node_train_split,node_test_split], node_test_data, node_features_data)
 
-#generating random selected list of node id's
-selected_node_train_list, processed_node_train_data = node_autoencoder_list_generator( 'train', [node_train_split,node_test_split], node_train_data, node_features_data)
-selected_node_test_list, processed_node_test_data = node_autoencoder_list_generator( 'test', [node_train_split,node_test_split], node_test_data, node_features_data)
+    num_cores = multiprocessing.cpu_count()
+    print(num_cores)
 
-
-model_parameters = node_features_data["model_parameters"].iloc[0]
-features =  feature_processor.cleanup(node_features_data["feature_name"].to_list())
-time_steps = model_parameters["time_steps"]
-
-scaled_features = []
-for feature in features:
-    scaled_features = scaled_features + ["scaled_"+feature]
-
-
-num_cores = multiprocessing.cpu_count()
-print(num_cores)
-
-#Train data feature engineering
-node_training_list = multiprocessing.Pool(num_cores).map(partial(node_autoencoder_ad_feature_engineering, 
-                     input_df=processed_node_train_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_train_list)
-node_training_df = pd.concat(node_training_list)
-node_training_tensor = np.array(list(map(lambda x: x.to_numpy(), node_training_list)))
-write_tensor(node_training_tensor, "dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "training_2022_9_29")
-awswrangler_pandas_dataframe_to_s3(node_training_df,  "dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "training_2022_9_29")
+    #Train data feature engineering
+    node_training_list = multiprocessing.Pool(num_cores).map(partial(node_ad_fe, 
+                         input_df=processed_node_train_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_train_list)
+    node_training_df = pd.concat(node_training_list)
+    node_training_tensor = np.array(list(map(lambda x: x.to_numpy(), node_training_list)))
+    write_tensor(node_training_tensor, bucket , feature_group_name, feature_version, f'training_{file_name}')
+    awswrangler_pandas_dataframe_to_s3(node_training_df, bucket , feature_group_name, feature_version, f'training_{file_name}')
 
 
-#Test data feature engineering
-node_testing_list = multiprocessing.Pool(num_cores).map(partial(node_autoencoder_ad_feature_engineering, 
-                     input_df=processed_node_test_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_test_list)
-node_testing_df = pd.concat(node_testing_list)
-node_testing_tensor = np.array(list(map(lambda x: x.to_numpy(), node_testing_list)))
-write_tensor(node_testing_tensor, "dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "testing_2022_9_29")
-awswrangler_pandas_dataframe_to_s3(node_testing_df,  "dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "testing_2022_9_29")
+    #Test data feature engineering
+    node_testing_list = multiprocessing.Pool(num_cores).map(partial(node_ad_fe, 
+                         input_df=processed_node_test_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_test_list)
+    node_testing_df = pd.concat(node_testing_list)
+    node_testing_tensor = np.array(list(map(lambda x: x.to_numpy(), node_testing_list)))
+    write_tensor(node_testing_tensor, bucket , feature_group_name, feature_version, f'testing_{file_name}')
+    awswrangler_pandas_dataframe_to_s3(node_testing_df,  bucket , feature_group_name, feature_version, f'testing_{file_name}')
+    
+
+if __name__ == "__main__":
+    #build and save node autoencoder training data to s3
+    node_fe_runner(*node_autoencoder_fe_input())
+
+    #build and save node pca training data to s3
+    node_fe_runner(*node_pca_fe_input())
