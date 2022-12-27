@@ -178,3 +178,67 @@ def node_autoencoder_list_generator(input_data_type, input_split_ratio, input_no
     node_list = input_node_df['InstanceId'].sample(n_samples).to_list()
     
     return node_list, input_node_df
+
+
+def node_autoencoder_fe_runner():
+    %%time
+from eks_ml_pipeline import node_autoencoder_ad_preprocessing, node_autoencoder_ad_feature_engineering, node_autoencoder_train_test_split, node_autoencoder_list_generator
+from eks_ml_pipeline import write_tensor, awswrangler_pandas_dataframe_to_s3, read_parquet_to_pandas_df
+import pandas as pd
+import numpy as np
+import multiprocessing
+from functools import partial
+
+#pre processing
+node_features_data, node_processed_data = node_autoencoder_ad_preprocessing("node_autoencoder_ad","v0.0.2","2022","9","29",-1,"384gb")
+
+#test, train split
+node_train_split = node_features_data["model_parameters"].iloc[0]["split_ratio"]
+node_test_split =  round(1 - node_train_split,2)
+node_train_data, node_test_data = node_autoencoder_train_test_split(node_processed_data, [node_train_split,node_test_split])
+
+#converting pyspark df's to pandas df
+node_train_data = node_train_data.toPandas()
+node_test_data = node_test_data.toPandas()
+
+#writing df's to s3 bucket
+awswrangler_pandas_dataframe_to_s3(node_train_data,  "dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "raw_training_2022_9_29")
+awswrangler_pandas_dataframe_to_s3(node_test_data,  "dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "raw_testing_2022_9_29")
+
+#reading df's from s3 bucket
+node_train_data = read_parquet_to_pandas_df("dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "raw_training_2022_9_29")
+node_test_data = read_parquet_to_pandas_df("dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "raw_testing_2022_9_29")
+
+#generating random selected list of node id's
+selected_node_train_list, processed_node_train_data = node_autoencoder_list_generator( 'train', [node_train_split,node_test_split], node_train_data, node_features_data)
+selected_node_test_list, processed_node_test_data = node_autoencoder_list_generator( 'test', [node_train_split,node_test_split], node_test_data, node_features_data)
+
+
+model_parameters = node_features_data["model_parameters"].iloc[0]
+features =  feature_processor.cleanup(node_features_data["feature_name"].to_list())
+time_steps = model_parameters["time_steps"]
+
+scaled_features = []
+for feature in features:
+    scaled_features = scaled_features + ["scaled_"+feature]
+
+
+num_cores = multiprocessing.cpu_count()
+print(num_cores)
+
+#Train data feature engineering
+node_training_list = multiprocessing.Pool(num_cores).map(partial(node_autoencoder_ad_feature_engineering, 
+                     input_df=processed_node_train_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_train_list)
+node_training_df = pd.concat(node_training_list)
+node_training_tensor = np.array(list(map(lambda x: x.to_numpy(), node_training_list)))
+write_tensor(node_training_tensor, "dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "training_2022_9_29")
+awswrangler_pandas_dataframe_to_s3(node_training_df,  "dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "training_2022_9_29")
+
+
+#Test data feature engineering
+node_testing_list = multiprocessing.Pool(num_cores).map(partial(node_autoencoder_ad_feature_engineering, 
+                     input_df=processed_node_test_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_test_list)
+node_testing_df = pd.concat(node_testing_list)
+node_testing_tensor = np.array(list(map(lambda x: x.to_numpy(), node_testing_list)))
+write_tensor(node_testing_tensor, "dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "testing_2022_9_29")
+awswrangler_pandas_dataframe_to_s3(node_testing_df,  "dish-5g.core.pd.g.dp.eks.logs.e", "node_autoencoder_ad", "v0.0.2", "testing_2022_9_29")
