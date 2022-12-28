@@ -5,7 +5,7 @@ import multiprocessing
 from functools import partial
 from pyspark.sql.functions import col, count
 from sklearn.preprocessing import StandardScaler
-from ..utilities import feature_processor, null_report, s3_utils
+from ..utilities import feature_processor, null_report, S3Utilities
 from ..inputs import feature_engineering_input
 from msspackages import Pyspark_data_ingestion, get_features
 from .train_test_split import all_rectypes_train_test_split
@@ -201,14 +201,17 @@ def node_fe_pipeline(feature_group_name, feature_version,
     #converting pyspark df's to pandas df
     node_train_data = node_train_data.toPandas()
     node_test_data = node_test_data.toPandas()
+    
+    #intializing s3 utils
+    s3_utils = S3Utilities(bucket,feature_group_name, feature_version)
 
-#     #writing df's to s3 bucket
-#     awswrangler_pandas_dataframe_to_s3(node_train_data, bucket , feature_group_name, feature_version, f'raw_training_{file_name}')
-#     awswrangler_pandas_dataframe_to_s3(node_test_data, bucket , feature_group_name, feature_version, f'raw_testing_{file_name}')
+    #writing df's to s3 bucket
+    s3_utils.awswrangler_pandas_dataframe_to_s3(node_train_data, "data", "pandas", f'raw_training_{file_name}.parquet')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(node_test_data, "data", "pandas", f'raw_testing_{file_name}.parquet')
 
-#     #reading df's from s3 bucket
-#     node_train_data = read_parquet_to_pandas_df(bucket , feature_group_name, feature_version, f'raw_training_{file_name}')
-#     node_test_data = read_parquet_to_pandas_df(bucket , feature_group_name, feature_version, f'raw_testing_{file_name}')
+    #reading df's from s3 bucket
+    node_train_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas", f'raw_training_{file_name}.parquet')
+    node_test_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas", f'raw_testing_{file_name}.parquet')
 
     #generating random selected list of node id's
     selected_node_train_list, processed_node_train_data = node_list_generator( 'train', [node_train_split,node_test_split], node_train_data, node_features_data)
@@ -222,19 +225,17 @@ def node_fe_pipeline(feature_group_name, feature_version,
                          input_df=processed_node_train_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_train_list)
     node_training_df = pd.concat(node_training_list)
     node_training_tensor = np.array(list(map(lambda x: x.to_numpy(), node_training_list)))
-    # write_tensor(node_training_tensor, bucket , feature_group_name, feature_version, f'training_{file_name}')
-    # awswrangler_pandas_dataframe_to_s3(node_training_df, bucket , feature_group_name, feature_version, f'training_{file_name}')
-
+    s3_utils.write_tensor(node_training_tensor, "data" , "tensors", f'training_{file_name}.npy')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(node_training_df, "data" , "pandas", f'training_{file_name}.parquet')
 
     #Test data feature engineering
     node_testing_list = multiprocessing.Pool(num_cores).map(partial(node_ad_feature_engineering, 
                          input_df=processed_node_test_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_test_list)
     node_testing_df = pd.concat(node_testing_list)
     node_testing_tensor = np.array(list(map(lambda x: x.to_numpy(), node_testing_list)))
-    # write_tensor(node_testing_tensor, bucket , feature_group_name, feature_version, f'testing_{file_name}')
-    # awswrangler_pandas_dataframe_to_s3(node_testing_df,  bucket , feature_group_name, feature_version, f'testing_{file_name}')
-    print(node_training_tensor.shape)
-    print(node_testing_tensor.shape)
+    s3_utils.write_tensor(node_testing_tensor, "data" , "tensors", f'testing_{file_name}.npy')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(node_testing_df,  "data" , "pandas", f'testing_{file_name}.parquet')
+
 if __name__ == "__main__":
     #build and save node autoencoder training data to s3
     node_fe_pipeline(*node_autoencoder_fe_input())

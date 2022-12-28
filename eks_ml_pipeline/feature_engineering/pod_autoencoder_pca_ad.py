@@ -5,7 +5,7 @@ import multiprocessing
 from functools import partial
 from pyspark.sql.functions import col, count, get_json_object
 from sklearn.preprocessing import StandardScaler
-from ..utilities import feature_processor, null_report, s3_utils
+from ..utilities import feature_processor, null_report, S3Utilities
 from ..inputs import feature_engineering_input
 from msspackages import Pyspark_data_ingestion, get_features
 from .train_test_split import all_rectypes_train_test_split
@@ -209,13 +209,16 @@ def pod_fe_pipeline(feature_group_name, feature_version,
     pod_train_data = pod_train_data.toPandas()
     pod_test_data = pod_test_data.toPandas()
 
+    #intializing s3 utils
+    s3_utils = S3Utilities(bucket,feature_group_name, feature_version)
+
     #writing df's to s3 bucket
-    awswrangler_pandas_dataframe_to_s3(pod_train_data, bucket , feature_group_name, feature_version, f'raw_training_{file_name}')
-    awswrangler_pandas_dataframe_to_s3(pod_test_data, bucket , feature_group_name, feature_version, f'raw_testing_{file_name}')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(pod_train_data, "data", "pandas", f'raw_training_{file_name}.parquet')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(pod_test_data, "data", "pandas", f'raw_testing_{file_name}.parquet')
 
     #reading df's from s3 bucket
-    pod_train_data = read_parquet_to_pandas_df(bucket , feature_group_name, feature_version, f'raw_training_{file_name}')
-    pod_test_data = read_parquet_to_pandas_df(bucket , feature_group_name, feature_version, f'raw_testing_{file_name}')
+    pod_train_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas", f'raw_training_{file_name}.parquet')
+    pod_test_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas", f'raw_testing_{file_name}.parquet')
 
     #generating random selected list of pod id's
     selected_pod_train_list, processed_pod_train_data = pod_list_generator( 'train', [pod_train_split,pod_test_split], pod_train_data, pod_features_data)
@@ -229,8 +232,8 @@ def pod_fe_pipeline(feature_group_name, feature_version,
                          input_df=processed_pod_train_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_pod_train_list)
     pod_training_df = pd.concat(pod_training_list)
     pod_training_tensor = np.array(list(map(lambda x: x.to_numpy(), pod_training_list)))
-    write_tensor(pod_training_tensor, bucket , feature_group_name, feature_version, f'training_{file_name}')
-    awswrangler_pandas_dataframe_to_s3(pod_training_df, bucket , feature_group_name, feature_version, f'training_{file_name}')
+    s3_utils.write_tensor(pod_training_tensor, "data" , "tensors", f'training_{file_name}.npy')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(pod_training_df, "data" , "pandas", f'training_{file_name}.parquet')
 
 
     #Test data feature engineering
@@ -238,8 +241,8 @@ def pod_fe_pipeline(feature_group_name, feature_version,
                          input_df=processed_pod_test_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_pod_test_list)
     pod_testing_df = pd.concat(pod_testing_list)
     pod_testing_tensor = np.array(list(map(lambda x: x.to_numpy(), pod_testing_list)))
-    write_tensor(pod_testing_tensor, bucket , feature_group_name, feature_version, f'testing_{file_name}')
-    awswrangler_pandas_dataframe_to_s3(pod_testing_df,  bucket , feature_group_name, feature_version, f'testing_{file_name}')
+    s3_utils.write_tensor(pod_testing_tensor, "data" , "tensors", f'training_{file_name}.npy')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(pod_testing_df, "data" , "pandas", f'training_{file_name}.parquet')
     
 
 if __name__ == "__main__":
