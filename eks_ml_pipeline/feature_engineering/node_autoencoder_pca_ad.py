@@ -105,14 +105,14 @@ def node_ad_preprocessing(input_feature_group_name, input_feature_group_version,
         return empty_df, empty_df
 
 
-def node_ad_fe(instance_id, input_df, input_features, input_scaled_features, input_time_steps):
+def node_ad_feature_engineering(instance_id, input_df, input_features, input_scaled_features, input_time_steps):
     """
     inputs
     ------
             instance_id: String
             randomly pick instance id
             
-            input_node_processed_df: df
+            input_df: df
             preprocessing and filtered node df 
             
             input_features: list
@@ -126,7 +126,8 @@ def node_ad_fe(instance_id, input_df, input_features, input_scaled_features, inp
 
     outputs
     -------
-            node_fe_df: training data df for exposing it as data product
+            node_fe_df: df
+            training data df for exposing it as data product
             
     """
 
@@ -146,7 +147,7 @@ def node_ad_fe(instance_id, input_df, input_features, input_scaled_features, inp
     return node_fe_df
 
 
-def node_fe_list_generator(input_data_type, input_split_ratio, input_node_processed_df, input_node_features_df):
+def node_list_generator(input_data_type, input_split_ratio, input_node_df, input_node_features_df):
     """
     inputs
     ------
@@ -156,7 +157,7 @@ def node_fe_list_generator(input_data_type, input_split_ratio, input_node_proces
             input_split_ratio: list
             list of split parameters
             
-            input_node_processed_df: df
+            input_node_df: df
             preprocessing and filtered node df 
             
             input_node_features_df: df
@@ -166,6 +167,9 @@ def node_fe_list_generator(input_data_type, input_split_ratio, input_node_proces
     -------
             node_list: list
             randomly selected list of node id's with replacement
+            
+            input_node_df: df
+            final node df with newly added columns
             
     """
     model_parameters = input_node_features_df["model_parameters"].iloc[0]
@@ -179,14 +183,14 @@ def node_fe_list_generator(input_data_type, input_split_ratio, input_node_proces
         
     
     input_node_df['freq'] = input_node_df.groupby('InstanceId')['InstanceId'].transform('count')
-    input_node_df = input_node_df[node_training_df["freq"] > time_steps]
+    input_node_df = input_node_df[input_node_df["freq"] > time_steps]
     
     node_list = input_node_df['InstanceId'].sample(n_samples).to_list()
     
     return node_list, input_node_df
 
 
-def node_fe_runner(feature_group_name, feature_version,
+def node_fe_pipeline(feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
             partition_hour, spark_config_setup,
             bucket):
@@ -228,14 +232,14 @@ def node_fe_runner(feature_group_name, feature_version,
     node_test_data = read_parquet_to_pandas_df(bucket , feature_group_name, feature_version, f'raw_testing_{file_name}')
 
     #generating random selected list of node id's
-    selected_node_train_list, processed_node_train_data = node_fe_list_generator( 'train', [node_train_split,node_test_split], node_train_data, node_features_data)
-    selected_node_test_list, processed_node_test_data = node_fe_list_generator( 'test', [node_train_split,node_test_split], node_test_data, node_features_data)
+    selected_node_train_list, processed_node_train_data = node_list_generator( 'train', [node_train_split,node_test_split], node_train_data, node_features_data)
+    selected_node_test_list, processed_node_test_data = node_list_generator( 'test', [node_train_split,node_test_split], node_test_data, node_features_data)
 
     num_cores = multiprocessing.cpu_count()
     print(num_cores)
 
     #Train data feature engineering
-    node_training_list = multiprocessing.Pool(num_cores).map(partial(node_ad_fe, 
+    node_training_list = multiprocessing.Pool(num_cores).map(partial(node_ad_feature_engineering, 
                          input_df=processed_node_train_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_train_list)
     node_training_df = pd.concat(node_training_list)
     node_training_tensor = np.array(list(map(lambda x: x.to_numpy(), node_training_list)))
@@ -244,7 +248,7 @@ def node_fe_runner(feature_group_name, feature_version,
 
 
     #Test data feature engineering
-    node_testing_list = multiprocessing.Pool(num_cores).map(partial(node_ad_fe, 
+    node_testing_list = multiprocessing.Pool(num_cores).map(partial(node_ad_feature_engineering, 
                          input_df=processed_node_test_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_test_list)
     node_testing_df = pd.concat(node_testing_list)
     node_testing_tensor = np.array(list(map(lambda x: x.to_numpy(), node_testing_list)))
@@ -254,7 +258,7 @@ def node_fe_runner(feature_group_name, feature_version,
 
 if __name__ == "__main__":
     #build and save node autoencoder training data to s3
-    node_fe_runner(*node_autoencoder_fe_input())
+    node_fe_pipeline(*node_autoencoder_fe_input())
 
     #build and save node pca training data to s3
-    node_fe_runner(*node_pca_fe_input())
+    node_fe_pipeline(*node_pca_fe_input())
