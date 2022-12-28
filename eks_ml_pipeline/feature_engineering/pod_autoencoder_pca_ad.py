@@ -8,6 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from ..utilities import feature_processor, null_report, s3_utils
 from ..inputs import feature_engineering_input
 from msspackages import Pyspark_data_ingestion, get_features
+from train_test_split import all_rectypes_train_test_split
 
 
 """
@@ -16,26 +17,6 @@ MSS Dish 5g - Pattern Detection
 
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """
-
-def pod_train_test_split(input_df, split_weights):
-    
-    """
-    inputs
-    ------
-            input_df: df
-            processed/filtered input df from pre processing
-            
-    outputs
-    -------
-            pod_train : train df
-            pod_test: test df
-            
-    """
-    pod_train, pod_test = input_df.randomSplit(weights= split_weights, seed=200)
-
-    return pod_train, pod_test
-
-
 def pod_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
     """
     inputs
@@ -222,7 +203,7 @@ def pod_fe_pipeline(feature_group_name, feature_version,
     #test, train split
     pod_train_split = pod_features_data["model_parameters"].iloc[0]["split_ratio"]
     pod_test_split =  round(1 - pod_train_split,2)
-    pod_train_data, pod_test_data = pod_train_test_split(pod_processed_data, [pod_train_split,pod_test_split])
+    pod_train_data, pod_test_data = all_rectypes_train_test_split(pod_processed_data, [pod_train_split,pod_test_split])
 
     #converting pyspark df's to pandas df
     pod_train_data = pod_train_data.toPandas()

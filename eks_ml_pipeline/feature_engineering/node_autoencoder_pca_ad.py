@@ -8,6 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from ..utilities import feature_processor, null_report, s3_utils
 from ..inputs import feature_engineering_input
 from msspackages import Pyspark_data_ingestion, get_features
+from train_test_split import all_rectypes_train_test_split
 
 
 """
@@ -16,28 +17,6 @@ MSS Dish 5g - Pattern Detection
 
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """
-
-
-
-def node_train_test_split(input_df, split_weights):
-    """
-    inputs
-    ------
-            input_df: df
-            processed/filtered input df from pre processing
-            
-    outputs
-    -------
-            node_train : train df
-            node_test: test df
-            
-    """
-    
-    node_train, node_test = input_df.randomSplit(weights=split_weights, seed=200)
-
-    return node_train, node_test
-
-
 def node_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
     """
     inputs
@@ -217,7 +196,7 @@ def node_fe_pipeline(feature_group_name, feature_version,
     #test, train split
     node_train_split = node_features_data["model_parameters"].iloc[0]["split_ratio"]
     node_test_split =  round(1 - node_train_split,2)
-    node_train_data, node_test_data = node_train_test_split(node_processed_data, [node_train_split,node_test_split])
+    node_train_data, node_test_data = all_rectypes_train_test_split(node_processed_data, [node_train_split,node_test_split])
 
     #converting pyspark df's to pandas df
     node_train_data = node_train_data.toPandas()

@@ -8,6 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from ..utilities import feature_processor, null_report, s3_utils
 from ..inputs import feature_engineering_input
 from msspackages import Pyspark_data_ingestion, get_features
+from train_test_split import all_rectypes_train_test_split
 
 
 """
@@ -16,23 +17,6 @@ MSS Dish 5g - Pattern Detection
 
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """    
-def container_train_test_split(input_df, split_weights):
-    """
-    inputs
-    ------
-            input_df: df
-            processed/filtered input df from pre processing
-            
-    outputs
-    -------
-            node_train : train df
-            node_test: test df
-            
-    """
-    container_train, container_test = input_df.randomSplit(weights=split_weights, seed=200)
-    return container_train, container_test
-
-
 def container_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
     """
     inputs
@@ -211,7 +195,7 @@ def container_fe_pipeline(feature_group_name, feature_version,
     #test, train split
     container_train_split = container_features_data["model_parameters"].iloc[0]["split_ratio"]
     container_test_split =  round(1 - container_train_split,2)
-    container_train_data, container_test_data = container_train_test_split(container_processed_data, [container_train_split,container_test_split])
+    container_train_data, container_test_data = all_rectypes_train_test_split(container_processed_data, [container_train_split,container_test_split])
 
     #converting pyspark df's to pandas df
     container_train_data = container_train_data.toPandas()
@@ -220,11 +204,13 @@ def container_fe_pipeline(feature_group_name, feature_version,
     #writing df's to s3 bucket
     awswrangler_pandas_dataframe_to_s3(container_train_data, bucket , feature_group_name, feature_version, f'raw_training_{file_name}')
     awswrangler_pandas_dataframe_to_s3(container_test_data, bucket , feature_group_name, feature_version, f'raw_testing_{file_name}')
+  
+    
 
     #reading df's from s3 bucket
     container_train_data = read_parquet_to_pandas_df(bucket , feature_group_name, feature_version, f'raw_training_{file_name}')
     container_test_data = read_parquet_to_pandas_df(bucket , feature_group_name, feature_version, f'raw_testing_{file_name}')
-
+    
     #generating random selected list of container id's
     selected_container_train_list, processed_container_train_data = container_list_generator( 'train', [container_train_split,container_test_split], container_train_data, container_features_data)
     selected_container_test_list, processed_container_test_data = container_list_generator( 'test', [container_train_split,container_test_split], container_test_data, container_features_data)
