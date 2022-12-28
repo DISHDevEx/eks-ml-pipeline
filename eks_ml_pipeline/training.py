@@ -3,9 +3,9 @@ import boto3
 import tf2onnx
 from io import BytesIO
 from msspackages import get_features
-from utilities import write_tensor, read_tensor, upload_zip, write_onnx
-from models import autoencoder_model_dish_5g, pca_model_dish_5g
-from inputs import training_input
+from .utilities import write_tensor, read_tensor, upload_zip, write_onnx
+from .models import autoencoder_model_dish_5g, pca_model_dish_5g
+from .inputs import training_input
 
 
 """

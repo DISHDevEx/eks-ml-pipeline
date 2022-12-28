@@ -6,9 +6,9 @@ from pandas import json_normalize
 import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
 from msspackages import Pyspark_data_ingestion, get_features
-from utilities import write_tensor, read_tensor
-from inputs import training_input, inference_input
-from evaluation import autoencoder_testing_pipeline, pca_testing_pipeline
+from .utilities import write_tensor, read_tensor
+from .inputs import training_input, inference_input
+from .evaluation import autoencoder_testing_pipeline, pca_testing_pipeline
 
     
 

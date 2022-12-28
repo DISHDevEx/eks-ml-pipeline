@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from ..utilities import feature_processor, null_report, s3_utils
 from ..inputs import feature_engineering_input
 from msspackages import Pyspark_data_ingestion, get_features
-from train_test_split import all_rectypes_train_test_split
+from .train_test_split import all_rectypes_train_test_split
 
 
 """
@@ -202,13 +202,13 @@ def node_fe_pipeline(feature_group_name, feature_version,
     node_train_data = node_train_data.toPandas()
     node_test_data = node_test_data.toPandas()
 
-    #writing df's to s3 bucket
-    awswrangler_pandas_dataframe_to_s3(node_train_data, bucket , feature_group_name, feature_version, f'raw_training_{file_name}')
-    awswrangler_pandas_dataframe_to_s3(node_test_data, bucket , feature_group_name, feature_version, f'raw_testing_{file_name}')
+#     #writing df's to s3 bucket
+#     awswrangler_pandas_dataframe_to_s3(node_train_data, bucket , feature_group_name, feature_version, f'raw_training_{file_name}')
+#     awswrangler_pandas_dataframe_to_s3(node_test_data, bucket , feature_group_name, feature_version, f'raw_testing_{file_name}')
 
-    #reading df's from s3 bucket
-    node_train_data = read_parquet_to_pandas_df(bucket , feature_group_name, feature_version, f'raw_training_{file_name}')
-    node_test_data = read_parquet_to_pandas_df(bucket , feature_group_name, feature_version, f'raw_testing_{file_name}')
+#     #reading df's from s3 bucket
+#     node_train_data = read_parquet_to_pandas_df(bucket , feature_group_name, feature_version, f'raw_training_{file_name}')
+#     node_test_data = read_parquet_to_pandas_df(bucket , feature_group_name, feature_version, f'raw_testing_{file_name}')
 
     #generating random selected list of node id's
     selected_node_train_list, processed_node_train_data = node_list_generator( 'train', [node_train_split,node_test_split], node_train_data, node_features_data)
@@ -222,8 +222,8 @@ def node_fe_pipeline(feature_group_name, feature_version,
                          input_df=processed_node_train_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_train_list)
     node_training_df = pd.concat(node_training_list)
     node_training_tensor = np.array(list(map(lambda x: x.to_numpy(), node_training_list)))
-    write_tensor(node_training_tensor, bucket , feature_group_name, feature_version, f'training_{file_name}')
-    awswrangler_pandas_dataframe_to_s3(node_training_df, bucket , feature_group_name, feature_version, f'training_{file_name}')
+    # write_tensor(node_training_tensor, bucket , feature_group_name, feature_version, f'training_{file_name}')
+    # awswrangler_pandas_dataframe_to_s3(node_training_df, bucket , feature_group_name, feature_version, f'training_{file_name}')
 
 
     #Test data feature engineering
@@ -231,10 +231,10 @@ def node_fe_pipeline(feature_group_name, feature_version,
                          input_df=processed_node_test_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_test_list)
     node_testing_df = pd.concat(node_testing_list)
     node_testing_tensor = np.array(list(map(lambda x: x.to_numpy(), node_testing_list)))
-    write_tensor(node_testing_tensor, bucket , feature_group_name, feature_version, f'testing_{file_name}')
-    awswrangler_pandas_dataframe_to_s3(node_testing_df,  bucket , feature_group_name, feature_version, f'testing_{file_name}')
-    
-
+    # write_tensor(node_testing_tensor, bucket , feature_group_name, feature_version, f'testing_{file_name}')
+    # awswrangler_pandas_dataframe_to_s3(node_testing_df,  bucket , feature_group_name, feature_version, f'testing_{file_name}')
+    print(node_training_tensor.shape)
+    print(node_testing_tensor.shape)
 if __name__ == "__main__":
     #build and save node autoencoder training data to s3
     node_fe_pipeline(*node_autoencoder_fe_input())

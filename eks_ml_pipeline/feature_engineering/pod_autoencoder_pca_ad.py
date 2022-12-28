@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from ..utilities import feature_processor, null_report, s3_utils
 from ..inputs import feature_engineering_input
 from msspackages import Pyspark_data_ingestion, get_features
-from train_test_split import all_rectypes_train_test_split
+from .train_test_split import all_rectypes_train_test_split
 
 
 """
