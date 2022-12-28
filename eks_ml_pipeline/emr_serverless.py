@@ -18,7 +18,7 @@ class EMRServerless:
     """
     def __init__(self, application_id: str = None, job_run_id: str = None) -> None:
         self.application_id = application_id
-        self.s3_log_prefix = "logs"
+        self.s3_log_prefix = "emr_serverless/logs"
         self.app_type = "SPARK"  # EMR Serverless also supports jobs of type 'HIVE'
         self.client = boto3.client("emr-serverless")
         self.job_run_id = job_run_id
@@ -112,7 +112,7 @@ class EMRServerless:
         """
         
         if job_role_arn==None:
-            job_role_arn = 'arn:aws:iam::064047601590:role/hamza-emr-serverless-role'
+            job_role_arn = 'arn:aws:iam::064047601590:role/Pattern-Detection-EMR-Serverless-Role'
         
         if custom_spark_config==None:
             custom_spark_config=''
@@ -129,7 +129,7 @@ class EMRServerless:
             configurationOverrides={
                 "monitoringConfiguration": {
                     "s3MonitoringConfiguration": {
-                        "logUri": f"s3://{s3_bucket_name}/logs/"
+                        "logUri": f"s3://{s3_bucket_name}/emr_serverless/logs/"
                     }
                 }
             },
@@ -248,7 +248,7 @@ if __name__ == "__main__":
         script_location=emr_emtry_point,
         job_role_arn=serverless_job_role_arn,
         application_id = application_id,
-        arguments=[f"s3://{s3_bucket_name}/emr-serverless/output"],
+        arguments=[f"s3://{s3_bucket_name}/emr_serverless/output"],
         s3_bucket_name=s3_bucket_name,
         zipped_env_path = zipped_env_path,
         custom_spark_config = custom_spark_config,
