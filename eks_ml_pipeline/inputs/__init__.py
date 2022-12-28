@@ -13,6 +13,6 @@ from .traning_input import pod_pca_input
 from .traning_input import container_autoencoder_input
 from .traning_input import container_pca_input
 
-from .inference import node_inference_input
-from .inference import pod_inference_input
-from .inference import container_inference_input
+from .inference_input import node_inference_input
+from .inference_input import pod_inference_input
+from .inference_input import container_inference_input
