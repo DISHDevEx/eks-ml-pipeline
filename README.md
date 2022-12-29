@@ -7,11 +7,11 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 
 ```
 
-├──  deployment_notebooks					contains notebooks consisting of deployment pipeline and inferencing
+├──  deployment_notebooks				contains notebooks consisting of deployment pipeline and inferencing
 │   ├── node_autoencoder_ad_v0.0.2_2022_9_29.ipynb
 │
 │
-├──  feature_engineering		contains all feature engineering modules by model type
+├──  feature_engineering				contains all feature engineering modules by model type
 │   ├── container_autoencoder_pca_ad.py
 │   ├── node_autoencoder_pca_ad.py
 │   ├── node_hmm_ad.py
@@ -19,13 +19,13 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 │   ├── train_test_split.py
 │
 │
-├──  inputs					contains functions for input parameters for feature engineering, training, and inferencing pipelines
+├──  inputs						contains functions for input parameters for feature engineering, training, and inferencing pipelines
 │   ├── feature_engineering_input.py
 │   ├── inference_input.py
 │   ├── training_input.py
 │
 │
-├──  models					contains all the modeling classes to initialize, fit and test models
+├──  models						contains all the modeling classes to initialize, fit and test models
 │   ├── autoencoder_model.py
 │   ├── pca_model.py
 │
