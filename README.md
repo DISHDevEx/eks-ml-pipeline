@@ -45,7 +45,7 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 ```
 
 
-### __Running EMR Serverless jobs from Sagemaker__
+### __Running EMR Serverless jobs__
 
 __us-east-1 applications:__
 * pd-autoencoder-ad-v1 : **00f64bef5869kl09**
@@ -97,4 +97,4 @@ pip install -r requirements.txt
 ```console
 from eks_ml_pipeline import EMRServerless
 ```
-For detailed step on how to submit a new job to EMR serverless application, refer to the documentaion [here](https://dish-wireless-network.atlassian.net/wiki/spaces/~6329e5517f85f167779caffe/pages/318669446/EMR+Serverless+-+How+to+Guide#2.a-When-submitting-a-new-job-to-EMR-serverless-application).
+For detailed steps on how to submit a new job to EMR serverless application, refer to the documentaion [here](https://dish-wireless-network.atlassian.net/wiki/spaces/~6329e5517f85f167779caffe/pages/318669446/EMR+Serverless+-+How+to+Guide#2.a-When-submitting-a-new-job-to-EMR-serverless-application).
