@@ -2,7 +2,7 @@ Data preprocessing, feature engineering, training and deployment of eks pattern 
 
 
 
-#### __Project Structure__
+### __Project Structure__
 
 Initial project structure for the eks-ml-pipeline. This will evolve over the time to reflect latest changes. 
 
@@ -42,7 +42,7 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 
 ```
 
-##### __Running EMR Serverless jobs from Sagemaker__
+#### __Running EMR Serverless jobs from Sagemaker__
 
 __us-east-1 applications:__
 * pd-autoencoder-ad-v1 : **00f64bef5869kl09**
@@ -57,33 +57,37 @@ jobs for us-east-1 applications can only be launched from us-east-1 and similarl
 ##### __Usage__
 ##### __Scenario 1: From CLI__
 
-Run the following command 
+Run the following command:
 ```console
 python emr_serverless.py --job-role-arn <<job_role_arn>> --applicationId <<applicationID>> --s3-bucket <<s3_bucket_name>> --entry-point <<emr_entry_point>> --zipped-env <<zipped_env_path>> --custom-spark-config <<custom_spark_config>>**
 ```
-optional arguments
+Optional arguments:
 - __--job-role-arn__    : default value = 'arn:aws:iam::064047601590:role/Pattern-Detection-EMR-Serverless-Role'
 - __--custom-spark-config__   : default value = default
     
-Without optional arguments :
+Without optional arguments:
 ```console
 python emr_serverless.py --applicationId <<applicationID>> --s3-bucket <<s3_bucket_name>> --entry-point <<emr_entry_point>> --zipped-env <<zipped_env_path>>
 ```
 
 ##### **Run examples** 
 
-**1. With only required arguments** 
-
+__1. With only required arguments__ 
+```console
 python emr_serverless.py --applicationId 00f66mmuts7enm09 --s3-bucket dish-5g.core.pd.g.dp.eks.logs.e --entry-point s3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/entry_point/s3_test_emr.py --zipped-env s3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/spark_dependency/pyspark_deps_test.tar.gz
-<br>
+```
 
-**2. With required argumemts and job_role_arn** 
+__2. With required argumemts and job_role_arn__ 
+```console
 python emr_serverless.py --job-role-arn arn:aws:iam::064047601590:role/Pattern-Detection-EMR-Serverless-Role --applicationId 00f66mmuts7enm09 --s3-bucket dish-5g.core.pd.g.dp.eks.logs.e --entry-point s3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/entry_point/s3_test_emr.py --zipped-env s3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/spark_dependency/pyspark_deps_test.tar.gz
-<br>
+```
 
-**3. With required arguments and custom_spark_config**
+__3. With required arguments and custom_spark_config__
+```console
 python emr_serverless.py --applicationId 00f66mmuts7enm09 --s3-bucket dish-5g.core.pd.g.dp.eks.logs.e --entry-point s3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/entry_point/s3_test_emr.py --zipped-env s3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/spark_dependency/pyspark_deps_test.tar.gz --custom-spark-config "--conf spark.driver.maxResultSize=2g --conf spark.driver.memory=10g --conf spark.executor.cores=4 --conf spark.executor.memory=15g --conf spark.memory.offHeap.size=2g"
-<br>
+```
 
 **4. With all arguments** 
+```console
 python emr_serverless.py --job-role-arn arn:aws:iam::064047601590:role/Pattern-Detection-EMR-Serverless-Role --applicationId 00f66mmuts7enm09 --s3-bucket dish-5g.core.pd.g.dp.eks.logs.e --entry-point s3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/entry_point/s3_test_emr.py --zipped-env s3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/spark_dependency/pyspark_deps_test.tar.gz --custom-spark-config "--conf spark.driver.maxResultSize=2g --conf spark.driver.memory=10g --conf spark.executor.cores=4 --conf spark.executor.memory=15g --conf spark.memory.offHeap.size=2g"
+```
