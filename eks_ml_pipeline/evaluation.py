@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from msspackages import get_features
-from .utilities import write_tensor, read_tensor
+from .utilities import S3Utilities
 from .models import pca_model_dish_5g
 from .inputs import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
 from .inputs import node_pca_input, pod_pca_input, container_pca_input

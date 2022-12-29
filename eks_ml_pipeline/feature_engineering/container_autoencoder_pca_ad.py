@@ -54,7 +54,7 @@ def container_ad_preprocessing(input_feature_group_name, input_feature_group_ver
 
     if err == 'PASS':
         #get features
-        features_df = get_features(feature_group_name,feature_group_version)
+        features_df = get_features(input_feature_group_name,input_feature_group_version)
         features = features_df["feature_name"].to_list()
         processed_features = feature_processor.cleanup(features)
         
@@ -205,27 +205,28 @@ def container_fe_pipeline(feature_group_name, feature_version,
     s3_utils = S3Utilities(bucket,feature_group_name, feature_version)
 
     #writing df's to s3 bucket
-    s3_utils.awswrangler_pandas_dataframe_to_s3(container_train_data, "data", "pandas", f'raw_training_{file_name}.parquet')
-    s3_utils.awswrangler_pandas_dataframe_to_s3(container_test_data, "data", "pandas", f'raw_testing_{file_name}.parquet')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(container_train_data, "data", "pandas_df", f'raw_training_{file_name}.parquet')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(container_test_data, "data", "pandas_df", f'raw_testing_{file_name}.parquet')
 
     #reading df's from s3 bucket
-    container_train_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas", f'raw_training_{file_name}.parquet')
-    container_test_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas", f'raw_testing_{file_name}.parquet')
+    container_train_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas_df", f'raw_training_{file_name}.parquet')
+    container_test_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas_df", f'raw_testing_{file_name}.parquet')
     
     #generating random selected list of container id's
     selected_container_train_list, processed_container_train_data = container_list_generator( 'train', [container_train_split,container_test_split], container_train_data, container_features_data)
     selected_container_test_list, processed_container_test_data = container_list_generator( 'test', [container_train_split,container_test_split], container_test_data, container_features_data)
-
+    
+    #getting number of cores per kernel
     num_cores = multiprocessing.cpu_count()
-    print(num_cores)
 
     #Train data feature engineering
     container_training_list = multiprocessing.Pool(num_cores).map(partial(container_ad_feature_engineering, 
                          input_df=processed_container_train_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_container_train_list)
     container_training_df = pd.concat(container_training_list)
     container_training_tensor = np.array(list(map(lambda x: x.to_numpy(), container_training_list)))
+    container_training_tensor = container_training_tensor[:,:,-3]
     s3_utils.write_tensor(container_training_tensor, "data" , "tensors", f'training_{file_name}.npy')
-    s3_utils.awswrangler_pandas_dataframe_to_s3(container_training_df, "data" , "pandas", f'training_{file_name}.parquet')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(container_training_df, "data" , "pandas_df", f'training_{file_name}.parquet')
 
 
     #Test data feature engineering
@@ -233,15 +234,9 @@ def container_fe_pipeline(feature_group_name, feature_version,
                          input_df=processed_container_test_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_container_test_list)
     container_testing_df = pd.concat(container_testing_list)
     container_testing_tensor = np.array(list(map(lambda x: x.to_numpy(), container_testing_list)))
-    s3_utils.write_tensor(container_testing_tensor, "data" , "tensors", f'training_{file_name}.npy')
-    s3_utils.awswrangler_pandas_dataframe_to_s3(container_testing_df, "data" , "pandas", f'training_{file_name}.parquet')
-    
-
-if __name__ == "__main__":
-    #build and save container autoencoder training data to s3
-    container_fe_pipeline(*container_autoencoder_fe_input())
-
-    #build and save container pca training data to s3
-    container_fe_pipeline(*container_pca_fe_input())   
+    container_testing_tensor = container_testing_tensor[:,:,-3]
+    s3_utils.write_tensor(container_testing_tensor, "data" , "tensors", f'testing_{file_name}.npy')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(container_testing_df, "data" , "pandas_df", f'testing_{file_name}.parquet')
+  
 
    

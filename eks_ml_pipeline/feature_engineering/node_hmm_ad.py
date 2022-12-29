@@ -187,8 +187,8 @@ def node_hmm_fe_pipeline(feature_group_name, feature_version,
     
     #parsing model parameters
     scaled_features = []
-    model_parameters = node_features_data["model_parameters"].iloc[0]
-    features =  feature_processor.cleanup(node_features_data["feature_name"].to_list())
+    model_parameters = node_hmm_features_data["model_parameters"].iloc[0]
+    features =  feature_processor.cleanup(node_hmm_features_data["feature_name"].to_list())
     time_steps = model_parameters["time_steps"]
 
     for feature in features:
@@ -207,33 +207,30 @@ def node_hmm_fe_pipeline(feature_group_name, feature_version,
     s3_utils = S3Utilities(bucket,feature_group_name, feature_version)
 
     #writing df's to s3 bucket
-    s3_utils.awswrangler_pandas_dataframe_to_s3(node_hmm_train_data, "data", "pandas", f'raw_training_{file_name}.parquet')
-    s3_utils.awswrangler_pandas_dataframe_to_s3(node_hmm_test_data, "data", "pandas", f'raw_testing_{file_name}.parquet')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(node_hmm_train_data, "data", "pandas_df", f'raw_training_{file_name}.parquet')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(node_hmm_test_data, "data", "pandas_df", f'raw_testing_{file_name}.parquet')
 
     #reading df's from s3 bucket
-    node_hmm_train_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas", f'raw_training_{file_name}.parquet')
-    node_hmm_test_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas", f'raw_testing_{file_name}.parquet')
+    node_hmm_train_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas_df", f'raw_training_{file_name}.parquet')
+    node_hmm_test_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas_df", f'raw_testing_{file_name}.parquet')
 
     #generating random selected list of node id's
     selected_hmm_node_train_list, processed_node_hmm_train_data = node_hmm_list_generator( 'train', [node_hmm_train_split,node_hmm_test_split], node_hmm_train_data, node_hmm_features_data)
     selected_hmm_node_test_list, processed_node_hmm_test_data = node_hmm_list_generator( 'test', [node_hmm_train_split,node_hmm_test_split], node_hmm_test_data, node_hmm_features_data)
-
+    
+    #getting number of cores per kernel
     num_cores = multiprocessing.cpu_count()
-    print(num_cores)
 
     #Train data feature engineering
     node_hmm_training_list = multiprocessing.Pool(num_cores).map(partial(node_hmm_ad_feature_engineering, 
                          input_df=processed_node_hmm_train_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_hmm_node_train_list)
     node_hmm_training_df = pd.concat(node_hmm_training_list)
-    s3_utils.awswrangler_pandas_dataframe_to_s3(node_hmm_training_df, "data" , "pandas", f'training_{file_name}.parquet')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(node_hmm_training_df, "data" , "pandas_df", f'training_{file_name}.parquet')
 
 
     #Test data feature engineering
     node_hmm_testing_list = multiprocessing.Pool(num_cores).map(partial(node_hmm_ad_feature_engineering, 
                          input_df=processed_node_hmm_test_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_hmm_node_test_list)
     node_hmm_testing_df = pd.concat(node_hmm_testing_list)
-    s3_utils.awswrangler_pandas_dataframe_to_s3(node_hmm_testing_df, "data" , "pandas", f'training_{file_name}.parquet')    
+    s3_utils.awswrangler_pandas_dataframe_to_s3(node_hmm_testing_df, "data" , "pandas_df", f'testing_{file_name}.parquet')    
 
-if __name__ == "__main__":
-    #build and save node autoencoder training data to s3
-    node_hmm_fe_pipeline(*node_hmm_fe_input())

@@ -10,7 +10,6 @@ from ..inputs import feature_engineering_input
 from msspackages import Pyspark_data_ingestion, get_features
 from .train_test_split import all_rectypes_train_test_split
 
-
 """
 Contributed by Madhu Bandi, Evgeniya Dontsova and Praveen Mada
 MSS Dish 5g - Pattern Detection
@@ -166,8 +165,7 @@ def pod_list_generator(input_data_type, input_split_ratio, input_pod_df, input_p
         n_samples = batch_size * model_parameters["train_sample_multiplier"]
     elif input_data_type == 'test':
         n_samples = round((batch_size * model_parameters["train_sample_multiplier"]* input_split_ratio[1])/ input_split_ratio[0])
-        
-    
+
     input_pod_df['freq'] = input_pod_df.groupby('pod_id')['pod_id'].transform('count')
     input_pod_df = input_pod_df[input_pod_df["freq"] > time_steps]
     
@@ -213,44 +211,38 @@ def pod_fe_pipeline(feature_group_name, feature_version,
     s3_utils = S3Utilities(bucket,feature_group_name, feature_version)
 
     #writing df's to s3 bucket
-    s3_utils.awswrangler_pandas_dataframe_to_s3(pod_train_data, "data", "pandas", f'raw_training_{file_name}.parquet')
-    s3_utils.awswrangler_pandas_dataframe_to_s3(pod_test_data, "data", "pandas", f'raw_testing_{file_name}.parquet')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(pod_train_data, "data", "pandas_df", f'raw_training_{file_name}.parquet')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(pod_test_data, "data", "pandas_df", f'raw_testing_{file_name}.parquet')
 
     #reading df's from s3 bucket
-    pod_train_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas", f'raw_training_{file_name}.parquet')
-    pod_test_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas", f'raw_testing_{file_name}.parquet')
+    pod_train_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas_df", f'raw_training_{file_name}.parquet')
+    pod_test_data = s3_utils.read_parquet_to_pandas_df("data" , "pandas_df", f'raw_testing_{file_name}.parquet')
 
     #generating random selected list of pod id's
     selected_pod_train_list, processed_pod_train_data = pod_list_generator( 'train', [pod_train_split,pod_test_split], pod_train_data, pod_features_data)
     selected_pod_test_list, processed_pod_test_data = pod_list_generator( 'test', [pod_train_split,pod_test_split], pod_test_data, pod_features_data)
-
+    
+    #getting number of cores per kernel
     num_cores = multiprocessing.cpu_count()
-    print(num_cores)
 
     #Train data feature engineering
     pod_training_list = multiprocessing.Pool(num_cores).map(partial(pod_ad_feature_engineering, 
                          input_df=processed_pod_train_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_pod_train_list)
     pod_training_df = pd.concat(pod_training_list)
     pod_training_tensor = np.array(list(map(lambda x: x.to_numpy(), pod_training_list)))
+    pod_training_tensor = pod_training_tensor[:,:,-3]
     s3_utils.write_tensor(pod_training_tensor, "data" , "tensors", f'training_{file_name}.npy')
-    s3_utils.awswrangler_pandas_dataframe_to_s3(pod_training_df, "data" , "pandas", f'training_{file_name}.parquet')
-
+    s3_utils.awswrangler_pandas_dataframe_to_s3(pod_training_df, "data" , "pandas_df", f'training_{file_name}.parquet')
 
     #Test data feature engineering
     pod_testing_list = multiprocessing.Pool(num_cores).map(partial(pod_ad_feature_engineering, 
                          input_df=processed_pod_test_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_pod_test_list)
     pod_testing_df = pd.concat(pod_testing_list)
     pod_testing_tensor = np.array(list(map(lambda x: x.to_numpy(), pod_testing_list)))
-    s3_utils.write_tensor(pod_testing_tensor, "data" , "tensors", f'training_{file_name}.npy')
-    s3_utils.awswrangler_pandas_dataframe_to_s3(pod_testing_df, "data" , "pandas", f'training_{file_name}.parquet')
-    
-
-if __name__ == "__main__":
-    #build and save pod autoencoder training data to s3
-    pod_fe_pipeline(*pod_autoencoder_fe_input())
-
-    #build and save pod pca training data to s3
-    pod_fe_pipeline(*pod_pca_fe_input())   
+    pod_testing_tensor = pod_testing_tensor[:,:,-3]
+    s3_utils.write_tensor(pod_testing_tensor, "data" , "tensors", f'testing_{file_name}.npy')
+    s3_utils.awswrangler_pandas_dataframe_to_s3(pod_testing_df, "data" , "pandas_df", f'testing_{file_name}.parquet')
+  
 
       
     

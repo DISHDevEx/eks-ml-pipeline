@@ -70,6 +70,7 @@ class S3Utilities:
         self.model_name = model_name
         self.version = version
         self.client = boto3.client('s3')
+        self.resource = boto3.resource('s3')
         if self.bucket_name is None or self.model_name is None or self.version is None:
             raise Exception("Please Initialize Class parameters")
 
@@ -234,7 +235,7 @@ class S3Utilities:
         """
         # Read the parquet file
         buffer = BytesIO()
-        object_ = self.client.Object(self.bucket_name,
+        object_ = self.resource.Object(self.bucket_name,
                                     f'{self.model_name}/{self.version}/'
                                     f'{folder}/{type_}/{file_name}')
         object_.download_fileobj(buffer)
