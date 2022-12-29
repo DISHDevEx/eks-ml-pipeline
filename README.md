@@ -7,36 +7,39 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 
 ```
 
-├──  data_prep					contains scripts for preparing train, test, validation and score samples
-│   ├── example_prep_train_samp.py 
+├──  deployment_notebooks					contains notebooks consisting of deployment pipeline and inferencing
+│   ├── node_autoencoder_ad_v0.0.2_2022_9_29.ipynb
 │
 │
-├──  feature_engineering		contains all feature engineering modules
-│   ├── example_feature_rollup_node.py
+├──  feature_engineering		contains all feature engineering modules by model type
+│   ├── container_autoencoder_pca_ad.py
+│   ├── node_autoencoder_pca_ad.py
+│   ├── node_hmm_ad.py
+│   ├── pod_autoencoder_pca_ad.py
+│   ├── train_test_split.py
 │
 │
-├──  modeling					contains all the models and its artifacts including metrics
-│   ├── example_model.py
+├──  inputs					contains functions for input parameters for feature engineering, training, and inferencing pipelines
+│   ├── feature_engineering_input.py
+│   ├── inference_input.py
+│   ├── training_input.py
 │
 │
-├──  notebooks					jupyter notebooks to run end-to-end modeling
-│   ├── example_cluster_anomaly_sarima.ipynb
-│
-│
-├──  pre_processing				all preprocessing and transformations go here 
-│    ├── example_sparse_to_dense.py  
-│
-│
-├──  reporting					contains all reporting modules 
-│    ├── example_roc_report.py
+├──  models					contains all the modeling classes to initialize, fit and test models
+│   ├── autoencoder_model.py
+│   ├── pca_model.py
 │
 │
 └── tests						contains unit and integration tests of the project
 │    ├── unit
 │    └── integration
-│ 
+│
+│
 └── utilities					any additional utilties we need for the project
-│    └── eventually we will be moving to msspackages│  
+│    └── feature_processor.py  
+│    └── null_report.py
+│    └── s3_utilities.py 
+│    └── variance_loss.py 
 │ 
 
 ```
@@ -138,7 +141,7 @@ emr_serverless = EMRServerless()
 ```
 ```console
 ## use this only if you want to create a new application
-#application_id = emr_serverless.create_application("pd-autoencoder-test-3", "emr-6.9.0")
+#application_id = emr_serverless.create_application("pd-autoencoder-test", "emr-6.9.0")
 ```
 ```console
 print("Starting EMR Serverless Spark App")
@@ -197,8 +200,8 @@ emr_serverless.fetch_driver_log(s3_bucket_name)
 ##### __2.b) Retrieving info on existing jobs in an application__
 
 ```console
-application_id = '00f66mmuts7enm09' # '00f66mmuts7enm09'
-job_run_id = '00f6ldlnm97t5409' #'00f6fkpig0rlip09'
+application_id = '00f66mmuts7enm09' 
+job_run_id = '00f6ldlnm97t5409'
 s3_bucket_name = 'dish-5g.core.pd.g.dp.eks.logs.e'
 ```
 
