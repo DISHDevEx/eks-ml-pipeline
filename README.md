@@ -42,5 +42,5 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 
 ```
 
-     
-     
+Example to run EMR Serverless job from Sagemaker
+
