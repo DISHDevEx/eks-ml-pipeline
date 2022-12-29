@@ -73,7 +73,7 @@ Without optional arguments:
 python emr_serverless.py --applicationId <<applicationID>> --s3-bucket <<s3_bucket_name>> --entry-point <<emr_entry_point>> --zipped-env <<zipped_env_path>>
 ```
 
-For examples on how to run the jobs via CLI, refer to the documentation [here](https://dish-wireless-network.atlassian.net/wiki/spaces/~6329e5517f85f167779caffe/pages/318669446/EMR+Serverless+-+How+to+Guide#Run-examples).
+For examples on how to run the jobs via CLI, refer to the documentation [here](https://dish-wireless-network.atlassian.net/wiki/spaces/MSS/pages/327549297/EMR+Serverless+-+How+To+Guide#Scenario-1%3A-From-CLI).
 
 
 ##### __Scenario 2: From Sagemaker Notebook__
@@ -97,4 +97,4 @@ pip install -r requirements.txt
 ```console
 from eks_ml_pipeline import EMRServerless
 ```
-For detailed steps on how to submit a new job to EMR serverless application, refer to the documentaion [here](https://dish-wireless-network.atlassian.net/wiki/spaces/~6329e5517f85f167779caffe/pages/318669446/EMR+Serverless+-+How+to+Guide#2.a-When-submitting-a-new-job-to-EMR-serverless-application).
+For detailed steps on how to submit a new job to EMR serverless application, refer to the documentaion [here](https://dish-wireless-network.atlassian.net/wiki/spaces/MSS/pages/327549297/EMR+Serverless+-+How+To+Guide#2.a-When-submitting-a-new-job-to-EMR-serverless-application).
