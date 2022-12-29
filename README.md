@@ -48,12 +48,11 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 ### __Running EMR Serverless jobs__
 
 __us-east-1 applications:__
-* pd-autoencoder-ad-v1 : **00f64bef5869kl09**
-* pd-autoencoder-ad-v2 : **00f66ohicnjchu09**
+* pattern-detection-emr-serverless : **00f6muv5dgv8n509**
 * pd-test-s3-writes : **00f66mmuts7enm09**
 
 __us-west-2 applications:__ 
-* pd-autoencoder-ad-container-v1  : **00f672mqiak1fp0l**
+* pattern-detection-emr-serverless  : **00f6mv29kbd4e10l**
 
 **Note**: while launching your job, please make note of the region from where you are running it.
 jobs for us-east-1 applications can only be launched from us-east-1 and similarly, jobs for us-west-2 applications can only be launched from us-west-2. 
