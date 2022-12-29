@@ -42,7 +42,7 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 ```
 
 
-#### __Running EMR Serverless jobs from Sagemaker__
+### __Running EMR Serverless jobs from Sagemaker__
 
 __us-east-1 applications:__
 * pd-autoencoder-ad-v1 : **00f64bef5869kl09**
@@ -54,7 +54,7 @@ __us-west-2 applications:__
 
 **Note**: while launching your job, please make note of the region from where you are running it.
 jobs for us-east-1 applications can only be launched from us-east-1 and similarly, jobs for us-west-2 applications can only be launched from us-west-2. 
-##### __Usage__
+#### __Usage__
 ##### __Scenario 1: From CLI__
 
 Run the following command:
@@ -71,6 +71,7 @@ python emr_serverless.py --applicationId <<applicationID>> --s3-bucket <<s3_buck
 ```
 
 ##### __Run examples__ 
+Navigate to the path where the __emr_serverless.py__ script resides and then run any of the following commands as per your use case: 
 
 __1. With only required arguments__ 
 ```console
@@ -96,11 +97,12 @@ python emr_serverless.py --job-role-arn arn:aws:iam::064047601590:role/Pattern-D
 
 The notebook should be in the ```'/root/eks-ml-pipeline'``` path.
 Follow the below steps to configure the basic setup to launch EMR Serverless apllications from Sagemaker Notebook:
+
 1. Check the path 
 ```console
 pwd
 ```
-2. If not already installed, install msspackages by using the .whl file
+2. If not already installed, install msspackages by using the .whl file (this assumes that the whl file already exists in the below location)
 ```console
 !pip install /root/msspackages/dist/msspackages-0.0.7-py3-none-any.whl
 ```
