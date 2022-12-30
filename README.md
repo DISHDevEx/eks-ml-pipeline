@@ -41,14 +41,3 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 │ 
 
 ```
-
-     
-steps to run fe
-!python3 -m pip install -r requirements.txt
-!pip install /root/msspackages/dist/msspackages-0.0.7-py3-none-any.whl
-from msspackages import setup_runner
-setup_runner()
-
-update node_autoencoder_fe_input per required parameters
-from eks_ml_pipeline import node_autoencoder_fe_input, node_fe_pipeline
-node_fe_pipeline(*node_autoencoder_fe_input())
