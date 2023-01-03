@@ -44,6 +44,24 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 
 ```
 
+### __ inital project setup__
+1. Check the path 
+```console
+pwd
+```
+2. If not already installed, install msspackages by using the .whl file (this assumes that the whl file already exists in the below location)
+```console
+!pip install /root/msspackages/dist/msspackages-0.0.7-py3-none-any.whl
+```
+3. Install the necessary requirements
+```console
+pip install -r requirements.txt
+```
+4. run below function to install java dependencies to run pyspark jobs
+```console
+from msspackages import setup_runner
+setup_runner()
+```
 
 ### __Running EMR Serverless jobs__
 
@@ -74,49 +92,21 @@ python emr_serverless.py --applicationId <<applicationID>> --s3-bucket <<s3_buck
 
 For examples on how to run the jobs via CLI, refer to the documentation [here](https://dish-wireless-network.atlassian.net/wiki/spaces/MSS/pages/327549297/EMR+Serverless+-+How+To+Guide#Scenario-1%3A-From-CLI).
 
-
 ##### __Scenario 2: From Sagemaker Notebook__
 
 The notebook should be in the ```'/root/eks-ml-pipeline'``` path.
 Follow the below steps to configure the basic setup to launch EMR Serverless apllications from Sagemaker Notebook:
 
-1. Check the path 
-```console
-pwd
-```
-2. If not already installed, install msspackages by using the .whl file (this assumes that the whl file already exists in the below location)
-```console
-!pip install /root/msspackages/dist/msspackages-0.0.7-py3-none-any.whl
-```
-3. Install the necessary requirements
-```console
-pip install -r requirements.txt
-```
-4. Import the EMRServerless class
+1. Import the EMRServerless class
 ```console
 from eks_ml_pipeline import EMRServerless
 ```
 For detailed steps on how to submit a new job to EMR serverless application, refer to the documentaion [here](https://dish-wireless-network.atlassian.net/wiki/spaces/MSS/pages/327549297/EMR+Serverless+-+How+To+Guide#2.a-When-submitting-a-new-job-to-EMR-serverless-application).
 
-
-
 ### __Running Feature Engineering jobs__
 
-1. If not already installed, install msspackages by using the .whl file (this assumes that the whl file already exists in the below location)
-```console
-!pip install /root/msspackages/dist/msspackages-0.0.7-py3-none-any.whl
-```
-2. Install the necessary requirements
-```console
-pip install -r requirements.txt
-```
-3. run below function to install java dependencies to run pyspark jobs
-```console
-from msspackages import setup_runner
-setup_runner()
-```
-4. update feature engineering input functions per required parameters
-5. run below function to start the feature engineering job
+1. update feature engineering input functions per required parameters
+2. run below function to start the feature engineering job
 ```console
 from eks_ml_pipeline import node_autoencoder_fe_input, node_fe_pipeline
 node_fe_pipeline(*node_autoencoder_fe_input())
