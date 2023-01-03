@@ -1,3 +1,10 @@
+
+"""
+EKS ML Pipeline
+A package to ETL, fit, and inference machine learning on data about
+AWS EKS clusters in DISH Wireless's accounts.
+"""
+
 from .inputs import node_autoencoder_fe_input
 from .inputs import node_pca_fe_input
 from .inputs import node_hmm_fe_input
