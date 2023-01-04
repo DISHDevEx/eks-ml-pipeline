@@ -65,7 +65,7 @@ def autoencoder_training(training_tensor,
 def autoencoder_training_pipeline(feature_group_name, feature_input_version,
                                   data_bucketname, train_data_filename, test_data_filename,
                                   save_model_local_path, model_bucketname,
-                                  model_name, model_version):
+                                  model_name, model_version, upload_zip = True, upload_onnx = True):
     
     """
     inputs
@@ -104,38 +104,48 @@ def autoencoder_training_pipeline(feature_group_name, feature_input_version,
             trained autoencoder model
             
     """
+    
+    ###Initialize s3 utilities class
+    s3_utils = S3Utilities(bucket_name=data_bucketname, 
+                           model_name=model_name, 
+                           version=feature_input_version)
 
         
     ###Load training data: read from s3 bucket
-    training_tensor = read_tensor(bucket_name = data_bucketname,
-                                  model_name = model_name,
-                                  version = model_version,
-                                  file_name =  train_data_filename)
+    training_tensor = s3_utils.read_tensor(folder = "data", 
+                                           type_ = "tensors", 
+                                           file_name = train_data_filename)
     
+
     ####Train autoencoder model
     autoencoder = autoencoder_training(training_tensor, 
                                        feature_group_name, 
                                        feature_input_version, 
                                        save_model_local_path)
+    
+    #Define model file name
+    model_file_name = '_'.join([model_name, "model", model_version, train_data_filename])
 
 
     ####Save model object to s3 bucket
-    upload_zip(local_path = save_model_local_path,
-               bucket_name = model_bucketname,
-               model_name = model_name,
-               version = model_version, 
-               file_name = '_'.join([model_name, model_version, train_data_filename]))
-    
-    #Save model locally in .onnx format 
-    model_proto, external_tensor_storage = tf2onnx.convert.from_keras(autoencoder.nn,
-                                                                      output_path = '../../' + model_name + ".onnx")
-    ####Save onnx model object to s3 bucket    
-    write_onnx(local_path = '../../' + model_name + ".onnx", 
-               bucket_name = model_bucketname, 
-               model_name = model_name, 
-               version = model_version, 
-               file_name = '_'.join([model_name, model_version, train_data_filename]))
-    
+    if upload_zip:
+        
+        s3_utils.zip_and_upload(local_path = save_model_local_path, 
+                                   folder = "models", 
+                                   type_ = "", 
+                                   file_name = model_file_name)
+            
+    if upload_onnx:
+        
+        save_model_local_path_onnx = save_model_local_path + '/' + model_name + ".onnx"
+        #Save model locally in .onnx format 
+        model_proto, external_tensor_storage = tf2onnx.convert.from_keras(autoencoder.nn,
+                                                                          output_path = save_model_local_path_onnx)
+        ####Save onnx model object to s3 bucket   
+        s3_utils.upload_file(local_path = save_model_local_path_onnx, 
+                                bucket_name = model_bucketname, 
+                                key = '/'.join([model_name, feature_input_version, "model", model_file_name]))
+     
     return autoencoder
     
 
@@ -256,19 +266,19 @@ if __name__ == "__main__":
     #Train node autoencoder model and save on s3
     autoencoder_training_pipeline(*node_autoencoder_input())
     
-    #Train pod autoencoder model and save on s3
-    autoencoder_training_pipeline(*pod_autoencoder_input())
+#     #Train pod autoencoder model and save on s3
+#     autoencoder_training_pipeline(*pod_autoencoder_input())
 
-    #Train container autoencoder model and save on s3
-    autoencoder_training_pipeline(*container_autoencoder_input())
+#     #Train container autoencoder model and save on s3
+#     autoencoder_training_pipeline(*container_autoencoder_input())
     
-    ###***PCA***###
+#     ###***PCA***###
     
-    #Train node pca model and save on s3
-    pca_training_pipeline(*node_pca_input())
+#     #Train node pca model and save on s3
+#     pca_training_pipeline(*node_pca_input())
     
-    #Train pod pca model and save on s3
-    pca_training_pipeline(*pod_pca_input())
+#     #Train pod pca model and save on s3
+#     pca_training_pipeline(*pod_pca_input())
 
-    #Train container pca model and save on s3
-    pca_training_pipeline(*container_pca_input())
+#     #Train container pca model and save on s3
+#     pca_training_pipeline(*container_pca_input())
