@@ -16,7 +16,8 @@ this model training functions will be used to train and save Anomaly Detection m
 """
 
 def model_training_pipeline(encode_decode_model,
-                            feature_input_version, data_bucketname, 
+                            feature_group_name, feature_input_version, 
+                            data_bucketname, 
                             train_data_filename, test_data_filename,
                             save_model_local_path, 
                             model_bucketname, model_name, model_version,
@@ -28,14 +29,17 @@ def model_training_pipeline(encode_decode_model,
     
     ###Initialize s3 utilities class
     s3_utils = S3Utilities(bucket_name=data_bucketname, 
-                           model_name=model_name, 
-                           version=feature_input_version)
+                           model_name="node_autoencoder_ad", 
+                           version="v0.0.2")
 
         
     ###Load training data: read from s3 bucket
     training_tensor = s3_utils.read_tensor(folder = "data", 
                                            type_ = "tensors", 
                                            file_name = train_data_filename)
+    
+    # print(training_tensor)
+    # print(training_tensor.shape)
         
     ###Train model
     encode_decode_model.fit(training_tensor)

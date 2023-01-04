@@ -32,7 +32,7 @@ def node_autoencoder_input_all():
     train_data_filename = "training_2022_9_29.npy" #add info about actual path
     test_data_filename = "testing_2022_9_29.npy" #add info about actual path
     
-    save_model_local_path = "../../node_autoencoder"
+    save_model_local_path = "../node_autoencoder"
     model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     model_name = 'node_autoencoder_ad'
     model_version = "test" #'v0.0.2' #add info about actual path for model
@@ -55,7 +55,8 @@ def node_autoencoder_input_all():
 
     
     return [encode_decode_model,
-            feature_input_version, data_bucketname, 
+            feature_group_name, feature_input_version, 
+            data_bucketname, 
             train_data_filename, test_data_filename,
             save_model_local_path, 
             model_bucketname, model_name, model_version,
@@ -83,7 +84,7 @@ def node_pca_input_all():
     train_data_filename = "training_2022_9_29.npy"
     test_data_filename = "testing_2022_9_29.npy"
 
-    save_model_local_path = "../../pod_pca.npy"
+    save_model_local_path = "../node_pca.npy"
     model_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
     model_name = "node_pca_ad"
     model_version = "test"
@@ -107,7 +108,8 @@ def node_pca_input_all():
 
 
     return [encode_decode_model,
-            feature_input_version, data_bucketname, 
+            feature_group_name, feature_input_version, 
+            data_bucketname, 
             train_data_filename, test_data_filename,
             save_model_local_path, 
             model_bucketname, model_name, model_version,
