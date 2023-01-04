@@ -46,7 +46,7 @@ def node_pca_fe_input():
     partition_year = "2022"
     partition_month = "9"
     partition_day = "29"
-    partition_hour = -1
+    partition_hour = "1"
     spark_config_setup = "384gb"
     
     ##s3 bucket parameters

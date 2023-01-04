@@ -78,15 +78,15 @@ def node_pca_input_all():
 
     ##generate pipeline input params for pca
     feature_group_name = "node_pca_ad"
-    feature_input_version = "v0.0.1"  
-    data_bucketname = 'mss-shared'
-    train_data_filename = "pcaDummyData"
-    test_data_filename = "pcaDummyData"
+    feature_input_version = "v0.0.1"  #need to add print statement if version does not exists
+    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    train_data_filename = "training_2022_9_29.npy"
+    test_data_filename = "testing_2022_9_29.npy"
 
-    save_model_local_path = "../../node_pca.npy"
-    model_bucketname = "mss-shared"
+    save_model_local_path = "../../pod_pca.npy"
+    model_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
     model_name = "node_pca_ad"
-    model_version = "v0.0.1"
+    model_version = "test"
     
     #model s3 bucket upload format
     upload_zip = False 

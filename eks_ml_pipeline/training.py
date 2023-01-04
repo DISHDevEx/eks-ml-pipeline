@@ -36,7 +36,7 @@ def model_training_pipeline(encode_decode_model,
     training_tensor = s3_utils.read_tensor(folder = "data", 
                                            type_ = "tensors", 
                                            file_name = train_data_filename)
-    
+        
     ###Train model
     encode_decode_model.fit(training_tensor)
     
