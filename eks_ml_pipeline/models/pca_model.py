@@ -2,8 +2,6 @@ import logging
 import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from numpy import save
-from numpy import load
 
 """
 Contributed by Vinayak Sharma and David Cherney
@@ -55,23 +53,23 @@ class pca_model_dish_5g():
         
         self.ss = StandardScaler()
         
-    def load_vs(self,filename = 'vs.npy'):
+    def load_model(self,filename = 'vs.npy'):
         """
         @:param vs: file path with model weights
         Takes model weights and:
             - loads them
         @:returns nothing
         """
-        self.vs = load(filename)
+        self.vs = np.load(filename)
         
-    def save_vs(self, filename = 'vs.npy'):
+    def save_model(self, filename = 'vs.npy'):
         """
         @:param filename
         Takes model weights and:
             - saves them in a .npy file
         @:returns nothing
         """
-        save(filename, self.vs)
+        np.save(filename, self.vs)
         
     def two_time_slice(self, samples):
         """

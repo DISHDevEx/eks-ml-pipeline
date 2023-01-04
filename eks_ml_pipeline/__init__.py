@@ -20,6 +20,9 @@ from .inputs import pod_pca_input
 from .inputs import container_autoencoder_input
 from .inputs import container_pca_input
 
+from .inputs import node_autoencoder_input_all
+from .inputs import node_pca_input_all
+
 from .inputs import node_inference_input
 from .inputs import pod_inference_input
 from .inputs import container_inference_input
@@ -65,3 +68,6 @@ from .training import pca_training_pipeline
 
 from .evaluation import autoencoder_testing_pipeline
 from .evaluation import pca_testing_pipeline
+
+from .training import model_training_pipeline
+

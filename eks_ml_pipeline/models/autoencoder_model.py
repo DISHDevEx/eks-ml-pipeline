@@ -114,7 +114,7 @@ class autoencoder_model_dish_5g():
         return anom_scores
     
     
-    def save_nn(self, filename):
+    def save_model(self, filename):
         """
         @:param filename: name of file to save model
             -saves nn to file
@@ -122,7 +122,7 @@ class autoencoder_model_dish_5g():
         """
         tf.keras.models.save_model(self.nn, filename)
     
-    def load_nn(self, filename):
+    def load_model(self, filename):
         """
         @:param filename: name of file to save model
         @:returns nothing 

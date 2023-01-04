@@ -15,14 +15,68 @@ MSS Dish 5g - Pattern Detection
 this model training functions will be used to train and save Anomaly Detection models
 """
 
-#def initiate_autoencoder_class()
+def model_training_pipeline(encode_decode_model,
+                            feature_input_version, data_bucketname, 
+                            train_data_filename, test_data_filename,
+                            save_model_local_path, 
+                            model_bucketname, model_name, model_version,
+                            upload_zip, upload_onnx, upload_npy):
+    
+    """
+    Generalized model training pipeline
+    """
+    
+    ###Initialize s3 utilities class
+    s3_utils = S3Utilities(bucket_name=data_bucketname, 
+                           model_name=model_name, 
+                           version=feature_input_version)
 
-#def initiate_pca_class()
+        
+    ###Load training data: read from s3 bucket
+    training_tensor = s3_utils.read_tensor(folder = "data", 
+                                           type_ = "tensors", 
+                                           file_name = train_data_filename)
+    
+    ###Train model
+    encode_decode_model.fit(training_tensor)
+    
+    ###Save model
+    encode_decode_model.save_model(save_model_local_path)
+    
+    #Define model file name
+    model_file_name = '_'.join([model_name, "model", model_version, train_data_filename.split(".")[-2]])
 
-#def initiate_hmm_class()
 
-
-#def model_training_pipeline()
+    ####Save model object to s3 bucket
+    #save zipped model object to s3 bucket   
+    if upload_zip:
+        
+        s3_utils.zip_and_upload(local_path = save_model_local_path, 
+                                folder = "models", 
+                                type_ = "zipped_models", 
+                                file_name = model_file_name + ".zip")
+        
+    #save onnx model object to s3 bucket   
+    if upload_onnx:
+        
+        save_model_local_path_onnx = save_model_local_path + '/' + model_file_name + ".onnx"
+        #Save model locally in .onnx format 
+        model_proto, external_tensor_storage = tf2onnx.convert.from_keras(encode_decode_model.nn,
+                                                                          output_path = save_model_local_path_onnx)
+        s3_utils.upload_file(local_path = save_model_local_path_onnx, 
+                             bucket_name = model_bucketname, 
+                             key = '/'.join([model_name, feature_input_version, "models", model_file_name + ".onnx"]))
+        
+    #save npy model object to s3 bucket          
+    if upload_npy:
+        
+        s3_utils.write_tensor(save_model_local_path, 
+                              folder = "models", 
+                              type_ = "npy_models", 
+                              file_name = model_file_name + ".zip")
+    
+    
+    return None
 
 
 
@@ -75,7 +129,7 @@ def autoencoder_training(training_tensor,
 def autoencoder_training_pipeline(feature_group_name, feature_input_version,
                                   data_bucketname, train_data_filename, test_data_filename,
                                   save_model_local_path, model_bucketname,
-                                  model_name, model_version, upload_zip = True, upload_onnx = True):
+                                  model_name, model_version):
     
     """
     inputs
@@ -138,23 +192,21 @@ def autoencoder_training_pipeline(feature_group_name, feature_input_version,
 
 
     ####Save model object to s3 bucket
-    if upload_zip:
-        
-        s3_utils.zip_and_upload(local_path = save_model_local_path, 
-                                folder = "models", 
-                                type_ = "zipped_models", 
-                                file_name = model_file_name + ".zip")
+
+    s3_utils.zip_and_upload(local_path = save_model_local_path, 
+                            folder = "models", 
+                            type_ = "zipped_models", 
+                            file_name = model_file_name + ".zip")
             
-    if upload_onnx:
-        
-        save_model_local_path_onnx = save_model_local_path + '/' + model_file_name + ".onnx"
-        #Save model locally in .onnx format 
-        model_proto, external_tensor_storage = tf2onnx.convert.from_keras(autoencoder.nn,
-                                                                          output_path = save_model_local_path_onnx)
-        ####Save onnx model object to s3 bucket   
-        s3_utils.upload_file(local_path = save_model_local_path_onnx, 
-                             bucket_name = model_bucketname, 
-                             key = '/'.join([model_name, feature_input_version, "models", model_file_name + ".onnx"]))
+    
+    ###Save model locally in .onnx format 
+    save_model_local_path_onnx = save_model_local_path + '/' + model_file_name + ".onnx"
+    model_proto, external_tensor_storage = tf2onnx.convert.from_keras(autoencoder.nn,
+                                                                      output_path = save_model_local_path_onnx)
+    ####Save onnx model object to s3 bucket   
+    s3_utils.upload_file(local_path = save_model_local_path_onnx, 
+                         bucket_name = model_bucketname, 
+                         key = '/'.join([model_name, feature_input_version, "models", model_file_name + ".onnx"]))
      
     return autoencoder
     
@@ -273,8 +325,8 @@ if __name__ == "__main__":
     
     ###***Autoencoder***###
     
-    #Train node autoencoder model and save on s3
-    autoencoder_training_pipeline(*node_autoencoder_input())
+#     #Train node autoencoder model and save on s3
+#     autoencoder_training_pipeline(*node_autoencoder_input())
     
 #     #Train pod autoencoder model and save on s3
 #     autoencoder_training_pipeline(*pod_autoencoder_input())
@@ -292,3 +344,6 @@ if __name__ == "__main__":
 
 #     #Train container pca model and save on s3
 #     pca_training_pipeline(*container_pca_input())
+
+
+    model_training_pipeline(*node_autoencoder_input_all())
