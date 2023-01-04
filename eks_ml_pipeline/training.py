@@ -15,6 +15,16 @@ MSS Dish 5g - Pattern Detection
 this model training functions will be used to train and save Anomaly Detection models
 """
 
+#def initiate_autoencoder_class()
+
+#def initiate_pca_class()
+
+#def initiate_hmm_class()
+
+
+#def model_training_pipeline()
+
+
 
 def autoencoder_training(training_tensor, 
                          feature_group_name, 
@@ -124,27 +134,27 @@ def autoencoder_training_pipeline(feature_group_name, feature_input_version,
                                        save_model_local_path)
     
     #Define model file name
-    model_file_name = '_'.join([model_name, "model", model_version, train_data_filename])
+    model_file_name = '_'.join([model_name, "model", model_version, train_data_filename.split(".")[-2]])
 
 
     ####Save model object to s3 bucket
     if upload_zip:
         
         s3_utils.zip_and_upload(local_path = save_model_local_path, 
-                                   folder = "models", 
-                                   type_ = "", 
-                                   file_name = model_file_name)
+                                folder = "models", 
+                                type_ = "zipped_models", 
+                                file_name = model_file_name + ".zip")
             
     if upload_onnx:
         
-        save_model_local_path_onnx = save_model_local_path + '/' + model_name + ".onnx"
+        save_model_local_path_onnx = save_model_local_path + '/' + model_file_name + ".onnx"
         #Save model locally in .onnx format 
         model_proto, external_tensor_storage = tf2onnx.convert.from_keras(autoencoder.nn,
                                                                           output_path = save_model_local_path_onnx)
         ####Save onnx model object to s3 bucket   
         s3_utils.upload_file(local_path = save_model_local_path_onnx, 
-                                bucket_name = model_bucketname, 
-                                key = '/'.join([model_name, feature_input_version, "model", model_file_name]))
+                             bucket_name = model_bucketname, 
+                             key = '/'.join([model_name, feature_input_version, "models", model_file_name + ".onnx"]))
      
     return autoencoder
     

@@ -96,7 +96,7 @@ class autoencoder_model_dish_5g():
                 )
         
         ##nn compile groups layers into a model; the loss here is MAE, optimizer is Adam, learning rate is predefined
-        self.nn.compile(optimizer=tf.keras.optimizers.Adam(lr=self.lr), loss="mae")
+        self.nn.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=self.lr), loss="mae")
         self.nn.summary()
         
     def __calculate_pred_and_err(self, data):

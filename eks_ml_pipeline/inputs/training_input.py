@@ -21,15 +21,16 @@ def node_autoencoder_input():
     
     feature_group_name = "node_autoencoder_ad"
     feature_input_version = "v0.0.2"  
-    data_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"  #'mss-shared'
-    train_data_filename = "training_2022_9_29.npy"
-    test_data_filename = "testing_2022_9_29.npy"
+    data_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
+    train_data_filename = "training_2022_9_29.npy" #add info about actual path
+    test_data_filename = "testing_2022_9_29.npy" #add info about actual path
     
     ##always save these 1 level out
     save_model_local_path = "../../node_autoencoder"
-    model_bucketname = 'mss-shared'
+    model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     model_name = 'node_autoencoder_ad'
-    model_version = 'v0.0.2'
+    model_version = "test" #'v0.0.2' 
+    #add info about actual path for model
     
     return [feature_group_name, feature_input_version,
             data_bucketname, train_data_filename, test_data_filename,
