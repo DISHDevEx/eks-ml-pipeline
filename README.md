@@ -46,7 +46,7 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 
 ### __ inital project setup__
 1. Check the path 
-```console
+```
 pwd
 ```
 2. If not already installed, install msspackages by using the .whl file (this assumes that the whl file already exists in the below location)
@@ -115,18 +115,18 @@ node_fe_pipeline(*node_autoencoder_fe_input())
 s3_utilities has a number of helper functions for the pipeline to download and upload files/objects to s3.
 #### - Usage
 Import
-~~~
+```console
 from eks_ml_pipeline import S3Utilities
-~~~
+```
 Class is initilized with the following three parameters
-~~~
+```console
 bucket_name = "example_bucket"
 model_name = "example_autoencorder"
 version = "v0.0.1"
 S3Utills = S3Utilities(bucket_name,model_name,version)
-~~~
+```
 The following functions can be accessed through the class
-~~~
+```console
 1. S3Utills.upload_file(local_path, bucket_name, key)
 2. S3Utills.download_file(local_path, bucket_name, key)
 3. S3Utills.download_zip(writing_path, folder, type_, file_name)
@@ -139,22 +139,22 @@ The following functions can be accessed through the class
 10. S3Utills.upload_directory(local_path, folder, type_)
 11. S3Utills.pyspark_write_parquet(df,folder, type_)
 12. S3Utills.read_parquet_to_pandas_df(folder, type_, file_name)
-~~~
+```
 Note: More helper functions can be added in the future without changing <br>
 the structure of the class new functions can just be appened to the class. 
 ### __s3 structure__
 This is the example s3 structure enforced by the s3_utilities class.
 All the important variables to note:
-~~~
+```console
 bucket_name = "example_bucket"
 model_name = "example_autoencorder"
 version = "v0.0.1"
 folder = "data" or ""models"
 type_ =  "pandas_df" or "tensors" or "zipped_models"
 file_name = "training_2022_10_10_10.parquet" 
-~~~
+```
 The following structure will be created when the pipeline is run in ```example_bucket```.
-~~~
+```
 example_bucket
 ├── example_autoencorder
 │├── v0.0.1
@@ -180,4 +180,4 @@ example_bucket
 │        ├── node_autoencoder_adv0.0.2training_2022_9_29.zip
 │        └── zipped_models
 │            └── node_autoencoder_ad_model_test_training_2022_9_29.zip
-~~~
+```
