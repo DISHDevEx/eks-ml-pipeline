@@ -224,7 +224,7 @@ def container_fe_pipeline(feature_group_name, feature_version,
                          input_df=processed_container_train_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_container_train_list)
     container_training_df = pd.concat(container_training_list)
     container_training_tensor = np.array(list(map(lambda x: x.to_numpy(), container_training_list)))
-    container_training_tensor = container_training_tensor[:,:,-3]
+    container_training_tensor = container_training_tensor[:,:,-len(scaled_features):]
     s3_utils.write_tensor(container_training_tensor, "data" , "tensors", f'training_{file_name}.npy')
     s3_utils.awswrangler_pandas_dataframe_to_s3(container_training_df, "data" , "pandas_df", f'training_{file_name}.parquet')
 
@@ -234,7 +234,7 @@ def container_fe_pipeline(feature_group_name, feature_version,
                          input_df=processed_container_test_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_container_test_list)
     container_testing_df = pd.concat(container_testing_list)
     container_testing_tensor = np.array(list(map(lambda x: x.to_numpy(), container_testing_list)))
-    container_testing_tensor = container_testing_tensor[:,:,-3]
+    container_testing_tensor = container_testing_tensor[:,:,-len(scaled_features):]
     s3_utils.write_tensor(container_testing_tensor, "data" , "tensors", f'testing_{file_name}.npy')
     s3_utils.awswrangler_pandas_dataframe_to_s3(container_testing_df, "data" , "pandas_df", f'testing_{file_name}.parquet')
   
