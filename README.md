@@ -47,7 +47,7 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 ### __ inital project setup__
 1. Check the path 
 ```console
-pwd
+!pwd
 ```
 2. If not already installed, install msspackages by using the .whl file (this assumes that the whl file already exists in the below location)
 ```console
@@ -55,7 +55,7 @@ pwd
 ```
 3. Install the necessary requirements
 ```console
-pip install -r requirements.txt
+!pip install -r requirements.txt
 ```
 4. run below function to install java dependencies to run pyspark jobs
 ```console
