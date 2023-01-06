@@ -225,7 +225,7 @@ def node_fe_pipeline(feature_group_name, feature_version,
                          input_df=processed_node_train_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_train_list)
     node_training_df = pd.concat(node_training_list)
     node_training_tensor = np.array(list(map(lambda x: x.to_numpy(), node_training_list)))
-    node_training_tensor = node_training_tensor[:,:,-3]
+    node_training_tensor = node_training_tensor[:,:,-len(scaled_features):]
     s3_utils.write_tensor(node_training_tensor, "data" , "tensors", f'training_{file_name}.npy')
     s3_utils.awswrangler_pandas_dataframe_to_s3(node_training_df, "data" , "pandas_df", f'training_{file_name}.parquet')
 
@@ -234,6 +234,6 @@ def node_fe_pipeline(feature_group_name, feature_version,
                          input_df=processed_node_test_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_test_list)
     node_testing_df = pd.concat(node_testing_list)
     node_testing_tensor = np.array(list(map(lambda x: x.to_numpy(), node_testing_list)))
-    node_testing_tensor = node_testing_tensor[:,:,-3]
+    node_testing_tensor = node_testing_tensor[:,:,-len(scaled_features):]
     s3_utils.write_tensor(node_testing_tensor, "data" , "tensors", f'testing_{file_name}.npy')
     s3_utils.awswrangler_pandas_dataframe_to_s3(node_testing_df,  "data" , "pandas_df", f'testing_{file_name}.parquet')
