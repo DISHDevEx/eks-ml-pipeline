@@ -61,7 +61,9 @@ def model_training_pipeline(encode_decode_model,
 
             upload_npy: bool
             flag to save model in npy format
-
+            
+            clean_local_folder: bool
+            flag to delete or keep locally saved model directory or files
     
     outputs
     -------

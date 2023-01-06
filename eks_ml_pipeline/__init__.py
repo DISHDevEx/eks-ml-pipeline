@@ -56,9 +56,6 @@ from .emr_serverless import EMRServerless
 
 from .training import model_training_pipeline
 
-from .evaluation import autoencoder_testing_pipeline
-from .evaluation import pca_testing_pipeline
-
 from .evaluation import model_evaluation_pipeline
 
 from .inference import inference_data_builder

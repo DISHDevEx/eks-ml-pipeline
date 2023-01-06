@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from msspackages import Pyspark_data_ingestion, get_features
 from .utilities import S3Utilities
 from .inputs import training_input, inference_input
-from .evaluation import autoencoder_testing_pipeline, pca_testing_pipeline
+#from .evaluation import autoencoder_testing_pipeline, pca_testing_pipeline
 
     
 
