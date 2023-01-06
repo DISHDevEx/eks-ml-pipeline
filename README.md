@@ -174,8 +174,9 @@ example_bucket
 │    │    ├── training_2022_9_29.npy
 │    │    └── training_2022_9_29_1.npy
 │    └── models
-│        ├── node_autoencoder_ad_model_test_training_2022_9_29.onnx
-│        ├── node_autoencoder_ad_v0.0.2_training_2022_9_29.onnx
-│        ├── node_autoencoder_adv0.0.22022_9_29.zip
-│        ├── node_autoencoder_adv0.0.2training_2022_9_29.zip
+│        ├── pod_autoencoder_ad_model_v0.0.1-test_training_2022_9_9_1.onnx
+│        ├── pod_autoencoder_adv0.0.2training_2022_9_9_scaled_features.zip
+│        └── zipped_models
+│            └── pod_autoencoder_ad_model_v0.0.1-test_training_2022_9_9_1.zip
+
 ```
