@@ -76,7 +76,7 @@ def node_hmm_fe_input():
     partition_year = "2022"
     partition_month = "9"
     partition_day = "29"
-    partition_hour = -1
+    partition_hour = "1"
     spark_config_setup = "384gb"
     
     ##s3 bucket parameters
@@ -106,7 +106,7 @@ def pod_autoencoder_fe_input():
     partition_year = "2022"
     partition_month = "9"
     partition_day = "9"
-    partition_hour = -1
+    partition_hour = "1"
     spark_config_setup = "384gb"
     
     ##s3 bucket parameters
@@ -136,7 +136,7 @@ def pod_pca_fe_input():
     partition_year = "2022"
     partition_month = "9"
     partition_day = "9"
-    partition_hour = -1
+    partition_hour = "1"
     spark_config_setup = "384gb"
     
     ##s3 bucket parameters
@@ -166,7 +166,7 @@ def container_autoencoder_fe_input():
     partition_year = "2022"
     partition_month = "5"
     partition_day = "5"
-    partition_hour = -1
+    partition_hour = "1"
     spark_config_setup = "384gb"
     
     ##s3 bucket parameters
@@ -196,7 +196,7 @@ def container_pca_fe_input():
     partition_year = "2022"
     partition_month = "5"
     partition_day = "5"
-    partition_hour = -1
+    partition_hour = "1"
     spark_config_setup = "384gb"
     
     ##s3 bucket parameters
