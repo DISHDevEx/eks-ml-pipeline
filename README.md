@@ -147,10 +147,10 @@ This is the example s3 structure enforced by the s3_utilities class.
 All the important variables to note:
 ```console
 bucket_name = "example_bucket"
-model_name = "example_autoencorder"
+model_name = "example_autoencoder"
 version = "v0.0.1"
 folder = "data" or ""models"
-type_ =  "pandas_df" or "tensors" or "zipped_models"
+type_ =  "pandas_df" or "tensors" or "zipped_models", "npy_models"
 file_name = "training_2022_10_10_10.parquet" 
 ```
 The following structure will be created when the pipeline is run in ```example_bucket```.
@@ -178,6 +178,4 @@ example_bucket
 │        ├── node_autoencoder_ad_v0.0.2_training_2022_9_29.onnx
 │        ├── node_autoencoder_adv0.0.22022_9_29.zip
 │        ├── node_autoencoder_adv0.0.2training_2022_9_29.zip
-│        └── zipped_models
-│            └── node_autoencoder_ad_model_test_training_2022_9_29.zip
 ```
