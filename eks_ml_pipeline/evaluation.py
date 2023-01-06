@@ -32,8 +32,9 @@ def model_evaluation_pipeline(encode_decode_model,
 
     ###Load training data: read from s3 bucket
     testing_tensor = s3_utils.read_tensor(folder = "data", 
-                                           type_ = "tensors", 
-                                           file_name = test_data_filename)
+                                          type_ = "tensors", 
+                                          file_name = test_data_filename)
+    
     
     #Additional data cleaning: converting everything into np.float32
     testing_tensor = np.asarray(testing_tensor).astype(np.float32)
@@ -44,28 +45,34 @@ def model_evaluation_pipeline(encode_decode_model,
         s3_utils.download_zip(local_path = save_model_local_path,
                               folder = "models",
                               type_ = "zipped_models",
-                              file_name = model_filename)
+                              file_name = model_filename + '.zip')
         
-        s3_utils.unzip(path_to_zip = save_model_local_path)
+        s3_utils.unzip(path_to_zip = save_model_local_path,
+                       extract_location = save_model_local_path)
 
 
     if upload_npy:
-        s3_utils.download_file(local_path = save_model_local_path,
-                               bucket_name = model_bucketname,
-                               key = '/'.join([feature_group_name, feature_input_version, "models", model_file_name + ".npy"]))
+        load_tensor = s3_utils.read_tensor(folder = "models",
+                                           type_ = "npy_models", 
+                                           file_name = model_filename + ".npy")
+        np.save(save_model_local_path, load_tensor)
             
+
     ###Load trained model from local path
     encode_decode_model.load_model(save_model_local_path)
 
     ###Use trained model to predict for testing tensor
-    #encode_decode_model.predict(testing_tensor)
+    results = encode_decode_model.predict(testing_tensor)
     
     ###Save predictions
-    # encode_decode_model.save_model(save_model_local_path)
-    
+    for i, result in enumerate(results):
+        print(f'predictions_{test_data_filename.split(".")[-2]}_part_{i}.npy')
+        s3_utils.write_tensor(tensor = result, 
+                              folder = "models", 
+                              type_ = "predictions", 
+                              file_name = f'predictions_{test_data_filename.split(".")[-2]}_part_{i}.npy')
+        
 
-
-    
     return None
 
 def autoencoder_testing_pipeline(feature_group_name, feature_input_version,

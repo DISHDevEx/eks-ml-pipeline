@@ -184,9 +184,10 @@ class AutoencoderModelDish5g():
             self.trained = True
             
             ##return reconstructions and mae
-            return train_predictions, train_mae
+            #return train_predictions, train_mae
+            return self.nn
             
-    def test(self, x_test):
+    def predict(self, x_test):
         """
         @:param x_test: test data. Must be of shape [ samples, timesteps, features]
         
@@ -202,7 +203,7 @@ class AutoencoderModelDish5g():
             test_pred, test_err = self.__calculate_pred_and_err(x_test)
             residuals = np.abs(test_pred - x_test)
             #anomaly_scores = self.__calculate_anomaly_score(residuals , self.error_threshold)
-            return test_pred,residuals
+            return [test_pred, residuals]
         
         
         

@@ -147,9 +147,10 @@ class PcaModelDish5g():
                                axis =1, # across timestamps
                            )
         #return residuals, errors, and vs
-        return residuals,ed_errors,self.vs
+        #return residuals, ed_errors, self.vs
+        return self.vs
 
-    def test(self, x_test):
+    def predict(self, x_test):
         """
         @:param x_test: test data. Must be of shape [ samples, timesteps, features]
         
@@ -167,8 +168,11 @@ class PcaModelDish5g():
 
         ### init for shape ##
         testX_slices_as_samples_ss = testX_slices_as_samples[:]
-        testX_slices_as_samples_ss_encoded = np.zeros(shape = (self.timesteps_per_slice - self.n_modes_to_delete ,testX_slices_as_samples.shape[0],self.num_of_features ))
-        testX_slices_as_samples_ss_decoded = np.zeros(shape = (testX_slices_as_samples.shape[0],self.timesteps_per_slice,self.num_of_features))
+        testX_slices_as_samples_ss_encoded = np.zeros(shape = (self.timesteps_per_slice \
+                                                               - self.n_modes_to_delete ,
+                                                               testX_slices_as_samples.shape[0],self.num_of_features ))
+        testX_slices_as_samples_ss_decoded = np.zeros(shape = (testX_slices_as_samples.shape[0],
+                                                               self.timesteps_per_slice,self.num_of_features))
         
         ##apply standard scaler###
         for i in range(self.num_of_features):
@@ -185,4 +189,4 @@ class PcaModelDish5g():
         
        
         #return reconstructions and residuals
-        return testX_slices_as_samples_ss_decoded,residuals
+        return [testX_slices_as_samples_ss_decoded, residuals]

@@ -85,7 +85,7 @@ def model_training_pipeline(encode_decode_model,
     training_tensor = np.asarray(training_tensor).astype(np.float32)
             
     ###Train model
-    encode_decode_model.fit(training_tensor)
+    model = encode_decode_model.fit(training_tensor)
     
     ###Save model
     encode_decode_model.save_model(save_model_local_path)
@@ -109,12 +109,12 @@ def model_training_pipeline(encode_decode_model,
                                                                           output_path = save_model_local_path_onnx)
         s3_utils.upload_file(local_path = save_model_local_path_onnx, 
                              bucket_name = model_bucketname, 
-                             key = '/'.join([feature_group_name, feature_input_version, "models", model_filename + ".onnx"]))
+                             key = '/'.join([feature_group_name, feature_input_version, "models", "onnx_models", model_filename + ".onnx"]))
         
     #save npy model object to s3 bucket          
     if upload_npy:
         
-        s3_utils.write_tensor(save_model_local_path, 
+        s3_utils.write_tensor(tensor = model, 
                               folder = "models", 
                               type_ = "npy_models", 
                               file_name = model_filename + ".npy")

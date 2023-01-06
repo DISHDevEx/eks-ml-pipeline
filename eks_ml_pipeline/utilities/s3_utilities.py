@@ -97,6 +97,7 @@ class S3Utilities:
         """
         downloads a zip file from s3.
         """
+        print('Try to download from', self.bucket_name, f'{self.model_name}/{self.version}/{folder}/{type_}/{file_name}')
         with open(local_path, 'wb') as file:
             self.client.download_fileobj(self.bucket_name,
                                          f'{self.model_name}/{self.version}/'
