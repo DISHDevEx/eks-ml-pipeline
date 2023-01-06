@@ -81,8 +81,8 @@ def node_pca_input_all():
     feature_group_name = "node_pca_ad"
     feature_input_version = "v0.0.1"  #need to add print statement if version does not exists
     data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
-    train_data_filename = "training_2022_9_29.npy"
-    test_data_filename = "testing_2022_9_29.npy"
+    train_data_filename = "training_2022_9_29_1.npy"
+    test_data_filename = "testing_2022_9_29_1.npy"
 
     save_model_local_path = "../node_pca.npy"
     model_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
