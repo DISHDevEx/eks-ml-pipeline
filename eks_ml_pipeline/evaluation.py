@@ -33,6 +33,10 @@ def model_evaluation_pipeline(encode_decode_model,
     testing_tensor = s3_utils.read_tensor(folder = "data", 
                                            type_ = "tensors", 
                                            file_name = test_data_filename)
+    
+    #Additional data cleaning: converting everything into np.float32
+    testing_tensor = np.asarray(testing_tensor).astype(np.float32)
+
         
     ###Load trained model: read from s3 bucket
     if upload_zip:

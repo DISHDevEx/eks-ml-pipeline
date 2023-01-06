@@ -1,5 +1,6 @@
 import logging
 import warnings
+import shutil
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
@@ -130,6 +131,14 @@ class AutoencoderModelDish5g():
         self.nn = tf.keras.models.load_model(filename)
         #self.error_threshold = error_threshold
         self.trained = True
+        
+    def clean_model(self, filename):
+        """
+        @:param filename: name of folder for locally saved model
+        @:returns nothing 
+        """
+        shutil.rmtree(filename)
+        print(f"Locally saved model in {filename} was succesfully deleted")
 
     def fit(self, x_train):
         """

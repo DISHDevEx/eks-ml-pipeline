@@ -1,3 +1,4 @@
+import numpy as np
 import tf2onnx
 from .utilities import S3Utilities
 from .inputs import training_input
@@ -24,7 +25,8 @@ def model_training_pipeline(encode_decode_model,
     ------
             encode_decode_model: Class
             initialized model class object that has 
-            fit(), save_model() and load_model() methods
+            fit(), predict(), save_model(), load_model(), 
+            and clean_model() methods
 
             feature_group_name: str
             json name to get the required features
@@ -78,6 +80,9 @@ def model_training_pipeline(encode_decode_model,
     training_tensor = s3_utils.read_tensor(folder = "data", 
                                            type_ = "tensors", 
                                            file_name = train_data_filename)
+    
+    #Additional data cleaning: converting everything into np.float32
+    training_tensor = np.asarray(training_tensor).astype(np.float32)
             
     ###Train model
     encode_decode_model.fit(training_tensor)
@@ -114,9 +119,10 @@ def model_training_pipeline(encode_decode_model,
                               type_ = "npy_models", 
                               file_name = model_filename + ".npy")
         
-    #Delete local model
+    #Delete locally saved model
     if clean_local_folder:
-        pass
+        
+        encode_decode_model.clean_model(save_model_local_path)
     
     
     return None

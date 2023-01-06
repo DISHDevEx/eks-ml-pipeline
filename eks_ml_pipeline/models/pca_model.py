@@ -1,3 +1,4 @@
+import os
 import logging
 import numpy as np
 from sklearn.decomposition import PCA
@@ -71,6 +72,15 @@ class PcaModelDish5g():
         """
         np.save(filename, self.vs)
         
+        
+    def clean_model(self, filename):
+        """
+        @:param filename: name of file for locally saved model
+        @:returns nothing 
+        """
+        os.remove(filename)
+        print(f"Locally saved model in {filename} was succesfully deleted.")
+
     def two_time_slice(self, samples):
         """
         @:param samples: training data or data set with shape [samples,ts,features]

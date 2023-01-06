@@ -243,7 +243,7 @@ def container_autoencoder_input():
     #*****************************************************#
 
     feature_group_name = "container_autoencoder_ad"
-    feature_input_version = "v0.0.2"  
+    feature_input_version = "v0.0.1"  
     data_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
     train_data_filename = "training_2022_5_5_1.npy"
     test_data_filename = "testing_2022_5_5_1.npy"
