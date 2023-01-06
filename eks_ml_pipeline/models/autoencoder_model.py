@@ -138,7 +138,7 @@ class AutoencoderModelDish5g():
         @:returns nothing 
         """
         shutil.rmtree(filename)
-        print(f"Locally saved model in {filename} was succesfully deleted")
+        print(f"\n***Locally saved model in {filename} was succesfully deleted***\n")
 
     def fit(self, x_train):
         """

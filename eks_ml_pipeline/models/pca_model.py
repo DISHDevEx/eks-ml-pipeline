@@ -79,7 +79,7 @@ class PcaModelDish5g():
         @:returns nothing 
         """
         os.remove(filename)
-        print(f"Locally saved model in {filename} was succesfully deleted.")
+        print(f"\n***Locally saved model in {filename} was succesfully deleted.***\n")
 
     def two_time_slice(self, samples):
         """

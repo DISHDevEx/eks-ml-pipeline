@@ -123,6 +123,10 @@ class S3Utilities:
             self.client.upload_file(path, self.bucket_name,
                                                f'{self.model_name}/{self.version}/'
                                                f'{folder}/{type_}/{file_name}')
+            os.remove(path)
+            print(f"\n***Locally saved {path} was succesfully deleted.***\n")
+
+
         except ClientError as error:
             logging.error(error)
             return False

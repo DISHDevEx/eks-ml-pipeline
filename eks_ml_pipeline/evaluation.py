@@ -17,7 +17,8 @@ def model_evaluation_pipeline(encode_decode_model,
                               feature_group_name, feature_input_version, 
                               data_bucketname, train_data_filename, test_data_filename,
                               save_model_local_path, model_bucketname, model_filename,
-                              upload_zip, upload_onnx, upload_npy):
+                              upload_zip, upload_onnx, upload_npy,
+                              clean_local_folder = True):
         
     """
     Generalized model evaluation pipeline
