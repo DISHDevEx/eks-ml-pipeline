@@ -2,7 +2,6 @@ import numpy as np
 import tensorflow as tf
 from msspackages import get_features
 from .utilities import S3Utilities
-from .models import pca_model_dish_5g
 from .inputs import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
 from .inputs import node_pca_input, pod_pca_input, container_pca_input
 
@@ -14,6 +13,55 @@ MSS Dish 5g - Pattern Detection
 this model testing functions will be used to test Anomaly Detection models and save the predictions
 """
 
+def model_evaluation_pipeline(encode_decode_model,
+                              feature_group_name, feature_input_version, 
+                              data_bucketname, train_data_filename, test_data_filename,
+                              save_model_local_path, model_bucketname, model_filename,
+                              upload_zip, upload_onnx, upload_npy):
+        
+    """
+    Generalized model evaluation pipeline
+    """
+    
+    ###Initialize s3 utilities class
+    s3_utils = S3Utilities(bucket_name=data_bucketname, 
+                           model_name=feature_group_name, 
+                           version=feature_input_version)
+
+
+    ###Load training data: read from s3 bucket
+    testing_tensor = s3_utils.read_tensor(folder = "data", 
+                                           type_ = "tensors", 
+                                           file_name = test_data_filename)
+        
+    ###Load trained model: read from s3 bucket
+    if upload_zip:
+        s3_utils.download_zip(local_path = save_model_local_path,
+                              folder = "models",
+                              type_ = "zipped_models",
+                              file_name = model_filename)
+        
+        s3_utils.unzip(path_to_zip = save_model_local_path)
+
+
+    if upload_npy:
+        s3_utils.download_file(local_path = save_model_local_path,
+                               bucket_name = model_bucketname,
+                               key = '/'.join([feature_group_name, feature_input_version, "models", model_file_name + ".npy"]))
+            
+    ###Load trained model from local path
+    encode_decode_model.load_model(save_model_local_path)
+
+    ###Use trained model to predict for testing tensor
+    #encode_decode_model.predict(testing_tensor)
+    
+    ###Save predictions
+    # encode_decode_model.save_model(save_model_local_path)
+    
+
+
+    
+    return None
 
 def autoencoder_testing_pipeline(feature_group_name, feature_input_version,
                                  data_bucketname, train_data_filename, test_data_filename,

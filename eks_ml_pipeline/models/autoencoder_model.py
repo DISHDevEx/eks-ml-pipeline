@@ -2,7 +2,6 @@ import logging
 import warnings
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow import keras
 import tensorflow as tf
@@ -18,7 +17,7 @@ this models serves to provide MSS with a tool to excavate anomalies in an unsupe
 
 """
 
-class autoencoder_model_dish_5g():
+class AutoencoderModelDish5g():
     """
     @:constructor takes in timesteps, batch size, learning rate, and a train_valid ratio
     

@@ -1,10 +1,5 @@
-import numpy as np
-import boto3
 import tf2onnx
-from io import BytesIO
-from msspackages import get_features
 from .utilities import S3Utilities
-from .models import autoencoder_model_dish_5g, pca_model_dish_5g
 from .inputs import training_input
 
 
@@ -18,9 +13,9 @@ this model training functions will be used to train and save Anomaly Detection m
 def model_training_pipeline(encode_decode_model,
                             feature_group_name, feature_input_version, 
                             data_bucketname, train_data_filename, test_data_filename,
-                            save_model_local_path, model_bucketname, 
-                            model_name, model_version,
-                            upload_zip, upload_onnx, upload_npy):
+                            save_model_local_path, model_bucketname, model_filename,
+                            upload_zip, upload_onnx, upload_npy,
+                            clean_local_folder = True):
         
     """
     Generalized model training pipeline
@@ -29,7 +24,7 @@ def model_training_pipeline(encode_decode_model,
     ------
             encode_decode_model: Class
             initialized model class object that has 
-            fit() and save_model() methods
+            fit(), save_model() and load_model() methods
 
             feature_group_name: str
             json name to get the required features
@@ -53,12 +48,9 @@ def model_training_pipeline(encode_decode_model,
             model_bucketname: str
             s3 bucket name where trained model will be saved
             
-            model_name: str
-            filename where training model will be saved
-
-            model_version: str
-            training model version
-            
+            model_filename: str
+            model filename where training model will be saved
+           
             upload_zip: bool
             flag to save model in zip format
             
@@ -86,19 +78,13 @@ def model_training_pipeline(encode_decode_model,
     training_tensor = s3_utils.read_tensor(folder = "data", 
                                            type_ = "tensors", 
                                            file_name = train_data_filename)
-    
-    #print(training_tensor)
-    print(training_tensor.shape)
-        
+            
     ###Train model
     encode_decode_model.fit(training_tensor)
     
     ###Save model
     encode_decode_model.save_model(save_model_local_path)
     
-    #Define model file name
-    model_file_name = '_'.join([model_name, "model", model_version, train_data_filename.split(".")[-2]])
-
 
     ####Save model object to s3 bucket
     #save zipped model object to s3 bucket   
@@ -107,18 +93,18 @@ def model_training_pipeline(encode_decode_model,
         s3_utils.zip_and_upload(local_path = save_model_local_path, 
                                 folder = "models", 
                                 type_ = "zipped_models", 
-                                file_name = model_file_name + ".zip")
+                                file_name = model_filename + ".zip")
         
     #save onnx model object to s3 bucket   
     if upload_onnx:
         
-        save_model_local_path_onnx = save_model_local_path + '/' + model_file_name + ".onnx"
+        save_model_local_path_onnx = save_model_local_path + '/' + model_filename + ".onnx"
         #Save model locally in .onnx format 
         model_proto, external_tensor_storage = tf2onnx.convert.from_keras(encode_decode_model.nn,
                                                                           output_path = save_model_local_path_onnx)
         s3_utils.upload_file(local_path = save_model_local_path_onnx, 
                              bucket_name = model_bucketname, 
-                             key = '/'.join([model_name, feature_input_version, "models", model_file_name + ".onnx"]))
+                             key = '/'.join([feature_group_name, feature_input_version, "models", model_filename + ".onnx"]))
         
     #save npy model object to s3 bucket          
     if upload_npy:
@@ -126,7 +112,11 @@ def model_training_pipeline(encode_decode_model,
         s3_utils.write_tensor(save_model_local_path, 
                               folder = "models", 
                               type_ = "npy_models", 
-                              file_name = model_file_name + ".npy")
+                              file_name = model_filename + ".npy")
+        
+    #Delete local model
+    if clean_local_folder:
+        pass
     
     
     return None

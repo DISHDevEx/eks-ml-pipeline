@@ -44,8 +44,8 @@ from .feature_engineering import node_hmm_ad_feature_engineering
 from .feature_engineering import node_hmm_list_generator
 from .feature_engineering import node_hmm_fe_pipeline
 
-from .models import autoencoder_model_dish_5g
-from .models import pca_model_dish_5g
+from .models import AutoencoderModelDish5g
+from .models import PcaModelDish5g
 
 from .utilities import cleanup
 from .utilities import report_generator

@@ -12,7 +12,7 @@ this models serves to provide MSS with a tool to excavate anomalies in an unsupe
 
 """
 
-class pca_model_dish_5g():
+class PcaModelDish5g():
     """
     @:constructor num_of_features, number_of_temporal_slices, timesteps_per_slice, n_modes_to_delete
     
