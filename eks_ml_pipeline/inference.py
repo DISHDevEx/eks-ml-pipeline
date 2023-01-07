@@ -8,12 +8,12 @@ from sklearn.preprocessing import StandardScaler
 from msspackages import Pyspark_data_ingestion, get_features
 from .utilities import S3Utilities
 from .inputs import training_input, inference_input
-#from .evaluation import autoencoder_testing_pipeline, pca_testing_pipeline
+from .evaluation import model_evaluation_pipeline
 
     
 
 """
-Contributed by Evgeniya Dontsova
+Contributed by Evgeniya Dontsova and Praveen Mada
 MSS Dish 5g - Pattern Detection
 
 this inference functions will be used for Anomaly Detection models
@@ -49,12 +49,13 @@ def read_raw_data(raw_data_s3_path):
     #Read raw data in parquet format from s3_path
     df = pd.read_parquet(raw_data_s3_path)
     
-    print(f"\nreading raw data from: {raw_data_s3_path}\n")
+    print(f"\n*** Reading raw data from: {raw_data_s3_path}***\n")
 
     return df
 
 
-def inference_data_builder(input_year, input_month,  input_day, input_hour, rec_type, input_setup):
+def inference_data_builder(input_year, input_month, input_day, input_hour, 
+                           rec_type, input_setup, bucket):
     
     """
     inputs
@@ -80,6 +81,7 @@ def inference_data_builder(input_year, input_month,  input_day, input_hour, rec_
     outputs
     -------
             writes parquet to specific s3 path
+            outputs s3 path for written parquet file
     """
 
     if input_hour == -1:
@@ -89,13 +91,20 @@ def inference_data_builder(input_year, input_month,  input_day, input_hour, rec_
     else:
         file_name = f'{rec_type}/{rec_type}_{input_year}_{input_month}_{input_day}_{input_hour}'
     
-    pyspark_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value = rec_type)
+    pyspark_data = Pyspark_data_ingestion(year = input_year, month = input_month, 
+                                          day = input_day, hour = input_hour, 
+                                          setup = input_setup, filter_column_value = rec_type)
     err, pyspark_df = pyspark_data.read()
+    print(err)
     
+    raw_data_s3_path = False
+
     if err == 'PASS':
-        print(err)
+        raw_data_s3_path = f"s3://{bucket}/inference_data/{file_name}.parquet"
         pyspark_df = pyspark_df.toPandas()
-        wr.s3.to_parquet(pyspark_df, path=f"s3://dish-5g.core.pd.g.dp.eks.logs.e/inference_data/{file_name}.parquet")
+        wr.s3.to_parquet(pyspark_df, path=raw_data_s3_path)
+        
+    return raw_data_s3_path
 
 
 def build_processed_data(inference_input_parameters,
@@ -118,17 +127,29 @@ def build_processed_data(inference_input_parameters,
             
     """
 
+    ### Load input parameters ###
     
     #inference input 
-    raw_data_s3_path, sampling_column, file_prefix = inference_input_parameters
+    rec_type, sampling_column, \
+    partition_year, partition_month, partition_day, partition_hour, \
+    spark_config_setup, data_bucketname, model_s3_path = inference_input_parameters
     
     #training input 
+    encode_decode_model, \
     feature_group_name, feature_input_version, \
     data_bucketname, train_data_filename, test_data_filename, \
-    save_model_local_path, model_bucketname, \
-    model_name, model_version = training_input_parameters
+    save_model_local_path, model_bucketname, model_filename, \
+    upload_zip, upload_onnx, upload_npy = training_input_parameters
+
+
+    ###Build raw inference data and get the s3 path
+    raw_data_s3_path = inference_data_builder(input_year = partition_year, input_month = partition_month,
+                                              input_day = partition_day, input_hour = partition_hour, 
+                                              rec_type = rec_type, input_setup = spark_config_setup, 
+                                              bucket = data_bucketname)
+    
                    
-    #load data
+    ###Load data
     df = read_raw_data(raw_data_s3_path)
         
     #Read features and parameters
@@ -182,7 +203,7 @@ def build_processed_data(inference_input_parameters,
         print(inference_input_tensor)
         print("\n***************************************\n")
 
-        saved_file_name = ('_').join([file_prefix, sampling_column, random_id])
+        saved_file_name = ('_').join(['inference', sampling_column, random_id])
 
         write_tensor(tensor = inference_input_tensor, 
                      bucket_name = model_bucketname, 
@@ -192,7 +213,7 @@ def build_processed_data(inference_input_parameters,
                      file_name = saved_file_name)
 
         #update training input parameters with new test_data_filename
-        training_input_parameters[4] = saved_file_name
+        training_input_parameters[5] = saved_file_name
         
     else:
         print(f"Exception occured: no unique values for {sampling_column} column.")
@@ -238,24 +259,24 @@ if __name__ == "__main__":
     ##***Autoencoder***###
 
     #Inference for node autoencoder model
-    inference_pipeline(node_inference_input(), node_autoencoder_input(), autoencoder_testing_pipeline)
+    inference_pipeline(node_inference_input(), node_autoencoder_input(), model_evaluation_pipeline)
     
     #Inference for pod autoencoder model
-    inference_pipeline(pod_inference_input(), pod_autoencoder_input(), autoencoder_testing_pipeline)
+    inference_pipeline(pod_inference_input(), pod_autoencoder_input(), model_evaluation_pipeline)
 
     #Inference for container autoencoder model
-    inference_pipeline(container_inference_input(), container_autoencoder_input(), autoencoder_testing_pipeline)
+    inference_pipeline(container_inference_input(), container_autoencoder_input(), model_evaluation_pipeline)
     
     ###***PCA***###
     
     #Inference for node pca model
-    inference_pipeline(node_inference_input(), node_pca_input(), pca_testing_pipeline)
+    inference_pipeline(node_inference_input(), node_pca_input(), model_evaluation_pipeline)
     
     #Inference for pod pca model
-    inference_pipeline(pod_inference_input(), pod_pca_input(), pca_testing_pipeline)
+    inference_pipeline(pod_inference_input(), pod_pca_input(), model_evaluation_pipeline)
 
     #Inference for container pca model
-    inference_pipeline(container_inference_input(), container_pca_input(), pca_testing_pipeline)
+    inference_pipeline(container_inference_input(), container_pca_input(), model_evaluation_pipeline)
     
 
 

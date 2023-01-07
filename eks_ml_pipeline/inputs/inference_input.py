@@ -16,11 +16,31 @@ def node_inference_input():
             
     """
     
-    raw_data_s3_path = 's3://dish-5g.core.pd.g.dp.eks.logs.e/inference_data/Node/Node_2022_9_11_12.parquet'
-    sampling_column = "InstanceId"
-    file_prefix = 'inference'
+    rec_type = 'Node'
     
-    return [raw_data_s3_path, sampling_column, file_prefix]
+    ##feature engineering specs
+    sampling_column = "InstanceId"
+    
+    ##eks s3 bucket parameters
+    partition_year = "2022"
+    partition_month = "9"
+    partition_day = "11"
+    partition_hour = "1"
+    spark_config_setup = "384gb"
+    
+    ##s3 bucket for raw inference data
+    data_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
+    
+    ##full s3 model path
+    model_s3_path = ""
+    
+    #raw_data_s3_path = 's3://dish-5g.core.pd.g.dp.eks.logs.e/inference_data/Node/Node_2022_9_11_12.parquet'
+    #sampling_column = "InstanceId"
+    #file_prefix = 'inference'
+    
+    return [rec_type, sampling_column,
+            partition_year, partition_month, partition_day, partition_hour, 
+            spark_config_setup, data_bucketname, model_s3_path]
 
 def pod_inference_input():
     
