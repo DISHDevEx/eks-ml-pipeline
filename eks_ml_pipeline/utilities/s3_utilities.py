@@ -60,6 +60,7 @@ class S3Utilities:
             read_tensor(folder, type_, file_name): variable: numpy tensor
             upload_directory(local_path, folder, type_): path
             pyspark_write_parquet(df,folder, type_): path
+            read_parquet_to_pandas_df(folder, type_, file_name): dataframe
     """
 
     def __init__(self, bucket_name=None, model_name=None, version=None):

@@ -45,7 +45,7 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 ```
 
 ### __ inital project setup__
-1. Check the path 
+1. Check the path
 ```console
 !pwd
 ```
@@ -110,4 +110,73 @@ For detailed steps on how to submit a new job to EMR serverless application, ref
 ```console
 from eks_ml_pipeline import node_autoencoder_fe_input, node_fe_pipeline
 node_fe_pipeline(*node_autoencoder_fe_input())
+```
+### __Using s3_utilities__
+s3_utilities has a number of helper functions for the pipeline to download and upload files/objects to s3.
+#### - Usage
+Import
+```console
+from eks_ml_pipeline import S3Utilities
+```
+Class is initilized with the following three parameters
+```console
+bucket_name = "example_bucket"
+model_name = "example_autoencorder"
+version = "v0.0.1"
+S3Utills = S3Utilities(bucket_name,model_name,version)
+```
+The following functions can be accessed through the class
+```console
+1. S3Utills.upload_file(local_path, bucket_name, key)
+2. S3Utills.download_file(local_path, bucket_name, key)
+3. S3Utills.download_zip(writing_path, folder, type_, file_name)
+4. S3Utills.unzip(path_to_zip, extract_location)
+5. S3Utills.zip_and_upload(local_path, folder, type_, file_name)
+6. S3Utills.pandas_dataframe_to_s3(input_datafame, folder, type_, file_name)
+7. S3Utills.write_tensor(tensor, folder, type_, file_name)
+8. S3Utills.awswrangler_pandas_dataframe_to_s3(input_datafame,folder, type_, file_name)
+9. S3Utills.read_tensor(folder, type_, file_name)
+10. S3Utills.upload_directory(local_path, folder, type_)
+11. S3Utills.pyspark_write_parquet(df,folder, type_)
+12. S3Utills.read_parquet_to_pandas_df(folder, type_, file_name)
+```
+Note: More helper functions can be added in the future without changing <br>
+the structure of the class new functions can just be appened to the class. 
+### __s3 structure__
+This is the example s3 structure enforced by the s3_utilities class.
+All the important variables to note:
+```console
+bucket_name = "example_bucket"
+model_name = "example_autoencoder"
+version = "v0.0.1"
+folder = "data" or ""models"
+type_ =  "pandas_df" or "tensors" or "zipped_models", "npy_models"
+file_name = "training_2022_10_10_10.parquet" 
+```
+The following structure will be created when the pipeline is run in ```example_bucket```.
+```
+example_bucket
+├── example_autoencorder
+│├── v0.0.1
+││└── data
+││    ├── pandas_df
+││    │└── training_2022_10_10_10.parquet
+││    └── tensors
+││        └── training_2022_10_10_10.npy
+│└── v0.0.2
+│    ├── data
+│    │├── pandas_df
+│    ││├── testing_2022_9_29.parquet
+│    ││└── training_2022_9_29.parquet
+│    │└── tensors
+│    │    ├── testing_2022_9_29.npy
+│    │    ├── testing_2022_9_29_1.npy
+│    │    ├── training_2022_9_29.npy
+│    │    └── training_2022_9_29_1.npy
+│    └── models
+│        ├── pod_autoencoder_ad_model_v0.0.1-test_training_2022_9_9_1.onnx
+│        ├── pod_autoencoder_adv0.0.2training_2022_9_9_scaled_features.zip
+│        └── zipped_models
+│            └── pod_autoencoder_ad_model_v0.0.1-test_training_2022_9_9_1.zip
+
 ```
