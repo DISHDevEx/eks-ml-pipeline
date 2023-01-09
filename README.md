@@ -111,6 +111,7 @@ For detailed steps on how to submit a new job to EMR serverless application, ref
 from eks_ml_pipeline import node_autoencoder_fe_input, node_fe_pipeline
 node_fe_pipeline(*node_autoencoder_fe_input())
 ```
+
 ### __Using s3_utilities__
 s3_utilities has a number of helper functions for the pipeline to download and upload files/objects to s3.
 #### - Usage
@@ -121,7 +122,7 @@ from eks_ml_pipeline import S3Utilities
 Class is initilized with the following three parameters
 ```console
 bucket_name = "example_bucket"
-model_name = "example_autoencorder"
+model_name = "example_autoencoder"
 version = "v0.0.1"
 S3Utills = S3Utilities(bucket_name,model_name,version)
 ```
@@ -174,9 +175,40 @@ example_bucket
 │    │    ├── training_2022_9_29.npy
 │    │    └── training_2022_9_29_1.npy
 │    └── models
-│        ├── pod_autoencoder_ad_model_v0.0.1-test_training_2022_9_9_1.onnx
-│        ├── pod_autoencoder_adv0.0.2training_2022_9_9_scaled_features.zip
+|        └── onnx_models
+│            └── pod_autoencoder_ad_model_v0.0.1-test_training_2022_9_9_1.onnx
 │        └── zipped_models
 │            └── pod_autoencoder_ad_model_v0.0.1-test_training_2022_9_9_1.zip
+│        └── predictions
+│            └── predictions_testing_2022_9_29_1_part_0.npy
+│            └── predictions_testing_2022_9_29_1_part_1.npy
 
+```
+
+### __Running Model Training jobs__
+
+1. update model training input functions per required parameters (eks_ml_pipeline/inputs/training_input.py)
+2. run below function to start the model training job
+```console
+from eks_ml_pipeline import model_training_pipeline, node_autoencoder_input
+model_training_pipeline(*node_autoencoder_input())
+```
+
+### __Running Model Evaluation/Testing jobs__
+
+1. update model training input functions per required parameters (eks_ml_pipeline/inputs/training_input.py)
+2. run below function to start the model training job
+```console
+from eks_ml_pipeline import model_evaluation_pipeline, node_autoencoder_input
+model_evaluation_pipeline(*node_autoencoder_input())
+```
+
+### __Running Model Inference jobs__
+
+1. update model inference input functions per required parameters (eks_ml_pipeline/inputs/inference_input.py)
+2. run below function to start the model training job
+```console
+from eks_ml_pipeline import inference_pipeline, model_evaluation_pipeline
+from eks_ml_pipeline import node_inference_input, node_autoencoder_input
+inference_pipeline(node_inference_input(), node_autoencoder_input(), model_evaluation_pipeline)
 ```

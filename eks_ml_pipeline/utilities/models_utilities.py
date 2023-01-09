@@ -1,6 +1,6 @@
 from sklearn.decomposition import PCA
-def loss_of_variance(data,data_predictions):
-    
+
+def loss_of_variance(data, data_predictions):
     
     """
     Input:
@@ -18,8 +18,8 @@ def loss_of_variance(data,data_predictions):
     
    
     pca = PCA(n_components=data.shape[1])
-         
     loss_of_variance_by_feature = []
+    
     for i in range(data.shape[2]):
            
         variance_of_data = pca.fit(data[:,:,i]).explained_variance_.sum()
@@ -27,6 +27,5 @@ def loss_of_variance(data,data_predictions):
         variance_loss = (variance_of_data - variance_of_DoE_data)
         loss_of_variance_by_feature.append(variance_loss)
  
-       
                      
     return loss_of_variance_by_feature
