@@ -136,28 +136,3 @@ def model_evaluation_pipeline(encode_decode_model,
      
 
     return None
-
-
-if __name__ == "__main__":
-    
-    ##***Autoencoder***###
-
-    #Test node autoencoder model and save on s3
-    model_evaluation_pipeline(*node_autoencoder_input())
-    
-    #Test pod autoencoder model and save on s3
-    model_evaluation_pipeline(*pod_autoencoder_input())
-
-    #Test container autoencoder model and save on s3
-    model_evaluation_pipeline(*container_autoencoder_input())
-    
-    ##***PCA***###
-    
-    #Test node pca model and save on s3
-    model_evaluation_pipeline(*node_pca_input())
-    
-    #Test pod pca model and save on s3
-    model_evaluation_pipeline(*pod_pca_input())
-
-    #Test container pca model and save on s3
-    model_evaluation_pipeline(*container_pca_input())

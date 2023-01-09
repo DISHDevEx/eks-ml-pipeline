@@ -42,7 +42,7 @@ def node_autoencoder_input():
     upload_onnx = True
     upload_npy = False
     
-    #remove locally saved model forlders/files
+    #remove locally saved model folder/file
     clean_local_folder = True
     
     #Define model filename and path
@@ -106,7 +106,7 @@ def node_pca_input():
     upload_onnx = False
     upload_npy = True
 
-    #remove locally saved model forlders/files
+    #remove locally saved model folder/file
     clean_local_folder = True
 
     #Define model filename
@@ -169,7 +169,7 @@ def pod_autoencoder_input():
     upload_onnx = True
     upload_npy = False
     
-    #remove locally saved model forlders/files
+    #remove locally saved model folder/file
     clean_local_folder = True
 
     #Define model filename
@@ -233,7 +233,7 @@ def pod_pca_input():
     upload_onnx = False
     upload_npy = True
     
-    #remove locally saved model forlders/files
+    #remove locally saved model folder/file
     clean_local_folder = True
     
     #Define model filename
@@ -295,7 +295,7 @@ def container_autoencoder_input():
     upload_onnx = True
     upload_npy = False
     
-    #remove locally saved model forlders/files
+    #remove locally saved model folder/file
     clean_local_folder = True
     
     #Define model filename
@@ -359,7 +359,7 @@ def container_pca_input():
     upload_onnx = False
     upload_npy = True
     
-    #remove locally saved model forlders/files
+    #remove locally saved model folder/file
     clean_local_folder = True
     
     #Define model filename

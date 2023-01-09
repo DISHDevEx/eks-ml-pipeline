@@ -285,31 +285,4 @@ def inference_pipeline(inference_input_parameters,
     model_evaluation_pipeline(*training_input_parameters)
     
     return None
-
-if __name__ == "__main__":
-    
-    ##***Autoencoder***###
-
-    #Inference for node autoencoder model
-    inference_pipeline(node_inference_input(), node_autoencoder_input(), model_evaluation_pipeline)
-    
-    #Inference for pod autoencoder model
-    inference_pipeline(pod_inference_input(), pod_autoencoder_input(), model_evaluation_pipeline)
-
-    #Inference for container autoencoder model
-    inference_pipeline(container_inference_input(), container_autoencoder_input(), model_evaluation_pipeline)
-    
-    ###***PCA***###
-    
-    #Inference for node pca model
-    inference_pipeline(node_inference_input(), node_pca_input(), model_evaluation_pipeline)
-    
-    #Inference for pod pca model
-    inference_pipeline(pod_inference_input(), pod_pca_input(), model_evaluation_pipeline)
-
-    #Inference for container pca model
-    inference_pipeline(container_inference_input(), container_pca_input(), model_evaluation_pipeline)
-    
-
-
     

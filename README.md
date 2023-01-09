@@ -190,8 +190,32 @@ example_bucket
 1. update model training input functions per required parameters (eks_ml_pipeline/inputs/training_input.py)
 2. run below function to start the model training job
 ```console
-from eks_ml_pipeline import model_training_pipeline, node_autoencoder_input
+from eks_ml_pipeline import model_training_pipeline
+from eks_ml_pipeline import node_pca_input, pod_pca_input, container_pca_input
+from eks_ml_pipeline import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
+
+###***Autoencoder***###
+
+#Train node autoencoder model and save on s3
 model_training_pipeline(*node_autoencoder_input())
+
+#Train pod autoencoder model and save on s3
+model_training_pipeline(*pod_autoencoder_input())
+
+#Train container autoencoder model and save on s3
+model_training_pipeline(*container_autoencoder_input())
+
+###***PCA***###
+
+#Train node pca model and save on s3
+model_training_pipeline(*node_pca_input())
+
+#Train pod pca model and save on s3
+model_training_pipeline(*pod_pca_input())
+
+#Train container pca model and save on s3
+model_training_pipeline(*container_pca_input())
+
 ```
 
 ### __Running Model Evaluation/Testing jobs__
@@ -199,8 +223,32 @@ model_training_pipeline(*node_autoencoder_input())
 1. update model training input functions per required parameters (eks_ml_pipeline/inputs/training_input.py)
 2. run below function to start the model training job
 ```console
-from eks_ml_pipeline import model_evaluation_pipeline, node_autoencoder_input
+from eks_ml_pipeline import model_evaluation_pipeline
+from eks_ml_pipeline import node_pca_input, pod_pca_input, container_pca_input
+from eks_ml_pipeline import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
+
+##***Autoencoder***###
+
+#Test node autoencoder model and save on s3
 model_evaluation_pipeline(*node_autoencoder_input())
+
+#Test pod autoencoder model and save on s3
+model_evaluation_pipeline(*pod_autoencoder_input())
+
+#Test container autoencoder model and save on s3
+model_evaluation_pipeline(*container_autoencoder_input())
+
+##***PCA***###
+
+#Test node pca model and save on s3
+model_evaluation_pipeline(*node_pca_input())
+
+#Test pod pca model and save on s3
+model_evaluation_pipeline(*pod_pca_input())
+
+#Test container pca model and save on s3
+model_evaluation_pipeline(*container_pca_input())
+
 ```
 
 ### __Running Model Inference jobs__
@@ -209,6 +257,30 @@ model_evaluation_pipeline(*node_autoencoder_input())
 2. run below function to start the model training job
 ```console
 from eks_ml_pipeline import inference_pipeline, model_evaluation_pipeline
-from eks_ml_pipeline import node_inference_input, node_autoencoder_input
+from eks_ml_pipeline import node_inference_input, pod_inference_input, container_inference_input
+from eks_ml_pipeline import node_pca_input, pod_pca_input, container_pca_input
+from eks_ml_pipeline import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
+
+##***Autoencoder***###
+
+#Inference for node autoencoder model
 inference_pipeline(node_inference_input(), node_autoencoder_input(), model_evaluation_pipeline)
+
+#Inference for pod autoencoder model
+inference_pipeline(pod_inference_input(), pod_autoencoder_input(), model_evaluation_pipeline)
+
+#Inference for container autoencoder model
+inference_pipeline(container_inference_input(), container_autoencoder_input(), model_evaluation_pipeline)
+
+###***PCA***###
+
+#Inference for node pca model
+inference_pipeline(node_inference_input(), node_pca_input(), model_evaluation_pipeline)
+
+#Inference for pod pca model
+inference_pipeline(pod_inference_input(), pod_pca_input(), model_evaluation_pipeline)
+
+#Inference for container pca model
+inference_pipeline(container_inference_input(), container_pca_input(), model_evaluation_pipeline)
+    
 ```

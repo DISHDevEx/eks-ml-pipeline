@@ -129,29 +129,3 @@ def model_training_pipeline(encode_decode_model,
     
     
     return None
-
-
-    
-if __name__ == "__main__":
-    
-    ###***Autoencoder***###
-    
-    #Train node autoencoder model and save on s3
-    model_training_pipeline(*node_autoencoder_input())
-    
-    #Train pod autoencoder model and save on s3
-    model_training_pipeline(*pod_autoencoder_input())
-    
-    #Train container autoencoder model and save on s3
-    model_training_pipeline(*container_autoencoder_input())
-    
-    ###***PCA***###
-    
-    #Train node pca model and save on s3
-    model_training_pipeline(*node_pca_input())
-    
-    #Train pod pca model and save on s3
-    model_training_pipeline(*pod_pca_input())
-    
-    #Train container pca model and save on s3
-    model_training_pipeline(*container_pca_input())
