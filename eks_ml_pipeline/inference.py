@@ -10,7 +10,6 @@ from .utilities import S3Utilities
 from .inputs import training_input, inference_input
 from .evaluation import model_evaluation_pipeline
 
-    
 
 """
 Contributed by Evgeniya Dontsova and Praveen Mada
@@ -33,29 +32,46 @@ def only_dict(d):
     """
     return ast.literal_eval(d)
 
-
-def read_raw_data(raw_data_s3_path):
+def inference_data_naming(input_year, input_month, input_day, input_hour, rec_type):
+    
     """
     inputs
     ------
-            raw_data_s3_path: str
+            input_year : STRING | Int
+            the year from which to read data, leave empty for all years
+
+            input_month : STRING | Int
+            the month from which to read data, leave empty for all months
+
+            input_day : STRING | Int
+            the day from which to read data, leave empty for all days
+
+            input_hour: STRING | Int
+            the hour from which to read data, leave empty for all hours
+            
+            rec_type: STRING
+            uses schema for rec type when building pyspark df
 
     outputs
     -------
-            df: pd.DataFrame
+            file_name: str
+            file name for raw inference data
 
     """
 
-    #Read raw data in parquet format from s3_path
-    df = pd.read_parquet(raw_data_s3_path)
     
-    print(f"\n*** Reading raw data from: {raw_data_s3_path}***\n")
+    if input_hour == -1:
+        file_name = f'{rec_type}/{rec_type}_{input_year}_{input_month}_{input_day}'
+    elif input_day == -1:
+        file_name = f'{rec_type}/{rec_type}_{input_year}_{input_month}'
+    else:
+        file_name = f'{rec_type}/{rec_type}_{input_year}_{input_month}_{input_day}_{input_hour}'
+        
+    return file_name
 
-    return df
-
-
-def inference_data_builder(input_year, input_month, input_day, input_hour, 
-                           rec_type, input_setup, bucket):
+    
+def inference_data_builder(input_year, input_month, input_day, input_hour, rec_type, 
+                           input_setup, bucket):
     
     """
     inputs
@@ -83,17 +99,14 @@ def inference_data_builder(input_year, input_month, input_day, input_hour,
             writes parquet to specific s3 path
             outputs s3 path for written parquet file
     """
-
-    if input_hour == -1:
-        file_name = f'{rec_type}/{rec_type}_{input_year}_{input_month}_{input_day}'
-    elif input_day == -1:
-        file_name = f'{rec_type}/{rec_type}_{input_year}_{input_month}'
-    else:
-        file_name = f'{rec_type}/{rec_type}_{input_year}_{input_month}_{input_day}_{input_hour}'
+    
+    file_name = inference_data_naming(input_year, input_month, 
+                                      input_day, input_hour, rec_type)
     
     pyspark_data = Pyspark_data_ingestion(year = input_year, month = input_month, 
                                           day = input_day, hour = input_hour, 
                                           setup = input_setup, filter_column_value = rec_type)
+    
     err, pyspark_df = pyspark_data.read()
     print(err)
     
@@ -127,31 +140,52 @@ def build_processed_data(inference_input_parameters,
             
     """
 
-    ### Load input parameters ###
+    ### Load input parameters
     
     #inference input 
     rec_type, sampling_column, \
     partition_year, partition_month, partition_day, partition_hour, \
-    spark_config_setup, data_bucketname, model_s3_path = inference_input_parameters
+    spark_config_setup, data_bucketname = inference_input_parameters
     
     #training input 
     encode_decode_model, \
     feature_group_name, feature_input_version, \
     data_bucketname, train_data_filename, test_data_filename, \
     save_model_local_path, model_bucketname, model_filename, \
-    upload_zip, upload_onnx, upload_npy = training_input_parameters
-
-
-    ###Build raw inference data and get the s3 path
-    raw_data_s3_path = inference_data_builder(input_year = partition_year, input_month = partition_month,
-                                              input_day = partition_day, input_hour = partition_hour, 
-                                              rec_type = rec_type, input_setup = spark_config_setup, 
-                                              bucket = data_bucketname)
-    
-                   
-    ###Load data
-    df = read_raw_data(raw_data_s3_path)
+    upload_zip, upload_onnx, upload_npy, \
+    clean_local_folder = training_input_parameters
         
+    #raw inference data path
+    raw_inference_file_name = inference_data_naming(input_year = partition_year, 
+                                                    input_month = partition_month, 
+                                                    input_day = partition_day, 
+                                                    input_hour = partition_hour, 
+                                                    rec_type = rec_type)
+    
+    raw_data_s3_path = f"s3://{data_bucketname}/inference_data/{raw_inference_file_name}.parquet"
+    
+    ###Initialize s3 utilities class
+    s3_utils = S3Utilities(bucket_name=data_bucketname, 
+                           model_name=feature_group_name, 
+                           version=feature_input_version)
+
+                   
+    ###Load data: Read raw data in parquet format from s3
+    print(f"\n*** Reading raw data from: {raw_data_s3_path}***\n")
+
+    try: 
+        df = pd.read_parquet(raw_data_s3_path)
+    except:
+        print(f"\n*** Raw data being build in {raw_data_s3_path}***\n")
+
+        #Build raw inference data and get the s3 path
+        raw_data_s3_path = inference_data_builder(input_year = partition_year, input_month = partition_month,
+                                                  input_day = partition_day, input_hour = partition_hour, 
+                                                  rec_type = rec_type, input_setup = spark_config_setup, 
+                                                  bucket = data_bucketname)
+        df = pd.read_parquet(raw_data_s3_path)
+    
+    ### Process raw data
     #Read features and parameters
     features_df = get_features(feature_group_name, feature_input_version)
     features = features_df["feature_name"].to_list()
@@ -203,14 +237,12 @@ def build_processed_data(inference_input_parameters,
         print(inference_input_tensor)
         print("\n***************************************\n")
 
-        saved_file_name = ('_').join(['inference', sampling_column, random_id])
-
-        write_tensor(tensor = inference_input_tensor, 
-                     bucket_name = model_bucketname, 
-                     model_name = model_name, 
-                     version = model_version, 
-                     flag = "data",
-                     file_name = saved_file_name)
+        saved_file_name = ('_').join(['inference', sampling_column, random_id]) + ".npy"
+        
+        s3_utils.write_tensor(tensor = inference_input_tensor, 
+                              folder = "data", 
+                              type_ = "tensors", 
+                              file_name = saved_file_name)
 
         #update training input parameters with new test_data_filename
         training_input_parameters[5] = saved_file_name
@@ -223,7 +255,7 @@ def build_processed_data(inference_input_parameters,
 
 def inference_pipeline(inference_input_parameters,
                        training_input_parameters,
-                       prediction_pipeline):
+                       model_evaluation_pipeline):
     
     """
     inputs
@@ -250,9 +282,9 @@ def inference_pipeline(inference_input_parameters,
     
     training_input_parameters = build_processed_data(inference_input_parameters, training_input_parameters)
     
-    predictions, residuals = prediction_pipeline(*training_input_parameters)
+    model_evaluation_pipeline(*training_input_parameters)
     
-    return predictions, residuals
+    return None
 
 if __name__ == "__main__":
     

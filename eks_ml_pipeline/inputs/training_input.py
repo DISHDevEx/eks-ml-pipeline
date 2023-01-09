@@ -9,9 +9,7 @@ MSS Dish 5g - Pattern Detection
 
 these are the parameters to our pipeline
 
-
 """
-
 
 def node_autoencoder_input():
     
@@ -44,8 +42,18 @@ def node_autoencoder_input():
     upload_onnx = True
     upload_npy = False
     
-    #Define model filename
+    #remove locally saved model forlders/files
+    clean_local_folder = True
+    
+    #Define model filename and path
     model_filename = '_'.join([model_name, "model", model_version, train_data_filename.split(".")[-2]])
+    
+    ##model s3 path for zip format
+    #model_s3_path = f'{model_bucketname}/{feature_group_name}/{feature_input_version}'
+    #                f'models/zipped_models/{model_filename}.zip'
+    ##model s3 path for onnx format
+    #model_s3_path = f'{model_bucketname}/{feature_group_name}/{feature_input_version}'
+    #                f'models/onnx_models/{model_filename}.onnx'
 
     #********************************************#
     #********** initialize model class **********#
@@ -56,14 +64,15 @@ def node_autoencoder_input():
     
     #Initialize autoencoder model class with specific parameters
     encode_decode_model = AutoencoderModelDish5g(time_steps=model_parameters["time_steps"], 
-                                                    batch_size=model_parameters["batch_size"], epochs=1)
+                                                 batch_size=model_parameters["batch_size"], epochs=1)
 
     
     return [encode_decode_model,
             feature_group_name, feature_input_version, 
             data_bucketname, train_data_filename, test_data_filename,
             save_model_local_path, model_bucketname, model_filename,
-            upload_zip, upload_onnx, upload_npy]
+            upload_zip, upload_onnx, upload_npy,
+            clean_local_folder]
 
 
 def node_pca_input():
@@ -96,9 +105,17 @@ def node_pca_input():
     upload_zip = False 
     upload_onnx = False
     upload_npy = True
-    
+
+    #remove locally saved model forlders/files
+    clean_local_folder = True
+
     #Define model filename
     model_filename = '_'.join([model_name, "model", model_version, train_data_filename.split(".")[-2]])
+    
+    ##model s3 path for npy format
+    #model_s3_path = f'{model_bucketname}/{feature_group_name}/{feature_input_version}'
+    #                f'models/npy_models/{model_filename}.npy'
+
 
     #********************************************#
     #********** initialize model class **********#
@@ -117,7 +134,8 @@ def node_pca_input():
             feature_group_name, feature_input_version, 
             data_bucketname, train_data_filename, test_data_filename,
             save_model_local_path, model_bucketname, model_filename,
-            upload_zip, upload_onnx, upload_npy]
+            upload_zip, upload_onnx, upload_npy,
+            clean_local_folder]
 
 
 def pod_autoencoder_input():
@@ -150,9 +168,19 @@ def pod_autoencoder_input():
     upload_zip = True 
     upload_onnx = True
     upload_npy = False
+    
+    #remove locally saved model forlders/files
+    clean_local_folder = True
 
     #Define model filename
     model_filename = '_'.join([model_name, "model", model_version, train_data_filename.split(".")[-2]])
+    
+    ##model s3 path for zip format
+    #model_s3_path = f'{model_bucketname}/{feature_group_name}/{feature_input_version}'
+    #                f'models/zipped_models/{model_filename}.zip'
+    ##model s3 path for onnx format
+    #model_s3_path = f'{model_bucketname}/{feature_group_name}/{feature_input_version}'
+    #                f'models/onnx_models/{model_filename}.onnx'
     
     #********************************************#
     #********** initialize model class **********#
@@ -170,7 +198,8 @@ def pod_autoencoder_input():
             feature_group_name, feature_input_version, 
             data_bucketname, train_data_filename, test_data_filename,
             save_model_local_path, model_bucketname, model_filename,
-            upload_zip, upload_onnx, upload_npy]
+            upload_zip, upload_onnx, upload_npy,
+            clean_local_folder]
 
 
 def pod_pca_input():
@@ -204,8 +233,15 @@ def pod_pca_input():
     upload_onnx = False
     upload_npy = True
     
+    #remove locally saved model forlders/files
+    clean_local_folder = True
+    
     #Define model filename
     model_filename = '_'.join([model_name, "model", model_version, train_data_filename.split(".")[-2]])
+    
+    ##model s3 path for npy format
+    #model_s3_path = f'{model_bucketname}/{feature_group_name}/{feature_input_version}'
+    #                f'models/npy_models/{model_filename}.npy'
 
     #********************************************#
     #********** initialize model class **********#
@@ -224,7 +260,8 @@ def pod_pca_input():
             feature_group_name, feature_input_version, 
             data_bucketname, train_data_filename, test_data_filename,
             save_model_local_path, model_bucketname, model_filename,
-            upload_zip, upload_onnx, upload_npy]
+            upload_zip, upload_onnx, upload_npy,
+            clean_local_folder]
 
 
 def container_autoencoder_input():
@@ -258,8 +295,18 @@ def container_autoencoder_input():
     upload_onnx = True
     upload_npy = False
     
+    #remove locally saved model forlders/files
+    clean_local_folder = True
+    
     #Define model filename
     model_filename = '_'.join([model_name, "model", model_version, train_data_filename.split(".")[-2]])
+    
+    ##model s3 path for zip format
+    #model_s3_path = f'{model_bucketname}/{feature_group_name}/{feature_input_version}'
+    #                f'models/zipped_models/{model_filename}.zip'
+    ##model s3 path for onnx format
+    #model_s3_path = f'{model_bucketname}/{feature_group_name}/{feature_input_version}'
+    #                f'models/onnx_models/{model_filename}.onnx'
     
     #********************************************#
     #********** initialize model class **********#
@@ -277,7 +324,8 @@ def container_autoencoder_input():
             feature_group_name, feature_input_version, 
             data_bucketname, train_data_filename, test_data_filename,
             save_model_local_path, model_bucketname, model_filename,
-            upload_zip, upload_onnx, upload_npy]
+            upload_zip, upload_onnx, upload_npy,
+            clean_local_folder]
 
 
 def container_pca_input():
@@ -311,9 +359,16 @@ def container_pca_input():
     upload_onnx = False
     upload_npy = True
     
+    #remove locally saved model forlders/files
+    clean_local_folder = True
+    
     #Define model filename
     model_filename = '_'.join([model_name, "model", model_version, train_data_filename.split(".")[-2]])
     
+    ##model s3 path for npy format
+    #model_s3_path = f'{model_bucketname}/{feature_group_name}/{feature_input_version}'
+    #                f'models/npy_models/{model_filename}.npy'
+ 
     #********************************************#
     #********** initialize model class **********#
     #********************************************#
@@ -331,4 +386,5 @@ def container_pca_input():
             feature_group_name, feature_input_version, 
             data_bucketname, train_data_filename, test_data_filename,
             save_model_local_path, model_bucketname, model_filename,
-            upload_zip, upload_onnx, upload_npy]
+            upload_zip, upload_onnx, upload_npy,
+            clean_local_folder]

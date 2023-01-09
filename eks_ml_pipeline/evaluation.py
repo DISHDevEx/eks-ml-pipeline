@@ -17,7 +17,7 @@ def model_evaluation_pipeline(encode_decode_model,
                               data_bucketname, train_data_filename, test_data_filename,
                               save_model_local_path, model_bucketname, model_filename,
                               upload_zip, upload_onnx, upload_npy,
-                              clean_local_folder = True):
+                              clean_local_folder):
         
    
     """

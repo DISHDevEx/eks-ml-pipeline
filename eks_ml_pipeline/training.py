@@ -16,7 +16,7 @@ def model_training_pipeline(encode_decode_model,
                             data_bucketname, train_data_filename, test_data_filename,
                             save_model_local_path, model_bucketname, model_filename,
                             upload_zip, upload_onnx, upload_npy,
-                            clean_local_folder = True):
+                            clean_local_folder):
         
     """
     Generalized model training pipeline
@@ -111,7 +111,8 @@ def model_training_pipeline(encode_decode_model,
                                                                           output_path = save_model_local_path_onnx)
         s3_utils.upload_file(local_path = save_model_local_path_onnx, 
                              bucket_name = model_bucketname, 
-                             key = '/'.join([feature_group_name, feature_input_version, "models", "onnx_models", model_filename + ".onnx"]))
+                             key = '/'.join([feature_group_name, feature_input_version,
+                                             "models", "onnx_models", model_filename + ".onnx"]))
         
     #save npy model object to s3 bucket          
     if upload_npy:
