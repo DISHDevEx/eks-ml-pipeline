@@ -236,7 +236,8 @@ def build_processed_data(inference_input_parameters,
         print("\n*** Inference input tensor ***")
         print(inference_input_tensor)
         print("\n***************************************\n")
-
+    
+        sampling_column = sampling_column.split('.')[-1]
         saved_file_name = ('_').join(['inference', sampling_column, random_id]) + ".npy"
         
         s3_utils.write_tensor(tensor = inference_input_tensor, 

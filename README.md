@@ -175,13 +175,15 @@ example_bucket
 │    │    ├── training_2022_9_29.npy
 │    │    └── training_2022_9_29_1.npy
 │    └── models
-|        └── onnx_models
+│        └── onnx_models
 │            └── pod_autoencoder_ad_model_v0.0.1-test_training_2022_9_9_1.onnx
 │        └── zipped_models
 │            └── pod_autoencoder_ad_model_v0.0.1-test_training_2022_9_9_1.zip
 │        └── predictions
-│            └── predictions_testing_2022_9_29_1_part_0.npy
-│            └── predictions_testing_2022_9_29_1_part_1.npy
+│            └── testing_2022_9_29_1_predictions.npy
+│            └── testing_2022_9_29_1_residuals.npy
+│            └── inference_pod_id_40f6b928-9ac6-4824-9031-a52f5d529940_predictions.npy
+│            └── inference_pod_id_40f6b928-9ac6-4824-9031-a52f5d529940_residuals.npy
 
 ```
 

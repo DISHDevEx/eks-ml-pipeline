@@ -115,12 +115,12 @@ def model_evaluation_pipeline(encode_decode_model,
     results = encode_decode_model.predict(testing_tensor)
     
     ###Save predictions
-    for i, result in enumerate(results):
-        print(f'predictions_{test_data_filename.split(".")[-2]}_part_{i}.npy')
+    for label, result in zip(['predictions', 'residuals'], results):
+        print(f'{test_data_filename.split(".")[-2]}_{label}.npy')
         s3_utils.write_tensor(tensor = result, 
                               folder = "models", 
                               type_ = "predictions", 
-                              file_name = f'predictions_{test_data_filename.split(".")[-2]}_part_{i}.npy')
+                              file_name = f'{test_data_filename.split(".")[-2]}_{label}.npy')
         
         
     #Delete locally saved model
