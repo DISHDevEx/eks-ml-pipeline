@@ -1,3 +1,8 @@
+"""
+An example implementation of running a PySpark job on EMR Serverless 
+via the command line.
+"""    
+
 from emr_serverless import EMRServerless
 import argparse
 
@@ -43,6 +48,7 @@ def parse_args():
         )
 
     return parser.parse_args()
+
 
 args = parse_args()
 
