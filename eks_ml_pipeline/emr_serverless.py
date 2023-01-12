@@ -1,13 +1,8 @@
 """
-PySpark job on EMR Serverless
-
-When run as a script 
-
-
+Class for PySpark jobs on EMR Serverless.
 """
 
 import gzip
-import argparse
 import boto3
 
 
@@ -15,12 +10,14 @@ class EMRServerless:
     """
     An example implementation of running a PySpark job on EMR Serverless.
 
-    This class provides support for creating an EMR Serverless Spark
-    application, running a job, fetching driver logs, and shutting the
-    application back down.
+    Provides support for 
+    creating an EMR Serverless Spark application, 
+    running a job, 
+    fetching driver logs, and 
+    shutting the application down.
 
-    By default, all calls are synchronous in that they wait for the
-    application to reach the desired state.
+    By default, all calls are synchronous; 
+    they wait for the application to reach the desired state.
     - `create_application` waits for the `CREATED` state.
     - `start_application` waits for the `STARTED` state.
     - `stop_application` waits for the `STOPPED state.
@@ -45,7 +42,8 @@ class EMRServerless:
         """
         if self.application_id is not None:
             raise Exception(
-                f"Application already created (application_id: `{self.application_id}`)"
+                "Application already created (application_id: "
+                + f"`{self.application_id}`)"
             )
 
         response = self.client.create_application(
@@ -70,7 +68,7 @@ class EMRServerless:
         if self.application_id is None:
             raise Exception(
                 "No application_id - please use creation_application first."
-            )
+                )
 
         self.client.start_application(applicationId=self.application_id)
 
@@ -92,9 +90,11 @@ class EMRServerless:
         app_stopped = False
         while wait and not app_stopped:
             if application_id is None:
-                response = self.client.get_application(applicationId=self.application_id)
+                response = self.client.get_application(
+                    applicationId=self.application_id)
             else:
-                response = self.client.get_application(applicationId=application_id)
+                response = self.client.get_application(
+                    applicationId=application_id)
             app_stopped = response.get("application").get("state") == "STOPPED"
 
         print("Successfully stopped app")
@@ -118,9 +118,9 @@ class EMRServerless:
             job_role_arn: str = None,
             custom_spark_config: str = None,
             wait: bool = True,
-            arguments: list = None) -> str:
+            ) -> str:
         """
-        Runs the Spark job identified by `script_location`.
+        Run the Spark job identified by `script_location`.
 
         By default, spark-submit parameters are hard-coded and logs are sent to
         the provided s3_bucket_name.
@@ -147,7 +147,7 @@ class EMRServerless:
                          + "--conf spark.emr-serverless.driverEnv"
                          + ".PYSPARK_PYTHON=./environment/bin/python "
                          + "--conf spark.executorEnv.PYSPARK_PYTHON="
-                         + "./environment/bin/python {custom_spark_config}"),
+                         + f"./environment/bin/python {custom_spark_config}"),
                 }
             },
             configurationOverrides={
@@ -161,8 +161,9 @@ class EMRServerless:
         self.job_run_id = response.get("jobRunId")
         print(f"job id : {self.job_run_id}")
 
-        ## Commenting out below lines to allow flexibility to cancel jobs if needed
-        ## Feel free to uncomment them as per requirement
+        print(f'Wait policy is currently {wait}.')
+        ## To allow flexibility to cancel jobs if needed
+        ## feel free to uncomment the following
         # job_done = False
         # while wait and not job_done:
         #     jr_response = self.get_job_run()
@@ -171,17 +172,23 @@ class EMRServerless:
         #         "FAILED",
         #         "CANCELLING",
         #         "CANCELLED",
-        #     ]
+        #         ]
 
         return self.job_run_id
 
     def get_job_run(self) -> dict:
+        """
+        Get the configuration and status of the job.
+        """
+#         client = boto3.client("emr-serverless")
         response = self.client.get_job_run(
-            applicationId=self.application_id, jobRunId=self.job_run_id
-        )
+            applicationId = self.application_id, jobRunId = self.job_run_id)
         return response.get("jobRun")
 
     def cancel_job_run(self, job_run_id=None) -> dict:
+        """
+        Discontinue the job if it is running.
+        """
         if job_run_id is None:
             response = self.client.cancel_job_run(
                 applicationId=self.application_id, jobRunId=self.job_run_id
@@ -200,8 +207,8 @@ class EMRServerless:
         """
         s3_client = boto3.client("s3")
         file_location = (f"{self.s3_log_prefix}/applications/"
-                         + "{self.application_id}/jobs/{self.job_run_id}/"
-                         + "SPARK_DRIVER/{log_type}.gz")
+                         + f"{self.application_id}/jobs/{self.job_run_id}/"
+                         + f"SPARK_DRIVER/{log_type}.gz")
         try:
             response = s3_client.get_object(
                 Bucket=s3_bucket_name, Key=file_location)
