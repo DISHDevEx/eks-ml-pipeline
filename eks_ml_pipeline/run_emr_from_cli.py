@@ -1,14 +1,14 @@
 """
-An example implementation of running a PySpark job on EMR Serverless 
+An example implementation of running a PySpark job on EMR Serverless
 via the command line.
-"""    
+"""
 
-from emr_serverless import EMRServerless
 import argparse
+from eks_ml_pipeline import EMRServerless
 
 def parse_args():
     """
-    Prepare the info given with python execution command 
+    Prepare the info given with python execution command
     for passing to the method EMRServerless.run_spark_job
     """
     parser = argparse.ArgumentParser()
@@ -16,8 +16,8 @@ def parse_args():
         "required named arguments"
         )  # to display hyphen-prefixed args under "required arguments" group
     required_named.add_argument(
-        "--job-role-arn", 
-        help = "EMR Serverless IAM Job Role ARN", 
+        "--job-role-arn",
+        help = "EMR Serverless IAM Job Role ARN",
         required = False
         )
     required_named.add_argument(
