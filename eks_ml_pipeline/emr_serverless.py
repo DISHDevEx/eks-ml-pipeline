@@ -10,13 +10,13 @@ class EMRServerless:
     """
     An example implementation of running a PySpark job on EMR Serverless.
 
-    Provides support for 
-    creating an EMR Serverless Spark application, 
-    running a job, 
-    fetching driver logs, and 
+    Provides support for
+    creating an EMR Serverless Spark application,
+    running a job,
+    fetching driver logs, and
     shutting the application down.
 
-    By default, all calls are synchronous; 
+    By default, all calls are synchronous;
     they wait for the application to reach the desired state.
     - `create_application` waits for the `CREATED` state.
     - `start_application` waits for the `STARTED` state.
@@ -32,7 +32,8 @@ class EMRServerless:
         self.job_run_id = job_run_id
 
     def __str__(self):
-        return f"EMR Serverless {self.app_type} Application: {self.application_id}"
+        return (f"EMR Serverless {self.app_type} "
+                + "Application: {self.application_id}")
 
     def create_application(
             self, name: str, release_label: str, wait: bool = True):
