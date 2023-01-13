@@ -44,10 +44,6 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 
 ```
 
-<<<<<<< HEAD
-
-### __Running EMR Serverless jobs from Sagemaker__
-=======
 ### __ inital project setup__
 1. Check the path
 ```console
@@ -68,7 +64,6 @@ setup_runner()
 ```
 
 ### __Running EMR Serverless jobs__
->>>>>>> origin
 
 __us-east-1 applications:__
 * pattern-detection-emr-serverless : **00f6muv5dgv8n509**
@@ -102,25 +97,6 @@ For examples on how to run the jobs via CLI, refer to the documentation [here](h
 The notebook should be in the ```'/root/eks-ml-pipeline'``` path.
 Follow the below steps to configure the basic setup to launch EMR Serverless apllications from Sagemaker Notebook:
 
-<<<<<<< HEAD
-1. Check the path 
-```console
-pwd
-```
-2. If not already installed, install msspackages by using the .whl file (this assumes that the whl file already exists in the below location)
-```console
-!pip install /root/msspackages/dist/msspackages-0.0.7-py3-none-any.whl
-```
-3. Install the necessary requirements
-```console
-pip install -r requirements.txt
-```
-4. Import the EMRServerless class
-```console
-from eks_ml_pipeline import EMRServerless
-```
-For detailed step on how to submit a new job to EMR serverless application, refer to the documentaion [here](https://dish-wireless-network.atlassian.net/wiki/spaces/~6329e5517f85f167779caffe/pages/318669446/EMR+Serverless+-+How+to+Guide#2.a-When-submitting-a-new-job-to-EMR-serverless-application).
-=======
 1. Import the EMRServerless class
 ```console
 from eks_ml_pipeline import EMRServerless
@@ -310,4 +286,3 @@ inference_pipeline(pod_inference_input(), pod_pca_input(), model_evaluation_pipe
 inference_pipeline(container_inference_input(), container_pca_input(), model_evaluation_pipeline)
     
 ```
->>>>>>> origin
