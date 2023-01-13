@@ -1,5 +1,8 @@
 """
 Train and save Anomaly Detection models with this single function.
+
+Contributed by Evgeniya Dontsova and Vinayak Sharma
+MSS Dish 5g - Pattern Detection
 """
 
 import numpy as np
@@ -110,7 +113,7 @@ def model_training_pipeline(encode_decode_model,
         save_model_local_path_onnx = (save_model_local_path + '/'
                                       + model_filename + ".onnx")
         #Save model locally in .onnx format
-        tf2onnx.convert.from_keras(
+        model_proto, external_tensor_storage = tf2onnx.convert.from_keras(
             encode_decode_model.nn, output_path = save_model_local_path_onnx)
         s3_utils.upload_file(local_path = save_model_local_path_onnx,
                              bucket_name = model_bucketname,
