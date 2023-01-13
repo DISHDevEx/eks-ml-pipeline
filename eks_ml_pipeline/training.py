@@ -113,7 +113,7 @@ def model_training_pipeline(encode_decode_model,
         save_model_local_path_onnx = (save_model_local_path + '/'
                                       + model_filename + ".onnx")
         #Save model locally in .onnx format
-        model_proto, external_tensor_storage = tf2onnx.convert.from_keras(
+        tf2onnx.convert.from_keras(
             encode_decode_model.nn, output_path = save_model_local_path_onnx)
         s3_utils.upload_file(local_path = save_model_local_path_onnx,
                              bucket_name = model_bucketname,
