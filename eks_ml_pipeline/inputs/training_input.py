@@ -1,15 +1,24 @@
+"""
+A script to feed inputs to the training pipeline. 
+
+To use
+1. choose the function below corresponding to the model of your choice
+2. modify the data and model imput paramters as needed
+3. feed the input function to model_training_pipeline
+
+e.g. use
+
+model_training_pipeline(*node_pca_input())
+
+Contributed by Evgeniya Dontsova and Vinayak Sharma
+MSS Dish 5g - Pattern Detection
+"""
+
 from msspackages import get_features
 from ..models import AutoencoderModelDish5g
 from ..models import PcaModelDish5g
 
 
-"""
-Contributed by Evgeniya Dontsova and Vinayak Sharma
-MSS Dish 5g - Pattern Detection
-
-these are the parameters to our pipeline
-
-"""
 
 def node_autoencoder_input():
     
