@@ -23,10 +23,10 @@ def node_ad_preprocessing(input_feature_group_name, input_feature_group_version,
     ------
             input_feature_group_name: STRING
             json name to get the required features
-            
+
             input_feature_group_version: STRING
-            json version to get the latest features 
-            
+            json version to get the latest features
+
             input_year : STRING | Int
             the year from which to read data, leave empty for all years
 
@@ -38,15 +38,15 @@ def node_ad_preprocessing(input_feature_group_name, input_feature_group_version,
 
             input_hour: STRING | Int
             the hour from which to read data, leave empty for all hours
-            
-            input_setup: STRING 
+
+            input_setup: STRING
             kernel config
-    
+
     outputs
     -------
             features_df : processed features dataFrame
             processed_node_df: pre processed node dataframe
-            
+
     """
 
     pyspark_node_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Node')
@@ -58,14 +58,14 @@ def node_ad_preprocessing(input_feature_group_name, input_feature_group_version,
         features_df = get_features(input_feature_group_name,input_feature_group_version)
         features = features_df["feature_name"].to_list()
         processed_features = feature_processor.cleanup(features)
-        
+
         model_parameters = features_df["model_parameters"].iloc[0]
         time_steps = model_parameters["time_steps"]
 
         #filter inital node df based on request features
         node_df = pyspark_node_df.select("Timestamp", "InstanceId", *processed_features)
         node_df = node_df.withColumn("Timestamp",(col("Timestamp")/1000).cast("timestamp"))
-        
+
         # Drop NA
         cleaned_node_df = node_df.na.drop(subset=processed_features)
 
@@ -73,10 +73,10 @@ def node_ad_preprocessing(input_feature_group_name, input_feature_group_version,
         quality_filtered_node_df = cleaned_node_df.groupBy("InstanceId").agg(count("Timestamp").alias("timestamp_count"))
         # to get data that is closer to 1min apart
         quality_filtered_nodes = quality_filtered_node_df.filter(col("timestamp_count") >= 2*time_steps)
-        
-        #Processed Node DF                                                      
+
+        #Processed Node DF
         processed_node_df = cleaned_node_df.filter(col("InstanceId").isin(quality_filtered_nodes["InstanceId"]))
-        
+
         return features_df, processed_node_df
 
     else:
@@ -90,16 +90,16 @@ def node_ad_feature_engineering(instance_id, input_df, input_features, input_sca
     ------
             instance_id: String
             randomly pick instance id
-            
+
             input_df: df
-            preprocessing and filtered node df 
-            
+            preprocessing and filtered node df
+
             input_features: list
             list of selected features
-            
+
             input_scaled_features: list
             list of tobe scaled features
-            
+
             input_time_steps: int
             model parameter time steps
 
@@ -107,7 +107,7 @@ def node_ad_feature_engineering(instance_id, input_df, input_features, input_sca
     -------
             node_fe_df: df
             training data df for exposing it as data product
-            
+
     """
 
     ##pick random df, and normalize
@@ -132,24 +132,24 @@ def node_list_generator(input_data_type, input_split_ratio, input_node_df, input
     ------
             input_data_type: String
             builds n_samples based on input string
-            
+
             input_split_ratio: list
             list of split parameters
-            
+
             input_node_df: df
-            preprocessing and filtered node df 
-            
+            preprocessing and filtered node df
+
             input_node_features_df: df
             processed node features df
- 
+
     outputs
     -------
             node_list: list
             randomly selected list of node id's with replacement
-            
+
             input_node_df: df
             final node df with newly added columns
-            
+
     """
     model_parameters = input_node_features_df["model_parameters"].iloc[0]
     time_steps = model_parameters["time_steps"]
@@ -159,13 +159,13 @@ def node_list_generator(input_data_type, input_split_ratio, input_node_df, input
         n_samples = batch_size * model_parameters["train_sample_multiplier"]
     elif input_data_type == 'test':
         n_samples = round((batch_size * model_parameters["train_sample_multiplier"]* input_split_ratio[1])/ input_split_ratio[0])
-        
-    
+
+
     input_node_df['freq'] = input_node_df.groupby('InstanceId')['InstanceId'].transform('count')
     input_node_df = input_node_df[input_node_df["freq"] > time_steps]
-    
+
     node_list = input_node_df['InstanceId'].sample(n_samples, replace=True).to_list()
-    
+
     return node_list, input_node_df
 
 
@@ -173,7 +173,7 @@ def node_fe_pipeline(feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
             partition_hour, spark_config_setup,
             bucket):
-    
+
     ##building file name dynamically
     if partition_hour == -1:
         file_name = f'{partition_year}_{partition_month}_{partition_day}'
@@ -181,10 +181,10 @@ def node_fe_pipeline(feature_group_name, feature_version,
         file_name = f'{partition_year}_{partition_month}'
     else:
         file_name = f'{partition_year}_{partition_month}_{partition_day}_{partition_hour}'
-    
+
     #pre processing
     node_features_data, node_processed_data = node_ad_preprocessing(feature_group_name, feature_version, partition_year, partition_month, partition_day, partition_hour, spark_config_setup)
-    
+
     #parsing model parameters
     scaled_features = []
     model_parameters = node_features_data["model_parameters"].iloc[0]
@@ -201,7 +201,7 @@ def node_fe_pipeline(feature_group_name, feature_version,
     #converting pyspark df's to pandas df
     node_train_data = node_train_data.toPandas()
     node_test_data = node_test_data.toPandas()
-    
+
     #intializing s3 utils
     s3_utils = S3Utilities(bucket,feature_group_name, feature_version)
 
@@ -216,12 +216,12 @@ def node_fe_pipeline(feature_group_name, feature_version,
     #generating random selected list of node id's
     selected_node_train_list, processed_node_train_data = node_list_generator( 'train', [node_train_split,node_test_split], node_train_data, node_features_data)
     selected_node_test_list, processed_node_test_data = node_list_generator( 'test', [node_train_split,node_test_split], node_test_data, node_features_data)
-    
+
     #getting number of cores per kernel
     num_cores = multiprocessing.cpu_count()
 
     #Train data feature engineering
-    node_training_list = multiprocessing.Pool(num_cores).map(partial(node_ad_feature_engineering, 
+    node_training_list = multiprocessing.Pool(num_cores).map(partial(node_ad_feature_engineering,
                          input_df=processed_node_train_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_train_list)
     node_training_df = pd.concat(node_training_list)
     node_training_tensor = np.array(list(map(lambda x: x.to_numpy(), node_training_list)))
@@ -230,7 +230,7 @@ def node_fe_pipeline(feature_group_name, feature_version,
     s3_utils.awswrangler_pandas_dataframe_to_s3(node_training_df, "data" , "pandas_df", f'training_{file_name}.parquet')
 
     #Test data feature engineering
-    node_testing_list = multiprocessing.Pool(num_cores).map(partial(node_ad_feature_engineering, 
+    node_testing_list = multiprocessing.Pool(num_cores).map(partial(node_ad_feature_engineering,
                          input_df=processed_node_test_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_node_test_list)
     node_testing_df = pd.concat(node_testing_list)
     node_testing_tensor = np.array(list(map(lambda x: x.to_numpy(), node_testing_list)))
