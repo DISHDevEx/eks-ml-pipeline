@@ -60,6 +60,10 @@ def node_autoencoder_input():
         train_data_filename.split(".")[-2] # all preceeding extension
         ])
 
+    save_model_locations = [save_model_local_path,
+                            model_bucketname,
+                            model_filename,]
+
     #********************************************#
     #********** initialize model class **********#
     #********************************************#
@@ -78,9 +82,8 @@ def node_autoencoder_input():
             encode_decode_model,
             feature_selection,
             data_locations,
-#             data_bucketname, train_data_filename, test_data_filename,
             # save model locations
-            save_model_local_path, model_bucketname, model_filename,
+            save_model_locations,
             ]
 
 def node_pca_input():
@@ -126,6 +129,10 @@ def node_pca_input():
          train_data_filename.split(".")[-2] # all preceeding extension
         ])
 
+    save_model_locations = [save_model_local_path,
+                            model_bucketname,
+                            model_filename,]
+
     #********************************************#
     #********** initialize model class **********#
     #********************************************#
@@ -143,7 +150,7 @@ def node_pca_input():
     return [encode_decode_model,
             feature_selection,
             data_locations,
-            save_model_local_path, model_bucketname, model_filename,
+            save_model_locations,
             ]
 
 def pod_autoencoder_input():
@@ -187,6 +194,10 @@ def pod_autoencoder_input():
          train_data_filename.split(".")[-2] # All preceeding extension.
         ])
 
+    save_model_locations = [save_model_local_path,
+                            model_bucketname,
+                            model_filename,]
+
     #********************************************#
     #********** initialize model class **********#
     #********************************************#
@@ -204,7 +215,7 @@ def pod_autoencoder_input():
     return [encode_decode_model,
             feature_selection,
             data_locations,
-            save_model_local_path, model_bucketname, model_filename,
+            save_model_locations,
             ]
 
 def pod_pca_input():
@@ -249,6 +260,10 @@ def pod_pca_input():
          train_data_filename.split(".")[-2] # All preceeding extension.
         ])
 
+    save_model_locations = [save_model_local_path,
+                            model_bucketname,
+                            model_filename,]
+
     #********************************************#
     #********** initialize model class **********#
     #********************************************#
@@ -266,7 +281,7 @@ def pod_pca_input():
     return [encode_decode_model,
             feature_selection,
             data_locations,
-            save_model_local_path, model_bucketname, model_filename,
+            save_model_locations
             ]
 
 def container_autoencoder_input():
@@ -309,6 +324,10 @@ def container_autoencoder_input():
          train_data_filename.split(".")[-2] # All preceeding extension.
          ])
 
+    save_model_locations = [save_model_local_path,
+                        model_bucketname,
+                        model_filename,]
+
     #********************************************#
     #********** initialize model class **********#
     #********************************************#
@@ -326,7 +345,7 @@ def container_autoencoder_input():
     return [encode_decode_model,
             feature_selection,
             data_locations,
-            save_model_local_path, model_bucketname, model_filename,
+            save_model_locations,
             ]
 
 def container_pca_input():
@@ -369,6 +388,10 @@ def container_pca_input():
          train_data_filename.split(".")[-2] # All preceeding extension.
         ])
 
+    save_model_locations = [save_model_local_path,
+                            model_bucketname,
+                            model_filename,]
+
     #********************************************#
     #********** initialize model class **********#
     #********************************************#
@@ -386,5 +409,5 @@ def container_pca_input():
     return [encode_decode_model,
             feature_selection,
             data_locations,
-            save_model_local_path, model_bucketname, model_filename,
+            save_model_locations,
             ]
