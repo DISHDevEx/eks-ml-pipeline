@@ -15,8 +15,8 @@ class ModelTraining:
     Parameters
     ------
     training_inputs : List
-        Intended to be passed from the functions defined in the module
-        named training_input.py.
+        Intended to from the functions defined in the module
+        named inputs/training_input.py.
 
     outputs
     -------
@@ -53,11 +53,7 @@ class ModelTraining:
         self.initialize_s3()
         training_tensor = self.s3_utilities.read_tensor(folder = "data",
             type_ = "tensors", file_name = self.train_data_filename)
-        return training_tensor
-
-    def ensure_np_type(self):
-        """Additional data cleaning: converting everything into np.float32"""
-        training_tensor = self.load_train_data()
+        # ensure np type
         training_tensor = np.asarray(training_tensor).astype(np.float32)
         return training_tensor
 
@@ -72,7 +68,7 @@ class ModelTraining:
         -------
             None
         """
-        training_tensor = self.ensure_np_type()
+        training_tensor = self.load_train_data()
         model = self.encode_decode_model.fit(training_tensor)
         print('\nModel is trained.')
         ###Save model
@@ -80,7 +76,8 @@ class ModelTraining:
         print('\nModel is saved in memory as the attribute .model.')
         self.encode_decode_model.save_model(self.save_model_local_path)
         print(f'\nModel is saved locally in {self.save_model_local_path}.')
-        print('\nTo save in S3 use the .save_to_s3 method.')
+        print('\nTo save in S3 use the .save_to_s3 method. '
+              + 'Note the option to clean local')
 
 
     def save_to_s3(self,
@@ -114,10 +111,11 @@ class ModelTraining:
 
         if upload_zip:
             #save zipped model object to s3 bucket
-            self.s3_utilities.zip_and_upload(local_path = self.save_model_local_path,
-                                    folder = "models",
-                                    type_ = "zipped_models",
-                                    file_name = self.model_filename + ".zip")
+            self.s3_utilities.zip_and_upload(
+                local_path = self.save_model_local_path,
+                folder = "models",
+                type_ = "zipped_models",
+                file_name = self.model_filename + ".zip")
         if upload_onnx:
             # Save onnx model object to s3 bucket.
             save_model_local_path_onnx = (self.save_model_local_path + '/'
@@ -147,3 +145,4 @@ class ModelTraining:
         if delete_local:
             # Delete locally saved model
             self.encode_decode_model.clean_model(self.save_model_local_path)
+            print(f'Local file {self.save_model_local_path} deleted.')
