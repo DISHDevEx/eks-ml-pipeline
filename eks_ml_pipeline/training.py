@@ -22,6 +22,7 @@ class ModelTraining:
     -------
     None
     """
+
     def __init__(self, training_inputs):
         # model
         self.encode_decode_model = training_inputs[0]
@@ -33,9 +34,7 @@ class ModelTraining:
 
         # save_model_locations = [save_model_local_path, model_bucketname, model_filename,]
         self.save_model_locations = training_inputs[3]
-#         self.save_model_local_path = training_inputs[3]
-#         self.model_bucketname = training_inputs[4]
-#         self.model_filename = training_inputs[5]
+
         # other
         self.model = None
         self.s3_utilities = None

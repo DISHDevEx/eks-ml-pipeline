@@ -1,15 +1,14 @@
-
 """
 A script to feed inputs to the training pipeline.
 
 To use
 1. choose the function below corresponding to the model of your choice
 2. modify the data and model imput paramters as needed
-3. feed the input function to model_training_pipeline
+3. feed the input function to the class in training.py
 
 e.g. use
 
-model_training_pipeline(node_pca_input())
+ModelTraining(node_pca_input())
 
 Contributed by Evgeniya Dontsova, Vinayak Sharma, and David Cherney
 MSS Dish 5g - Pattern Detection
