@@ -23,18 +23,20 @@ class ModelTraining:
     None
     """
     def __init__(self, training_inputs):
-        # model and feature specification
+        # model
         self.encode_decode_model = training_inputs[0]
-        self.feature_group_name = training_inputs[1]
-        self.feature_input_version = training_inputs[2]
+        # feature_selection
+        self.feature_selection = training_inputs[1]
+#         self.feature_group_name = training_inputs[1]
+#         self.feature_input_version = training_inputs[2]
         # data locations
-        self.data_bucketname = training_inputs[3]
-        self.train_data_filename = training_inputs[4]
-        self.test_data_filename = training_inputs[5]
+        self.data_bucketname = training_inputs[2]
+        self.train_data_filename = training_inputs[3]
+        self.test_data_filename = training_inputs[4]
         # save model locations
-        self.save_model_local_path = training_inputs[6]
-        self.model_bucketname = training_inputs[7]
-        self.model_filename = training_inputs[8]
+        self.save_model_local_path = training_inputs[5]
+        self.model_bucketname = training_inputs[6]
+        self.model_filename = training_inputs[7]
         # other
         self.model = None
         self.s3_utilities = None
@@ -45,8 +47,8 @@ class ModelTraining:
     def initialize_s3(self):
         """Initialize s3 utilities class"""
         self.s3_utilities = S3Utilities(bucket_name = self.data_bucketname,
-                               model_name = self.feature_group_name,
-                               version = self.feature_input_version)
+                               model_name = self.feature_selection[0],
+                               version = self.feature_selection[1])
 
     def load_train_data(self):
         """Load training data: read from s3 bucket"""
