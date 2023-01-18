@@ -27,16 +27,14 @@ class ModelTraining:
         self.encode_decode_model = training_inputs[0]
         # feature_selection = [feature_group_name,feature_input_version]
         self.feature_selection = training_inputs[1]
-#         self.feature_group_name = training_inputs[1]
-#         self.feature_input_version = training_inputs[2]
-        # data locations
-        self.data_bucketname = training_inputs[2]
-        self.train_data_filename = training_inputs[3]
-        self.test_data_filename = training_inputs[4]
+
+        # data_locations = [data_bucketname, train_data_filename, test_data_filename]
+        self.data_locations = training_inputs[2]
+
         # save model locations
-        self.save_model_local_path = training_inputs[5]
-        self.model_bucketname = training_inputs[6]
-        self.model_filename = training_inputs[7]
+        self.save_model_local_path = training_inputs[3]
+        self.model_bucketname = training_inputs[4]
+        self.model_filename = training_inputs[5]
         # other
         self.model = None
         self.s3_utilities = None
@@ -46,15 +44,19 @@ class ModelTraining:
 
     def initialize_s3(self):
         """Initialize s3 utilities class"""
-        self.s3_utilities = S3Utilities(bucket_name = self.data_bucketname,
+        self.s3_utilities = S3Utilities(
+            bucket_name = self.data_locations[0], # data_bucketname
                                model_name = self.feature_selection[0],
                                version = self.feature_selection[1])
 
     def load_train_data(self):
         """Load training data: read from s3 bucket"""
         self.initialize_s3()
-        training_tensor = self.s3_utilities.read_tensor(folder = "data",
-            type_ = "tensors", file_name = self.train_data_filename)
+        training_tensor = self.s3_utilities.read_tensor(
+            folder = "data",
+            type_ = "tensors",
+            file_name = self.data_locations[1] # train_data_filename
+            )
         # ensure np type
         training_tensor = np.asarray(training_tensor).astype(np.float32)
         return training_tensor
