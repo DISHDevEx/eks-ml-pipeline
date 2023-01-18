@@ -1,4 +1,5 @@
 
+
 """
 EKS ML Pipeline
 A package to ETL, fit, and inference machine learning on data about
@@ -61,3 +62,5 @@ from .evaluation import model_evaluation_pipeline
 from .inference import inference_data_builder
 from .inference import build_processed_data
 from .inference import inference_pipeline
+
+from .secrets import data_bucketname
