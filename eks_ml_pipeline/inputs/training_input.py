@@ -99,12 +99,15 @@ def node_pca_input():
     #*****************************************************#
 
     ##generate pipeline input params for pca
+    #feature
     feature_group_name = "node_pca_ad"
     feature_input_version = "v0.0.1"
+    feature_selection = [feature_group_name,feature_input_version]
+    # data
     data_bucketname = data_bucket()
     train_data_filename = "training_2022_9_29_1.npy"
     test_data_filename = "testing_2022_9_29_1.npy"
-
+    #
     save_model_local_path = "../node_pca.npy"
     model_bucketname = model_bucket()
     model_name = "node_pca_ad"
@@ -133,7 +136,8 @@ def node_pca_input():
         )
 
     return [encode_decode_model,
-            feature_group_name, feature_input_version,
+            feature_selection,
+#             feature_group_name, feature_input_version,
             data_bucketname, train_data_filename, test_data_filename,
             save_model_local_path, model_bucketname, model_filename,
             ]
