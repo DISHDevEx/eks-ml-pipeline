@@ -17,7 +17,7 @@ MSS Dish 5g - Pattern Detection
 from msspackages import get_features
 from ..models import AutoencoderModelDish5g
 from ..models import PcaModelDish5g
-
+from ..secrets import data_bucketname as data_bucket
 
 
 def node_autoencoder_input():
@@ -40,7 +40,7 @@ def node_autoencoder_input():
 
     feature_group_name = "node_autoencoder_ad"
     feature_input_version = "v0.0.2"
-    data_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
+    data_bucketname = data_bucket()
     train_data_filename = "training_2022_9_29_1.npy"
     test_data_filename = "testing_2022_9_29_1.npy"
 
@@ -101,7 +101,7 @@ def node_pca_input():
     ##generate pipeline input params for pca
     feature_group_name = "node_pca_ad"
     feature_input_version = "v0.0.1"
-    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    data_bucketname = data_bucket()
     train_data_filename = "training_2022_9_29_1.npy"
     test_data_filename = "testing_2022_9_29_1.npy"
 
@@ -158,7 +158,7 @@ def pod_autoencoder_input():
 
     feature_group_name = "pod_autoencoder_ad"
     feature_input_version = "v0.0.2"
-    data_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
+    data_bucketname = data_bucket()
     train_data_filename = "training_2022_9_9_1.npy"
     test_data_filename = "testing_2022_9_9_1.npy"
 
@@ -216,7 +216,7 @@ def pod_pca_input():
     ##generate pipeline input params for pca
     feature_group_name = "pod_pca_ad"
     feature_input_version = "v0.0.1"
-    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    data_bucketname = data_bucket()
     train_data_filename = "training_2022_9_9_1.npy"
     test_data_filename = "testing_2022_9_9_1.npy"
 
@@ -273,7 +273,7 @@ def container_autoencoder_input():
 
     feature_group_name = "container_autoencoder_ad"
     feature_input_version = "v0.0.1"
-    data_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
+    data_bucketname = data_bucket()
     train_data_filename = "training_2022_5_5_1.npy"
     test_data_filename = "testing_2022_5_5_1.npy"
 
@@ -330,7 +330,7 @@ def container_pca_input():
     ##generate pipeline input params for pca
     feature_group_name = "container_pca_ad"
     feature_input_version = "v0.0.1"
-    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    data_bucketname = data_bucket()
     train_data_filename = "training_2022_5_5_1.npy"
     test_data_filename = "testing_2022_5_5_1.npy"
 
