@@ -31,10 +31,11 @@ class ModelTraining:
         # data_locations = [data_bucketname, train_data_filename, test_data_filename]
         self.data_locations = training_inputs[2]
 
-        # save model locations
-        self.save_model_local_path = training_inputs[3]
-        self.model_bucketname = training_inputs[4]
-        self.model_filename = training_inputs[5]
+        # save_model_locations = [save_model_local_path, model_bucketname, model_filename,]
+        self.save_model_locations = training_inputs[3]
+#         self.save_model_local_path = training_inputs[3]
+#         self.model_bucketname = training_inputs[4]
+#         self.model_filename = training_inputs[5]
         # other
         self.model = None
         self.s3_utilities = None
@@ -78,8 +79,8 @@ class ModelTraining:
         ###Save model
         self.model = model
         print('\nModel is saved in memory as the attribute .model.')
-        self.encode_decode_model.save_model(self.save_model_local_path)
-        print(f'\nModel is saved locally in {self.save_model_local_path}.')
+        self.encode_decode_model.save_model(self.save_model_locations[0])
+        print(f'\nModel is saved locally in {self.save_model_locations[0]}.')
         print('\nTo save in S3 use the .save_to_s3 method.'
               + '\nNote the option to delete the local copy.')
 
@@ -120,26 +121,27 @@ class ModelTraining:
         if upload_zip:
             #save zipped model object to s3 bucket
             self.s3_utilities.zip_and_upload(
-                local_path = self.save_model_local_path,
+                local_path = self.save_model_locations[0], # save_model_local_path
                 folder = "models",
                 type_ = "zipped_models",
-                file_name = self.model_filename + ".zip")
+                file_name = self.save_model_locations[2] # model_filename
+                    + ".zip")
         if upload_onnx:
             # Save onnx model object to s3 bucket.
-            save_model_local_path_onnx = (self.save_model_local_path + '/'
-                                          + self.model_filename + ".onnx")
+            save_model_local_path_onnx = (self.save_model_locations[0] + '/'
+                                          + self.save_model_locations[2] + ".onnx")
             # Save model locally in .onnx format.
             tf2onnx.convert.from_keras(
                 self.encode_decode_model.nn,
                 output_path = save_model_local_path_onnx)
             self.s3_utilities.upload_file(
                 local_path = save_model_local_path_onnx,
-                bucket_name = self.model_bucketname,
+                bucket_name = self.save_model_locations[1],
                 key = '/'.join(
                     [self.feature_selection[0], # feature_group_name
                      self.feature_selection[1], # feature_input_version
                      "models", "onnx_models",
-                     self.model_filename + ".onnx"]
+                     self.save_model_locations[2] + ".onnx"]
                      )
                 )
 
@@ -148,10 +150,10 @@ class ModelTraining:
             self.s3_utilities.write_tensor(tensor = self.model,
                                   folder = "models",
                                   type_ = "npy_models",
-                                  file_name = self.model_filename + ".npy")
+                                  file_name = self.save_model_locations[2] + ".npy")
             print('\nModel uploaded to S3 as .npy type.')
 
         if delete_local:
             # Delete locally saved model
-            self.encode_decode_model.clean_model(self.save_model_local_path)
-            print(f'Local file {self.save_model_local_path} deleted.')
+            self.encode_decode_model.clean_model(self.save_model_locations[0])
+            print(f'Local file {self.save_model_locations[0]} deleted.')
