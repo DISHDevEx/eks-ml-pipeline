@@ -25,7 +25,7 @@ class ModelTraining:
     def __init__(self, training_inputs):
         # model
         self.encode_decode_model = training_inputs[0]
-        # feature_selection
+        # feature_selection = [feature_group_name,feature_input_version]
         self.feature_selection = training_inputs[1]
 #         self.feature_group_name = training_inputs[1]
 #         self.feature_input_version = training_inputs[2]
@@ -133,12 +133,13 @@ class ModelTraining:
             self.s3_utilities.upload_file(
                 local_path = save_model_local_path_onnx,
                 bucket_name = self.model_bucketname,
-                key = '/'.join([self.feature_group_name,
-                                 self.feature_input_version,
-                                 "models", "onnx_models",
-                                 self.model_filename + ".onnx"]
-                               )
-                                )
+                key = '/'.join(
+                    [self.feature_selection[0], # feature_group_name
+                     self.feature_selection[1], # feature_input_version
+                     "models", "onnx_models",
+                     self.model_filename + ".onnx"]
+                     )
+                )
 
         if upload_npy:
             # Save npy model object to s3 bucket.
@@ -152,4 +153,3 @@ class ModelTraining:
             # Delete locally saved model
             self.encode_decode_model.clean_model(self.save_model_local_path)
             print(f'Local file {self.save_model_local_path} deleted.')
-
