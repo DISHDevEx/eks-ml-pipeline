@@ -122,12 +122,14 @@ class ModelTraining:
 
         if upload_zip:
             #save zipped model object to s3 bucket
+            print(f'*********** {self.save_model_locations[0]}')
             self.s3_utilities.zip_and_upload(
                 local_path = self.save_model_locations[0], # save_model_local_path
                 folder = "models",
                 type_ = "zipped_models",
-                file_name = self.save_model_locations[2] # model_filename
-                    + ".zip")
+                file_name = (self.save_model_locations[2] # model_filename
+                             + ".zip")
+                )
         if upload_onnx:
             # Save onnx model object to s3 bucket.
             save_model_local_path_onnx = (self.save_model_locations[0] + '/'
@@ -164,7 +166,7 @@ class ModelTraining:
 
     def load_test_data(self):
         """Load training data: read from s3 bucket"""
-        self.initialize_s3()
+        self.initialize_s3() # in case user has not ititialized S3 through .train
         testing_tensor = self.s3_utilities.read_tensor(
             folder = "data",
             type_ = "tensors",
@@ -173,6 +175,35 @@ class ModelTraining:
         # ensure np type
         testing_tensor = np.asarray(testing_tensor).astype(np.float32)
         return testing_tensor
+
+    def load_model(self,upload_zip , upload_onnx , upload_npy):
+        ###Load trained model: read from s3 bucket
+        print('\n now this is happening.\n')
+
+        if upload_zip:
+            self.s3_utilities.download_zip(
+                local_path = (self.save_model_locations[0] # save_model_local_path
+                              + '.zip'),
+                folder = "models",
+                type_ = "zipped_models",
+                file_name = (self.save_model_locations[2] # model_filename
+                             + '.zip')
+                )
+
+            self.s3_utilities.unzip(
+                path_to_zip = (self.save_model_locations[0] # save_model_local_path
+                               + '.zip'),
+                extract_location = self.save_model_locations[0] # save_model_local_path
+                )
+
+
+#     if upload_npy:
+#         load_tensor = s3_utils.read_tensor(folder = "models",
+#                                            type_ = "npy_models",
+#                                            file_name = (self.save_model_locations[2] # model_filename
+# + ".npy")
+#             )
+#         np.save(save_model_local_path, load_tensor)
 
 
     def evaluate(self,
@@ -211,7 +242,9 @@ class ModelTraining:
         testing_tensor = self.load_test_data()
 
         # load model: if any of the booleans for loading the model are true run load_model
-        # not yet written
+        if (upload_zip or upload_onnx or upload_npy):
+#             self.encode_decode_model=
+            self.load_model(upload_zip , upload_onnx , upload_npy)
 
         # if model is not in memory and all booleans are false, print a notice
 
@@ -223,7 +256,8 @@ class ModelTraining:
         test_data_filename = self.data_locations[2]
         for label, result in zip(['predictions', 'residuals'], results):
             print(f'{test_data_filename.split(".")[-2]}_{label}.npy')
-            self.s3_utilities.write_tensor(tensor = result,
-                                  folder = "models",
-                                  type_ = "predictions",
-                                  file_name = f'{test_data_filename.split(".")[-2]}_{label}.npy')
+            self.s3_utilities.write_tensor(
+                tensor = result,
+                folder = "models",
+                type_ = "predictions",
+                file_name = f'{test_data_filename.split(".")[-2]}_{label}.npy')
