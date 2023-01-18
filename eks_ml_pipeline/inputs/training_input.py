@@ -40,6 +40,8 @@ def node_autoencoder_input():
 
     feature_group_name = "node_autoencoder_ad"
     feature_input_version = "v0.0.2"
+    feature_selection = [feature_group_name,feature_input_version]
+
     data_bucketname = data_bucket()
     train_data_filename = "training_2022_9_29_1.npy"
     test_data_filename = "testing_2022_9_29_1.npy"
@@ -73,7 +75,8 @@ def node_autoencoder_input():
 
     return [ # model and feature specification
             encode_decode_model,
-            feature_group_name, feature_input_version,
+            feature_selection,
+#             feature_group_name, feature_input_version,
             # data locations
             data_bucketname, train_data_filename, test_data_filename,
             # save model locations
@@ -162,6 +165,8 @@ def pod_autoencoder_input():
 
     feature_group_name = "pod_autoencoder_ad"
     feature_input_version = "v0.0.2"
+    feature_selection = [feature_group_name,feature_input_version]
+
     data_bucketname = data_bucket()
     train_data_filename = "training_2022_9_9_1.npy"
     test_data_filename = "testing_2022_9_9_1.npy"
@@ -194,7 +199,8 @@ def pod_autoencoder_input():
         )
 
     return [encode_decode_model,
-            feature_group_name, feature_input_version,
+            feature_selection,
+#             feature_group_name, feature_input_version,
             data_bucketname, train_data_filename, test_data_filename,
             save_model_local_path, model_bucketname, model_filename,
             ]
@@ -220,6 +226,8 @@ def pod_pca_input():
     ##generate pipeline input params for pca
     feature_group_name = "pod_pca_ad"
     feature_input_version = "v0.0.1"
+    feature_selection = [feature_group_name,feature_input_version]
+
     data_bucketname = data_bucket()
     train_data_filename = "training_2022_9_9_1.npy"
     test_data_filename = "testing_2022_9_9_1.npy"
@@ -252,7 +260,8 @@ def pod_pca_input():
         )
 
     return [encode_decode_model,
-            feature_group_name, feature_input_version,
+            feature_selection,
+#             feature_group_name, feature_input_version,
             data_bucketname, train_data_filename, test_data_filename,
             save_model_local_path, model_bucketname, model_filename,
             ]
@@ -277,6 +286,8 @@ def container_autoencoder_input():
 
     feature_group_name = "container_autoencoder_ad"
     feature_input_version = "v0.0.1"
+    feature_selection = [feature_group_name,feature_input_version]
+
     data_bucketname = data_bucket()
     train_data_filename = "training_2022_5_5_1.npy"
     test_data_filename = "testing_2022_5_5_1.npy"
@@ -309,7 +320,7 @@ def container_autoencoder_input():
         )
 
     return [encode_decode_model,
-            feature_group_name, feature_input_version,
+            feature_selection,
             data_bucketname, train_data_filename, test_data_filename,
             save_model_local_path, model_bucketname, model_filename,
             ]
@@ -334,6 +345,8 @@ def container_pca_input():
     ##generate pipeline input params for pca
     feature_group_name = "container_pca_ad"
     feature_input_version = "v0.0.1"
+    feature_selection = [feature_group_name,feature_input_version]
+
     data_bucketname = data_bucket()
     train_data_filename = "training_2022_5_5_1.npy"
     test_data_filename = "testing_2022_5_5_1.npy"
@@ -365,7 +378,7 @@ def container_pca_input():
         )
 
     return [encode_decode_model,
-            feature_group_name, feature_input_version,
+            feature_selection,
             data_bucketname, train_data_filename, test_data_filename,
             save_model_local_path, model_bucketname, model_filename,
             ]
