@@ -71,9 +71,12 @@ def node_autoencoder_input():
         epochs=1
         )
 
-    return [encode_decode_model,
+    return [ # model and feature specification
+            encode_decode_model,
             feature_group_name, feature_input_version,
+            # data locations
             data_bucketname, train_data_filename, test_data_filename,
+            # save model locations
             save_model_local_path, model_bucketname, model_filename,
             ]
 
