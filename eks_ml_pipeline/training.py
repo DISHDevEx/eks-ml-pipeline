@@ -26,6 +26,7 @@ class ModelTraining:
     def __init__(self, training_inputs):
         # model
         self.encode_decode_model = training_inputs[0]
+
         # feature_selection = [feature_group_name,feature_input_version]
         self.feature_selection = training_inputs[1]
 
@@ -46,8 +47,9 @@ class ModelTraining:
         """Initialize s3 utilities class"""
         self.s3_utilities = S3Utilities(
             bucket_name = self.data_locations[0], # data_bucketname
-                               model_name = self.feature_selection[0],
-                               version = self.feature_selection[1])
+            model_name = self.feature_selection[0], # feature_group_name
+            version = self.feature_selection[1], # feature_input_version
+            )
 
     def load_train_data(self):
         """Load training data: read from s3 bucket"""
@@ -156,3 +158,71 @@ class ModelTraining:
             # Delete locally saved model
             self.encode_decode_model.clean_model(self.save_model_locations[0])
             print(f'Local file {self.save_model_locations[0]} deleted.')
+
+# evaluation methods:
+
+    def load_test_data(self):
+        """Load training data: read from s3 bucket"""
+        self.initialize_s3()
+        testing_tensor = self.s3_utilities.read_tensor(
+            folder = "data",
+            type_ = "tensors",
+            file_name = self.data_locations[2] # test_data_filename
+            )
+        # ensure np type
+        testing_tensor = np.asarray(testing_tensor).astype(np.float32)
+        return testing_tensor
+
+
+    def evaluate(self,
+             upload_zip = False,
+             upload_onnx = False,
+             upload_npy = False,
+             delete_local = False,
+             ):
+        """Evaluate model on test data.
+
+        Default is to use the model created by the .train method
+        that is in memory as the attribute .model.
+        Parameters allow users to obviate training by
+        loading models saved in S3 instead.
+
+
+        Parmeters
+        ---------
+        upload_zip: bool
+            flag to load model from S3 zip format
+
+        upload_onnx: bool
+            flag to load model from S3 onnx format
+
+        upload_npy: bool
+            flag to load model from S3 npy format
+
+        clean_local_folder: bool
+            flag to delete or keep locally saved model directory or files
+
+        Outputs
+        -------
+            None
+        """
+        ###Load training data: read from s3 bucket
+        testing_tensor = self.load_test_data()
+
+        # load model: if any of the booleans for loading the model are true run load_model
+        # not yet written
+
+        # if model is not in memory and all booleans are false, print a notice
+
+
+        ###Use trained model to predict for testing tensor
+        results = self.encode_decode_model.predict(testing_tensor)
+
+        ###Save predictions
+        test_data_filename = self.data_locations[2]
+        for label, result in zip(['predictions', 'residuals'], results):
+            print(f'{test_data_filename.split(".")[-2]}_{label}.npy')
+            self.s3_utilities.write_tensor(tensor = result,
+                                  folder = "models",
+                                  type_ = "predictions",
+                                  file_name = f'{test_data_filename.split(".")[-2]}_{label}.npy')

@@ -17,8 +17,10 @@ MSS Dish 5g - Pattern Detection
 from msspackages import get_features
 from ..models import AutoencoderModelDish5g
 from ..models import PcaModelDish5g
-from ..secrets import data_bucketname as data_bucket
-from ..secrets import model_bucketname as model_bucket
+
+# from ..secrets import data_bucketname as data_bucket
+# from ..secrets import model_bucketname as model_bucket
+# from ..secrets import secrets
 
 
 def node_autoencoder_input():
@@ -44,13 +46,13 @@ def node_autoencoder_input():
     feature_input_version = "v0.0.2"
 
     # data_locations
-    data_bucketname = data_bucket()
+    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     train_data_filename = "training_2022_9_29_1.npy"
     test_data_filename = "testing_2022_9_29_1.npy"
 
     # save_model_locations
     save_model_local_path = "../node_autoencoder"
-    model_bucketname = model_bucket()
+    model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     model_name = 'node_autoencoder_ad'
     model_version = "v0.0.1-test"
     #Define model filename and path
@@ -106,13 +108,13 @@ def node_pca_input():
     feature_input_version = "v0.0.1"
 
     # data_locations
-    data_bucketname = data_bucket()
+    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     train_data_filename = "training_2022_9_29_1.npy"
     test_data_filename = "testing_2022_9_29_1.npy"
 
     # save_model_locations
     save_model_local_path = "../node_pca.npy"
-    model_bucketname = model_bucket()
+    model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     model_name = "node_pca_ad"
     model_version = "v0.0.1-test"
 
@@ -167,13 +169,13 @@ def pod_autoencoder_input():
     feature_input_version = "v0.0.2"
 
     # data+locations
-    data_bucketname = data_bucket()
+    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     train_data_filename = "training_2022_9_9_1.npy"
     test_data_filename = "testing_2022_9_9_1.npy"
 
     # save_model_locations
     save_model_local_path = "../pod_autoencoder"
-    model_bucketname = model_bucket()
+    model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     model_name = 'pod_autoencoder_ad'
     model_version = "v0.0.1-test"
     #Define model filename
@@ -229,13 +231,13 @@ def pod_pca_input():
     feature_input_version = "v0.0.1"
 
     # data_locations
-    data_bucketname = data_bucket()
+    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     train_data_filename = "training_2022_9_9_1.npy"
     test_data_filename = "testing_2022_9_9_1.npy"
 
     # save_model_locations
     save_model_local_path = "../pod_pca.npy"
-    model_bucketname = model_bucket()
+    model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     model_name = "pod_pca_ad"
     model_version = "v0.0.1-test"
     #Define model filename
@@ -289,13 +291,13 @@ def container_autoencoder_input():
     feature_input_version = "v0.0.1"
 
     # data_locations
-    data_bucketname = data_bucket()
+    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     train_data_filename = "training_2022_5_5_1.npy"
     test_data_filename = "testing_2022_5_5_1.npy"
 
     # save_model_locations
     save_model_local_path = "../container_autoencoder"
-    model_bucketname = model_bucket()
+    model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     model_name = 'container_autoencoder_ad'
     model_version = "v0.0.1-test"
     #Define model filename
@@ -350,13 +352,13 @@ def container_pca_input():
     feature_input_version = "v0.0.1"
 
     # data_locations
-    data_bucketname = data_bucket()
+    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     train_data_filename = "training_2022_5_5_1.npy"
     test_data_filename = "testing_2022_5_5_1.npy"
 
     # save_model_locations
     save_model_local_path = "../container_pca.npy"
-    model_bucketname = model_bucket()
+    model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     model_name = "container_pca_ad"
     model_version = "v0.0.1-test"
     #Define model filename
