@@ -76,13 +76,13 @@ class ModelTraining:
         print('\nModel is saved in memory as the attribute .model.')
         self.encode_decode_model.save_model(self.save_model_local_path)
         print(f'\nModel is saved locally in {self.save_model_local_path}.')
-        print('\nTo save in S3 use the .save_to_s3 method. '
-              + 'Note the option to clean local')
+        print('\nTo save in S3 use the .save_to_s3 method.'
+              + '\nNote the option to delete the local copy.')
 
 
     def save_to_s3(self,
             upload_zip=False, upload_onnx=False, upload_npy=False,
-            delete_local = True):
+            delete_local = False):
         """Save a trained model object to s3 bucket.
 
         Parameters
@@ -108,6 +108,10 @@ class ModelTraining:
         if self.model is None:
             print('A model must be trained before it is saved.')
             return
+
+        # Check that a format has been chosen.
+        if not (upload_zip or upload_onnx or upload_npy):
+            print('Parameters specified that no files be saved to S3.')
 
         if upload_zip:
             #save zipped model object to s3 bucket
@@ -146,3 +150,4 @@ class ModelTraining:
             # Delete locally saved model
             self.encode_decode_model.clean_model(self.save_model_local_path)
             print(f'Local file {self.save_model_local_path} deleted.')
+
