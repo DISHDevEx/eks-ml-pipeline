@@ -64,3 +64,4 @@ from .inference import build_processed_data
 from .inference import inference_pipeline
 
 from .secrets import data_bucketname
+from .secrets import model_bucketname
