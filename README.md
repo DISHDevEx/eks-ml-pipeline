@@ -1,9 +1,11 @@
-Data preprocessing, feature engineering, training and deployment of eks pattern detection models.
+save_to_s3(self,
+            upload_zip=False, upload_onnx=False, upload_npy=False,
+            delete_local = False):Data preprocessing, feature engineering, training and deployment of eks pattern detection models.
 
 
 ### __Project Structure__
 
-Initial project structure for the eks-ml-pipeline. This will evolve over the time to reflect latest changes. 
+Initial project structure for the eks-ml-pipeline. This will evolve over the time to reflect latest changes.
 
 ```
 
@@ -36,11 +38,11 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 │
 │
 └── utilities					any additional utilties we need for the project
-│    └── feature_processor.py  
+│    └── feature_processor.py
 │    └── null_report.py
-│    └── s3_utilities.py 
-│    └── variance_loss.py 
-│ 
+│    └── s3_utilities.py
+│    └── variance_loss.py
+│
 
 ```
 
@@ -69,11 +71,11 @@ __us-east-1 applications:__
 * pattern-detection-emr-serverless : **00f6muv5dgv8n509**
 * pd-test-s3-writes : **00f66mmuts7enm09**
 
-__us-west-2 applications:__ 
+__us-west-2 applications:__
 * pattern-detection-emr-serverless  : **00f6mv29kbd4e10l**
 
 **Note**: while launching your job, please make note of the region from where you are running it.
-jobs for us-east-1 applications can only be launched from us-east-1 and similarly, jobs for us-west-2 applications can only be launched from us-west-2. 
+jobs for us-east-1 applications can only be launched from us-east-1 and similarly, jobs for us-west-2 applications can only be launched from us-west-2.
 #### __Usage__
 ##### __Scenario 1: From CLI__
 
@@ -84,7 +86,7 @@ python run_emr_from_cli.py --job-role-arn <<job_role_arn>> --applicationId <<app
 Optional arguments:
 - __--job-role-arn__    : default value = 'arn:aws:iam::064047601590:role/Pattern-Detection-EMR-Serverless-Role'
 - __--custom-spark-config__   : default value = default
-    
+
 Without optional arguments:
 ```console
 python run_emr_from_cli.py --applicationId <<applicationID>> --s3-bucket <<s3_bucket_name>> --entry-point <<emr_entry_point>> --zipped-env <<zipped_env_path>>
@@ -142,7 +144,7 @@ S3Utills.pyspark_write_parquet(df,folder, type_)
 S3Utills.read_parquet_to_pandas_df(folder, type_, file_name)
 ```
 Note: More helper functions can be added in the future without changing <br>
-the structure of the class new functions can just be appened to the class. 
+the structure of the class new functions can just be appened to the class.
 ### __s3 structure__
 This is the example s3 structure enforced by the s3_utilities class.
 All the important variables to note:
@@ -152,7 +154,7 @@ model_name = "example_autoencoder"
 version = "v0.0.1"
 folder = "data" or "models"
 type_ =  "pandas_df" or "tensors" or "zipped_models", "npy_models"
-file_name = "training_2022_10_10_10.parquet" 
+file_name = "training_2022_10_10_10.parquet"
 ```
 The following structure will be created when the pipeline is run in ```example_bucket```.
 ```
@@ -191,66 +193,30 @@ example_bucket
 
 1. update model training input functions per required parameters (eks_ml_pipeline/inputs/training_input.py)
 2. run below function to start the model training job
+
+The example below can be extended to any of the input functions listed in the imports.
+
 ```python
-from eks_ml_pipeline import model_training_pipeline
+from eks_ml_pipeline import ModelTraining
 from eks_ml_pipeline import node_pca_input, pod_pca_input, container_pca_input
 from eks_ml_pipeline import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
 
-###***Autoencoder***###
+# Create training object
+training = ModelTraining(node_autoencoder_input())
 
-#Train node autoencoder model and save on s3
-model_training_pipeline(*node_autoencoder_input())
+# Train node autoencoder model on train data spectfied by input function.
+training.train()
 
-#Train pod autoencoder model and save on s3
-model_training_pipeline(*pod_autoencoder_input())
+# Evaluate trained model on the test data specified in input function
+# with predictions and residuals saved to S3.
+model.evaluate()
 
-#Train container autoencoder model and save on s3
-model_training_pipeline(*container_autoencoder_input())
-
-###***PCA***###
-
-#Train node pca model and save on s3
-model_training_pipeline(*node_pca_input())
-
-#Train pod pca model and save on s3
-model_training_pipeline(*pod_pca_input())
-
-#Train container pca model and save on s3
-model_training_pipeline(*container_pca_input())
-
-```
-
-### __Running Model Evaluation/Testing jobs__
-
-1. update model training input functions per required parameters (eks_ml_pipeline/inputs/training_input.py)
-2. run below function to start the model training job
-```python
-from eks_ml_pipeline import model_evaluation_pipeline
-from eks_ml_pipeline import node_pca_input, pod_pca_input, container_pca_input
-from eks_ml_pipeline import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
-
-##***Autoencoder***###
-
-#Test node autoencoder model and save on s3
-model_evaluation_pipeline(*node_autoencoder_input())
-
-#Test pod autoencoder model and save on s3
-model_evaluation_pipeline(*pod_autoencoder_input())
-
-#Test container autoencoder model and save on s3
-model_evaluation_pipeline(*container_autoencoder_input())
-
-##***PCA***###
-
-#Test node pca model and save on s3
-model_evaluation_pipeline(*node_pca_input())
-
-#Test pod pca model and save on s3
-model_evaluation_pipeline(*pod_pca_input())
-
-#Test container pca model and save on s3
-model_evaluation_pipeline(*container_pca_input())
-
+# Save model to S3 as a zip file without deleting local version of model.
+training.save_to_s3(
+    upload_zip=True,
+    upload_onnx=False,
+    upload_npy=False,
+    delete_local = False):
 ```
 
 ### __Running Model Inference jobs__
@@ -284,5 +250,5 @@ inference_pipeline(pod_inference_input(), pod_pca_input(), model_evaluation_pipe
 
 #Inference for container pca model
 inference_pipeline(container_inference_input(), container_pca_input(), model_evaluation_pipeline)
-    
+
 ```

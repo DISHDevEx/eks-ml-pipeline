@@ -121,15 +121,18 @@ class ModelTraining:
             print('Parameters specified that no files be saved to S3.')
 
         if upload_zip:
-            #save zipped model object to s3 bucket
-            print(f'*********** {self.save_model_locations[0]}')
-            self.s3_utilities.zip_and_upload(
-                local_path = self.save_model_locations[0], # save_model_local_path
-                folder = "models",
-                type_ = "zipped_models",
-                file_name = (self.save_model_locations[2] # model_filename
-                             + ".zip")
-                )
+            try:
+                #save zipped model object to s3 bucket
+                self.s3_utilities.zip_and_upload(
+                    local_path = self.save_model_locations[0], # save_model_local_path
+                    folder = "models",
+                    type_ = "zipped_models",
+                    file_name = (self.save_model_locations[2] # model_filename
+                                 + ".zip")
+                    )
+            except NotADirectoryError:
+                print('The requested format, zip, is not appropriate '
+                      + 'because your model is not in a folder.')
         if upload_onnx:
             # Save onnx model object to s3 bucket.
             save_model_local_path_onnx = (self.save_model_locations[0] + '/'
@@ -162,7 +165,9 @@ class ModelTraining:
             self.encode_decode_model.clean_model(self.save_model_locations[0])
             print(f'Local file {self.save_model_locations[0]} deleted.')
 
-# evaluation methods:
+    #####################################################
+    ######## Methods for evaluation of the model:########
+    #####################################################
 
     def load_test_data(self):
         """Load training data: read from s3 bucket"""
@@ -176,61 +181,15 @@ class ModelTraining:
         testing_tensor = np.asarray(testing_tensor).astype(np.float32)
         return testing_tensor
 
-    def load_model(self,upload_zip , upload_onnx , upload_npy):
-        ###Load trained model: read from s3 bucket
-        print('\n now this is happening.\n')
-
-        if upload_zip:
-            self.s3_utilities.download_zip(
-                local_path = (self.save_model_locations[0] # save_model_local_path
-                              + '.zip'),
-                folder = "models",
-                type_ = "zipped_models",
-                file_name = (self.save_model_locations[2] # model_filename
-                             + '.zip')
-                )
-
-            self.s3_utilities.unzip(
-                path_to_zip = (self.save_model_locations[0] # save_model_local_path
-                               + '.zip'),
-                extract_location = self.save_model_locations[0] # save_model_local_path
-                )
-
-
-#     if upload_npy:
-#         load_tensor = s3_utils.read_tensor(folder = "models",
-#                                            type_ = "npy_models",
-#                                            file_name = (self.save_model_locations[2] # model_filename
-# + ".npy")
-#             )
-#         np.save(save_model_local_path, load_tensor)
-
-
     def evaluate(self,
-             upload_zip = False,
-             upload_onnx = False,
-             upload_npy = False,
-             delete_local = False,
+             clean_local_folder = True,
              ):
         """Evaluate model on test data.
 
-        Default is to use the model created by the .train method
-        that is in memory as the attribute .model.
-        Parameters allow users to obviate training by
-        loading models saved in S3 instead.
-
+        The test data was specified in creation of the class object.
 
         Parmeters
         ---------
-        upload_zip: bool
-            flag to load model from S3 zip format
-
-        upload_onnx: bool
-            flag to load model from S3 onnx format
-
-        upload_npy: bool
-            flag to load model from S3 npy format
-
         clean_local_folder: bool
             flag to delete or keep locally saved model directory or files
 
@@ -241,13 +200,10 @@ class ModelTraining:
         ###Load training data: read from s3 bucket
         testing_tensor = self.load_test_data()
 
-        # load model: if any of the booleans for loading the model are true run load_model
-        if (upload_zip or upload_onnx or upload_npy):
-#             self.encode_decode_model=
-            self.load_model(upload_zip , upload_onnx , upload_npy)
-
         # if model is not in memory and all booleans are false, print a notice
-
+        if self.model is None:
+            print("No mode lis in memory for evaluation.")
+            return
 
         ###Use trained model to predict for testing tensor
         results = self.encode_decode_model.predict(testing_tensor)
@@ -255,9 +211,15 @@ class ModelTraining:
         ###Save predictions
         test_data_filename = self.data_locations[2]
         for label, result in zip(['predictions', 'residuals'], results):
-            print(f'{test_data_filename.split(".")[-2]}_{label}.npy')
+            print(f'Writing {test_data_filename.split(".")[-2]}_{label}.npy '
+                   + 'to S3...')
             self.s3_utilities.write_tensor(
                 tensor = result,
                 folder = "models",
                 type_ = "predictions",
                 file_name = f'{test_data_filename.split(".")[-2]}_{label}.npy')
+
+        if clean_local_folder:
+            self.encode_decode_model.clean_model(
+                self.save_model_locations[0] #save_model_local_path
+                )
