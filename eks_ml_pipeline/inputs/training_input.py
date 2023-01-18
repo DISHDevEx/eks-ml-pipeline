@@ -144,7 +144,7 @@ def node_pca_input():
     return [encode_decode_model,
             [feature_group_name,feature_input_version], # feature_selection,
             [data_bucketname, train_data_filename, test_data_filename], # data_locations
-            [save_model_local_path, model_bucketname, model_filename,]# save_model_locations,
+            [save_model_local_path, model_bucketname, model_filename]# save_model_locations,
             ]
 
 def pod_autoencoder_input():
