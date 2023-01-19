@@ -1,8 +1,3 @@
-save_to_s3(self,
-            upload_zip=False, upload_onnx=False, upload_npy=False,
-            delete_local = False):Data preprocessing, feature engineering, training and deployment of eks pattern detection models.
-
-
 ### __Project Structure__
 
 Initial project structure for the eks-ml-pipeline. This will evolve over the time to reflect latest changes.
@@ -209,7 +204,7 @@ training.train()
 
 # Evaluate trained model on the test data specified in input function
 # with predictions and residuals saved to S3.
-model.evaluate()
+training.evaluate()
 
 # Save model to S3 as a zip file without deleting local version of model.
 training.save_to_s3(
