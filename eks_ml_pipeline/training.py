@@ -181,7 +181,7 @@ class ModelTraining:
         return testing_tensor
 
     def evaluate(self,
-             clean_local_folder = True,
+             clean_local_folder = False,
              ):
         """Evaluate model on test data.
 
