@@ -148,12 +148,11 @@ def build_processed_data(inference_input_parameters,
     spark_config_setup, data_bucketname = inference_input_parameters
 
     #training input
-    encode_decode_model, \
-    feature_group_name, feature_input_version, \
-    data_bucketname, train_data_filename, test_data_filename, \
-    save_model_local_path, model_bucketname, model_filename, \
-    upload_zip, upload_onnx, upload_npy, \
-    clean_local_folder = training_input_parameters
+    encode_decode_model = training_input_parameters[0]
+    feature_group_name, feature_input_version = training_input_parameters[1]
+    data_bucketname, train_data_filename, test_data_filename = training_input_parameters[2]
+    save_model_local_path, model_bucketname, model_filename = training_input_parameters[3]
+
 
     #raw inference data path
     raw_inference_file_name = inference_data_naming(input_year = partition_year,
@@ -281,7 +280,8 @@ def inference_pipeline(inference_input_parameters,
     """
 
 
-    training_input_parameters = build_processed_data(inference_input_parameters, training_input_parameters)
+    training_input_parameters = build_processed_data(
+        inference_input_parameters, training_input_parameters)
 
     model_evaluation_pipeline(training_input_parameters)
 
