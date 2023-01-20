@@ -49,9 +49,9 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 ```console
 !pwd
 ```
-2. If not already installed, install msspackages by using the .whl file (this assumes that the whl file already exists in the below location)
+2. If not already installed, install devex_sdk by using the .whl file (this assumes that the whl file already exists in the below location)
 ```console
-!pip install /root/msspackages/dist/msspackages-0.0.7-py3-none-any.whl
+!pip install /root/dish-devex_sdk/dist/devex_sdk-0.0.7-py3-none-any.whl
 ```
 3. Install the necessary requirements
 ```console
@@ -59,7 +59,7 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 ```
 4. run below function to install java dependencies to run pyspark jobs
 ```console
-from msspackages import setup_runner
+from devex_sdk import setup_runner
 setup_runner()
 ```
 
