@@ -5,8 +5,6 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 """
-Contributed by Vinayak Sharma and David Cherney
-MSS Dish 5g - Pattern Detection
 Groundwork to help us self heal
 
 this models serves to provide MSS with a tool to excavate anomalies in an unsupervised fashion

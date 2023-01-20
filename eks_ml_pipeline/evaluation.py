@@ -6,8 +6,6 @@ from .inputs import node_pca_input, pod_pca_input, container_pca_input
 
 
 """
-Contributed by Evgeniya Dontsova and Vinayak Sharma
-MSS Dish 5g - Pattern Detection
 
 this model testing functions will be used to test Anomaly Detection models and save the predictions
 """

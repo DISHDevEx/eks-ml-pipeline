@@ -12,9 +12,6 @@ from .evaluation import model_evaluation_pipeline
 
 
 """
-Contributed by Evgeniya Dontsova and Praveen Mada
-MSS Dish 5g - Pattern Detection
-
 this inference functions will be used for Anomaly Detection models
 """
 
