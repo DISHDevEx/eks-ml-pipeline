@@ -11,8 +11,6 @@ from devex_sdk import Pyspark_data_ingestion, get_features
 from .train_test_split import all_rectypes_train_test_split
 
 """
-Contributed by Madhu Bandi, Evgeniya Dontsova and Praveen Mada
-MSS Dish 5g - Pattern Detection
 
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """
