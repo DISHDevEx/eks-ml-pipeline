@@ -1,9 +1,5 @@
 """
-Contributed by Evgeniya Dontsova
-MSS Dish 5g - Pattern Detection
-
 these are the parameters for inference pipeline
-
 """
 
 def node_inference_input():

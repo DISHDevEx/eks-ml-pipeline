@@ -1,8 +1,5 @@
 """
 Train and save Anomaly Detection models with this single function.
-
-Contributed by Evgeniya Dontsova and Vinayak Sharma
-MSS Dish 5g - Pattern Detection
 """
 
 import numpy as np
