@@ -57,7 +57,7 @@ from .emr_serverless import EMRServerless
 
 from .training import ModelTraining
 
-from .evaluation import model_evaluation_pipeline
+# from .evaluation import model_evaluation_pipeline
 
 from .inference import inference_data_builder
 from .inference import build_processed_data

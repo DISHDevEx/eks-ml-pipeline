@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from msspackages import Pyspark_data_ingestion, get_features
 from .utilities import S3Utilities
 from .inputs import training_input, inference_input
-from .evaluation import model_evaluation_pipeline
+from .training import ModelTraining
 
 
 """
@@ -245,7 +245,7 @@ def build_processed_data(inference_input_parameters,
                               file_name = saved_file_name)
 
         #update training input parameters with new test_data_filename
-        training_input_parameters[5] = saved_file_name
+        training_input_parameters[2][1] = saved_file_name
 
     else:
         print(f"Exception occured: no unique values for {sampling_column} column.")
@@ -254,35 +254,34 @@ def build_processed_data(inference_input_parameters,
 
 
 def inference_pipeline(inference_input_parameters,
-                       training_input_parameters,
-                       model_evaluation_pipeline):
+                       training_input_parameters):
 
     """
-    inputs
-    ------
-            inference_input_parameters: list
-            list of parameters required for inference
+    Parameters
+    ----------
+    inference_input_parameters: list
+        list of parameters required for inference
 
-            training_input_parameters: list
-            list of training input parameter specific to rec type and model
+    training_input_parameters: list
+        list of training input parameter specific to rec type and model
 
-            prediction_pipeline: function
-            available values are autoencoder_testing_pipeline() or pca_testing_pipeline()
+    prediction_pipeline: function
+        available values are autoencoder_testing_pipeline() or pca_testing_pipeline()
 
-    outputs
+    Returns
     -------
-            predictions: np.array
-            model predictions
+    predictions: np.array
+        model predictions
 
-            residuals: np.array
-            model residuals
+    residuals: np.array
+        model residuals
 
     """
 
-
+    # replace test data with data for inference.
     training_input_parameters = build_processed_data(
         inference_input_parameters, training_input_parameters)
 
-    model_evaluation_pipeline(training_input_parameters)
+    ModelTraining(training_input_parameters).evaluate()
 
     return None

@@ -219,7 +219,7 @@ training.save_to_s3(
 1. update model inference input functions per required parameters (eks_ml_pipeline/inputs/inference_input.py)
 2. run below function to start the model training job
 ```python
-from eks_ml_pipeline import inference_pipeline, model_evaluation_pipeline
+from eks_ml_pipeline import inference_pipeline
 from eks_ml_pipeline import node_inference_input, pod_inference_input, container_inference_input
 from eks_ml_pipeline import node_pca_input, pod_pca_input, container_pca_input
 from eks_ml_pipeline import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
@@ -227,23 +227,23 @@ from eks_ml_pipeline import node_autoencoder_input, pod_autoencoder_input, conta
 ##***Autoencoder***###
 
 #Inference for node autoencoder model
-inference_pipeline(node_inference_input(), node_autoencoder_input(), model_evaluation_pipeline)
+inference_pipeline(node_inference_input(), node_autoencoder_input())
 
 #Inference for pod autoencoder model
-inference_pipeline(pod_inference_input(), pod_autoencoder_input(), model_evaluation_pipeline)
+inference_pipeline(pod_inference_input(), pod_autoencoder_input())
 
 #Inference for container autoencoder model
-inference_pipeline(container_inference_input(), container_autoencoder_input(), model_evaluation_pipeline)
+inference_pipeline(container_inference_input(), container_autoencoder_input())
 
 ###***PCA***###
 
 #Inference for node pca model
-inference_pipeline(node_inference_input(), node_pca_input(), model_evaluation_pipeline)
+inference_pipeline(node_inference_input(), node_pca_input())
 
 #Inference for pod pca model
-inference_pipeline(pod_inference_input(), pod_pca_input(), model_evaluation_pipeline)
+inference_pipeline(pod_inference_input(), pod_pca_input())
 
 #Inference for container pca model
-inference_pipeline(container_inference_input(), container_pca_input(), model_evaluation_pipeline)
+inference_pipeline(container_inference_input(), container_pca_input())
 
 ```
