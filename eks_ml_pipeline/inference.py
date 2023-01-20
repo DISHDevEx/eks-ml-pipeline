@@ -5,7 +5,7 @@ import ast
 from pandas import json_normalize
 import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
-from msspackages import Pyspark_data_ingestion, get_features
+from devex_sdk import Pyspark_data_ingestion, get_features
 from .utilities import S3Utilities
 from .inputs import training_input, inference_input
 from .evaluation import model_evaluation_pipeline
