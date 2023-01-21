@@ -9,14 +9,14 @@ import numpy as np
 import tf2onnx
 from .utilities import S3Utilities
 
-class ModelTraining:
-    """A class for training models and storing results.
+class TrainTestPipelines:
+    """A class for training and testing the models in the directory modules, 
+    and storing results.
 
     Parameters
     ------
     training_inputs : List
-        Intended to from the functions defined in the module
-        named inputs/training_input.py.
+        Intended to be one of the functions in inputs/training_input.py.
 
     outputs
     -------
@@ -38,7 +38,7 @@ class ModelTraining:
 #         self.model_bucketname = training_inputs[4]
 #         self.model_filename = training_inputs[5]
         # other
-        self.model = None
+        self.encode_decode_function = None
         self.s3_utilities = None
         print(f'You are all set up to train a\n {self.encode_decode_model}'
               +'\nusing the .train method.')
@@ -76,13 +76,15 @@ class ModelTraining:
             None
         """
         training_tensor = self.load_train_data()
-        model = self.encode_decode_model.fit(training_tensor)
+        encode_decode_function = self.encode_decode_model.fit(training_tensor)
         print('\nModel is trained.')
         ###Save model
-        self.model = model
-        print('\nModel is saved in memory as the attribute .model.')
+        self.encode_decode_function = encode_decode_function
+        print('\nThe Encode-Decode function (ED) is saved in memory '
+              + 'as the attribute .encode_decode_function.')
         self.encode_decode_model.save_model(self.save_model_locations[0])
-        print(f'\nModel is saved locally in {self.save_model_locations[0]}.')
+        print('\nThetrained model is saved locally in '
+              + f'{self.save_model_locations[0]}.')
         print('\nTo save in S3 use the .save_to_s3 method.'
               + '\nNote the option to delete the local copy.')
 
@@ -112,8 +114,9 @@ class ModelTraining:
         """
 
         # Check that model exists and thus can be saved.
-        if self.model is None:
-            print('A model must be trained before it is saved.')
+        if self.encode_decode_function is None:
+            print('A model must be trained before '
+                  + 'the function it generates is saved.')
             return
 
         # Check that a format has been chosen.
@@ -154,7 +157,7 @@ class ModelTraining:
 
         if upload_npy:
             # Save npy model object to s3 bucket.
-            self.s3_utilities.write_tensor(tensor = self.model,
+            self.s3_utilities.write_tensor(tensor = self.encode_decode_function,
                                   folder = "models",
                                   type_ = "npy_models",
                                   file_name = self.save_model_locations[2] + ".npy")
@@ -181,7 +184,7 @@ class ModelTraining:
         testing_tensor = np.asarray(testing_tensor).astype(np.float32)
         return testing_tensor
 
-    def evaluate(self,
+    def test(self,
              clean_local_folder = False,
              ):
         """Evaluate model on test data.
@@ -191,7 +194,7 @@ class ModelTraining:
         Parmeters
         ---------
         clean_local_folder: bool
-            flag to delete or keep locally saved model directory or files
+            Flag to delete or keep locally saved model directory or files.
 
         Outputs
         -------
@@ -201,8 +204,8 @@ class ModelTraining:
         testing_tensor = self.load_test_data()
 
         # if model is not in memory and all booleans are false, print a notice
-        if self.model is None:
-            print("No mode lis in memory for evaluation.")
+        if self.encode_decode_function is None:
+            print("No Encode-Decode function is in memory for evaluation.")
             return
 
         ###Use trained model to predict for testing tensor
@@ -223,3 +226,53 @@ class ModelTraining:
             self.encode_decode_model.clean_model(
                 self.save_model_locations[0] #save_model_local_path
                 )
+
+            
+    #######
+    ### methods to upload trained models
+
+    def load_model(self,upload_zip, upload_npy):
+        """
+        Read a trained model in from S3. 
+        
+        Parameters
+        ----------
+        upload_zip : bool
+            upload a trained model from .zip format (for autoencoders)
+            
+        upload_npy : bool
+            upload a model from .npy format (for PCA models)
+
+        """
+        ###Load trained model: read from s3 bucket
+        if not (upload_zip or upload_npy):
+            print('Select a format to upload via passing bollean arguments.')
+            return
+
+        if upload_zip:
+            self.s3_utilities.download_zip(
+                local_path = (self.save_model_locations[0] # save_model_local_path
+                              + '.zip'),
+                folder = "models",
+                type_ = "zipped_models",
+                file_name = (self.save_model_locations[2] # model_filename
+                             + '.zip')
+                )
+
+            self.s3_utilities.unzip(
+                path_to_zip = (self.save_model_locations[0] # save_model_local_path
+                               + '.zip'),
+                extract_location = self.save_model_locations[0] # save_model_local_path
+                )
+
+
+        if upload_npy:
+            load_tensor = self.s3_utilities.read_tensor(
+                folder = "models",
+                type_ = "npy_models",
+                file_name = (self.save_model_locations[2] # model_filename
+                             + ".npy")
+                )
+            np.save(self.save_model_locations[0], # save_model_local_path, 
+                    load_tensor
+                    )

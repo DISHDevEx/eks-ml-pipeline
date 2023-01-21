@@ -100,7 +100,7 @@ class AutoencoderModelDish5g():
     def __calculate_pred_and_err(self, data):
         predictions = self.nn.predict(data)
         mae_loss = np.mean(np.abs(predictions - data), axis=1)
-        return predictions,mae_loss
+        return predictions, mae_loss
 
     def __calculate_anomaly_score(self, residuals: np.ndarray, initial_threshold: float = 1.0):
         max_resid = np.nanmax(np.array(residuals, dtype=np.float64))
