@@ -7,11 +7,14 @@ from pyspark.sql.functions import get_json_object, col, count, concat_ws
 from sklearn.preprocessing import StandardScaler
 from ..utilities import feature_processor, null_report, S3Utilities
 from ..inputs import feature_engineering_input
-from devex_sdk import EKS_Connector, get_features
+from devex_sdk import Pyspark_data_ingestion, get_features
 from .train_test_split import all_rectypes_train_test_split
 
 
 """
+Contributed by David Cherney and Praveen Mada
+MSS Dish 5g - Pattern Detection
+
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """    
 def container_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
@@ -46,7 +49,7 @@ def container_ad_preprocessing(input_feature_group_name, input_feature_group_ver
             
     """
 
-    pyspark_container_data = EKS_Connector(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup,  filter_column_value ='Container')
+    pyspark_container_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup,  filter_column_value ='Container')
     err, pyspark_container_df = pyspark_container_data.read()
 
     if err == 'PASS':

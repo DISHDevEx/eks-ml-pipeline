@@ -15,7 +15,7 @@ Contributed by Evgeniya Dontsova, Vinayak Sharma, and David Cherney
 MSS Dish 5g - Pattern Detection
 """
 
-from msspackages import get_features
+from devex_sdk import get_features
 from ..models import AutoencoderModelDish5g
 from ..models import PcaModelDish5g
 
@@ -73,8 +73,8 @@ def node_autoencoder_input():
 
     #Initialize autoencoder model class with specific parameters
     encode_decode_model = AutoencoderModelDish5g(
-        time_steps=model_parameters["time_steps"],
-        batch_size=model_parameters["batch_size"],
+        time_steps = model_parameters["time_steps"],
+        batch_size = model_parameters["batch_size"],
         epochs=1
         )
 
