@@ -55,9 +55,7 @@ from .utilities import S3Utilities
 
 from .emr_serverless import EMRServerless
 
-from .training import ModelTraining
-
-# from .evaluation import model_evaluation_pipeline
+from .train_test_pipelines import TrainTestPipelines
 
 from .inference import inference_data_builder
 from .inference import build_processed_data

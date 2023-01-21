@@ -7,7 +7,7 @@ from pyspark.sql.functions import col, count
 from sklearn.preprocessing import StandardScaler
 from ..utilities import feature_processor, null_report, S3Utilities
 from ..inputs import feature_engineering_input
-from msspackages import Pyspark_data_ingestion, get_features
+from devex_sdk import Pyspark_data_ingestion, get_features
 from .train_test_split import all_rectypes_train_test_split
 
 
