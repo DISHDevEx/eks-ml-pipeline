@@ -245,6 +245,7 @@ class TrainTestPipelines:
 
         """
         ###Load trained model: read from s3 bucket
+        self.initialize_s3()
         if not (upload_zip or upload_npy):
             print('Select a format to upload via passing bollean arguments.')
             return
@@ -276,5 +277,3 @@ class TrainTestPipelines:
             np.save(self.save_model_locations[0], # save_model_local_path, 
                     load_tensor
                     )
-            
-            self.encode_decode_model.load_model(self.save_model_local_path)
