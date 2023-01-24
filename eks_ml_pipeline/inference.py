@@ -12,9 +12,6 @@ from .train_test_pipelines import TrainTestPipelines
 
 
 """
-Contributed by Evgeniya Dontsova and Praveen Mada
-MSS Dish 5g - Pattern Detection
-
 this inference functions will be used for Anomaly Detection models
 """
 

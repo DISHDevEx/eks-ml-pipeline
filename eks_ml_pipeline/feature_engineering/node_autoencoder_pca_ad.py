@@ -12,9 +12,6 @@ from .train_test_split import all_rectypes_train_test_split
 
 
 """
-Contributed by Vinayak Sharma and Praveen Mada
-MSS Dish 5g - Pattern Detection
-
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """
 def node_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):

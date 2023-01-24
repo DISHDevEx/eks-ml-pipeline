@@ -8,19 +8,12 @@ To use
 
 e.g. use
 
-ModelTraining(node_pca_input())
-
-Contributed by Evgeniya Dontsova, Vinayak Sharma, and David Cherney
-MSS Dish 5g - Pattern Detection
+TrainTestPipelines(node_pca_input())
 """
 
 from devex_sdk import get_features
 from ..models import AutoencoderModelDish5g
 from ..models import PcaModelDish5g
-
-# from ..secrets import data_bucketname as data_bucket
-# from ..secrets import model_bucketname as model_bucket
-# from ..secrets import secrets
 
 
 def node_autoencoder_input():
