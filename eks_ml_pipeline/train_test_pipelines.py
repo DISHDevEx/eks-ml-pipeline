@@ -80,10 +80,10 @@ class TrainTestPipelines:
         print('\nModel is trained.')
         ###Save model
         self.encode_decode_function = encode_decode_function
-        print('\nThe Encode-Decode function (ED) is saved in memory '
+        print('\nThe Encode-Decode function is saved in memory '
               + 'as the attribute .encode_decode_function.')
         self.encode_decode_model.save_model(self.save_model_locations[0])
-        print('\nThetrained model is saved locally in '
+        print('\nThe trained model is saved locally in '
               + f'{self.save_model_locations[0]}.')
         print('\nTo save in S3 use the .save_to_s3 method.'
               + '\nNote the option to delete the local copy.')
@@ -276,3 +276,5 @@ class TrainTestPipelines:
             np.save(self.save_model_locations[0], # save_model_local_path, 
                     load_tensor
                     )
+            
+            self.encode_decode_model.load_model(self.save_model_local_path)

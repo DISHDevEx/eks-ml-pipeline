@@ -282,6 +282,6 @@ def inference_pipeline(inference_input_parameters,
     training_input_parameters = build_processed_data(
         inference_input_parameters, training_input_parameters)
 
-    ModelTraining(training_input_parameters).evaluate()
+    TrainTestPipelines(training_input_parameters).evaluate()
 
     return None
