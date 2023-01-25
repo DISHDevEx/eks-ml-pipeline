@@ -256,7 +256,7 @@ class TrainTestPipelines:
         self.encode_decode_model.load_model(
             self.save_model_locations[0], # save_model_local_path
             )
-        
+
         # Local file is no longer needed; delete it.
         if self.file_flags[3]: # clean_local_folder:
             self.encode_decode_model.clean_model(
