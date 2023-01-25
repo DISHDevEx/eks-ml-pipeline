@@ -161,9 +161,9 @@ def build_processed_data(inference_input_parameters,
     raw_data_s3_path = f"s3://{data_bucketname}/inference_data/{raw_inference_file_name}.parquet"
 
     ###Initialize s3 utilities class
-    s3_utils = S3Utilities(bucket_name=data_bucketname,
-                           model_name=feature_group_name,
-                           version=feature_input_version)
+    s3_utils = S3Utilities(bucket_name = data_bucketname,
+                           model_name = feature_group_name,
+                           version = feature_input_version)
 
 
     ###Load data: Read raw data in parquet format from s3
@@ -217,8 +217,8 @@ def build_processed_data(inference_input_parameters,
 
         print("\n***** Inference input data shape*****")
         print(df.shape)
-        print("\n*** Inference data tensor ***")
-        print(df)
+#         print("\n*** Inference data tensor ***")
+#         print(df)
         print("\n***************************************\n")
 
         #scaler transformations
@@ -229,8 +229,8 @@ def build_processed_data(inference_input_parameters,
 
         print("\n***** Inference input tensor shape*****")
         print(inference_input_tensor.shape)
-        print("\n*** Inference input tensor ***")
-        print(inference_input_tensor)
+#         print("\n*** Inference input tensor ***")
+#         print(inference_input_tensor)
         print("\n***************************************\n")
 
         sampling_column = sampling_column.split('.')[-1]
@@ -279,6 +279,6 @@ def inference_pipeline(inference_input_parameters,
     training_input_parameters = build_processed_data(
         inference_input_parameters, training_input_parameters)
 
-    TrainTestPipelines(training_input_parameters).evaluate()
+    TrainTestPipelines(training_input_parameters).test()
 
     return None

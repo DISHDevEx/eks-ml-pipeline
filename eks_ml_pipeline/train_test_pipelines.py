@@ -36,9 +36,13 @@ class TrainTestPipelines:
         # save_model_locations = [save_model_local_path, model_bucketname, model_filename,]
         self.save_model_locations = training_inputs[3]
 
+        # file_flags = [upload_zip, upload_onnx, upload_npy, clean_local_folder]
+        self.file_flags = training_inputs[4]
+        
         # other
         self.encode_decode_function = None
         self.s3_utilities = None
+        self.initialize_s3()
         print(f'You are all set up to train a\n {self.encode_decode_model}'
               +'\nusing the .train method.')
 
@@ -53,7 +57,6 @@ class TrainTestPipelines:
 
     def load_train_data(self):
         """Load training data: read from s3 bucket"""
-        self.initialize_s3()
         training_tensor = self.s3_utilities.read_tensor(
             folder = "data",
             type_ = "tensors",
@@ -79,50 +82,26 @@ class TrainTestPipelines:
         print('\nModel is trained.')
         ###Save model
         self.encode_decode_function = encode_decode_function
-        print('\nThe Encode-Decode function is saved in memory '
-              + 'as the attribute .encode_decode_function.')
-        self.encode_decode_model.save_model(self.save_model_locations[0])
-        print('\nThe trained model is saved locally in '
-              + f'{self.save_model_locations[0]}.')
-        print('\nTo save in S3 use the .save_to_s3 method.'
-              + '\nNote the option to delete the local copy.')
+        
+        self.encode_decode_model.save_model(
+            self.save_model_locations[0] # save_model_local_path
+            )
+        self.save_to_s3()
 
 
-    def save_to_s3(self,
-            upload_zip=False, upload_onnx=False, upload_npy=False,
-            delete_local = False):
+    def save_to_s3(self):
         """Save a trained model object to s3 bucket.
 
         Parameters
         ----------
-        upload_zip : Bool (optional, default=False)
-            If True than upload a .zip file to S3.
-
-        upload_onnx : Bool (optional, default=False)
-            If True than upload a .onyx file to S3.
-
-        upload_npy : Bool (optional, default=False)
-            If True than upload a .npy file to S3.
-
-        delete_local : Bool (optional, default=True)
-            If True than delete the locally saved model.
+        None
 
         Returns
         -------
         None
         """
 
-        # Check that model exists and thus can be saved.
-        if self.encode_decode_function is None:
-            print('A model must be trained before '
-                  + 'the function it generates is saved.')
-            return
-
-        # Check that a format has been chosen.
-        if not (upload_zip or upload_onnx or upload_npy):
-            print('Parameters specified that no files be saved to S3.')
-
-        if upload_zip:
+        if self.file_flags[0]: # upload_zip:
             try:
                 #save zipped model object to s3 bucket
                 self.s3_utilities.zip_and_upload(
@@ -135,7 +114,7 @@ class TrainTestPipelines:
             except NotADirectoryError:
                 print('The requested format, zip, is not appropriate '
                       + 'because your model is not in a folder.')
-        if upload_onnx:
+        if self.file_flags[1]: # upload_onnx:
             # Save onnx model object to s3 bucket.
             save_model_local_path_onnx = (self.save_model_locations[0] + '/'
                                           + self.save_model_locations[2] + ".onnx")
@@ -154,7 +133,7 @@ class TrainTestPipelines:
                      )
                 )
 
-        if upload_npy:
+        if self.file_flags[3]: # upload_npy:
             # Save npy model object to s3 bucket.
             self.s3_utilities.write_tensor(tensor = self.encode_decode_function,
                                   folder = "models",
@@ -162,7 +141,8 @@ class TrainTestPipelines:
                                   file_name = self.save_model_locations[2] + ".npy")
             print('\nModel uploaded to S3 as .npy type.')
 
-        if delete_local:
+        ## Delete the locally saved model.
+        if self.file_flags[0]: # clean_local_folder:
             # Delete locally saved model
             self.encode_decode_model.clean_model(self.save_model_locations[0])
             print(f'Local file {self.save_model_locations[0]} deleted.')
@@ -173,7 +153,6 @@ class TrainTestPipelines:
 
     def load_test_data(self):
         """Load training data: read from s3 bucket"""
-        self.initialize_s3() # in case user has not ititialized S3 through .train
         testing_tensor = self.s3_utilities.read_tensor(
             folder = "data",
             type_ = "tensors",
@@ -183,9 +162,7 @@ class TrainTestPipelines:
         testing_tensor = np.asarray(testing_tensor).astype(np.float32)
         return testing_tensor
 
-    def test(self,
-             clean_local_folder = False,
-             ):
+    def test(self):
         """Evaluate model on test data.
 
         The test data was specified in creation of the class object.
@@ -199,13 +176,17 @@ class TrainTestPipelines:
         -------
             None
         """
+        # Load the model 
+        # to make the methods of self.encode_decode_model available.
+        self.load_model()
+        
         ###Load training data: read from s3 bucket
         testing_tensor = self.load_test_data()
 
-        # if model is not in memory and all booleans are false, print a notice
-        if self.encode_decode_function is None:
-            print("No Encode-Decode function is in memory for evaluation.")
-            return
+#         # if model is not in memory and all booleans are false, print a notice
+#         if self.encode_decode_function is None:
+#             print("No Encode-Decode function is in memory for evaluation.")
+#             return
 
         ###Use trained model to predict for testing tensor
         results = self.encode_decode_model.predict(testing_tensor)
@@ -220,17 +201,11 @@ class TrainTestPipelines:
                 folder = "models",
                 type_ = "predictions",
                 file_name = f'{test_data_filename.split(".")[-2]}_{label}.npy')
-
-        if clean_local_folder:
-            self.encode_decode_model.clean_model(
-                self.save_model_locations[0] #save_model_local_path
-                )
-
             
     #######
     ### methods to upload trained models
 
-    def load_model(self,upload_zip, upload_npy):
+    def load_model(self):
         """
         Read a trained model in from S3. 
         
@@ -243,13 +218,10 @@ class TrainTestPipelines:
             upload a model from .npy format (for PCA models)
 
         """
-        ###Load trained model: read from s3 bucket
-        self.initialize_s3()
-        if not (upload_zip or upload_npy):
-            print('Select a format to upload via passing bollean arguments.')
-            return
-
-        if upload_zip:
+        ### Load trained model: read from s3 bucket
+        
+        # save file locally so that if it is a zip it can be unzipped.
+        if self.file_flags[0]:# upload_zip:
             self.s3_utilities.download_zip(
                 local_path = (self.save_model_locations[0] # save_model_local_path
                               + '.zip'),
@@ -266,13 +238,27 @@ class TrainTestPipelines:
                 )
 
 
-        if upload_npy:
+        if self.file_flags[2]: # upload_npy:
             load_tensor = self.s3_utilities.read_tensor(
                 folder = "models",
                 type_ = "npy_models",
                 file_name = (self.save_model_locations[2] # model_filename
                              + ".npy")
                 )
+
             np.save(self.save_model_locations[0], # save_model_local_path, 
                     load_tensor
                     )
+        
+        ## While model file is saved in local path, 
+        ## use model object's load_model method.
+        ## This makes the methods of self.encode_decode_model available.
+        self.encode_decode_model.load_model(
+            self.save_model_locations[0], # save_model_local_path
+            )
+        
+        # Local file is no longer needed; delete it.
+        if self.file_flags[3]: # clean_local_folder:
+            self.encode_decode_model.clean_model(
+                self.save_model_locations[0] #save_model_local_path
+                )

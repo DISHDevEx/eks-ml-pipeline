@@ -48,6 +48,7 @@ def node_autoencoder_input():
     model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     model_name = 'node_autoencoder_ad'
     model_version = "v0.0.1-test"
+    
     #Define model filename and path
     model_filename = '_'.join(
         [model_name,
@@ -69,12 +70,19 @@ def node_autoencoder_input():
         batch_size = model_parameters["batch_size"],
         epochs=1
         )
+    
+    # File flags
+    upload_zip = True 
+    upload_onnx = True
+    upload_npy = False
+    clean_local_folder = True
 
     return [encode_decode_model,
             [feature_group_name,feature_input_version], # feature_selection,
             [data_bucketname, train_data_filename, test_data_filename], # data_locations
-            [save_model_local_path, model_bucketname, model_filename]# save_model_locations,
-            ]
+            [save_model_local_path, model_bucketname, model_filename], # save_model_locations,
+            [upload_zip, upload_onnx, upload_npy, clean_local_folder] # file_flags
+           ]
 
 def node_pca_input():
     """
@@ -133,11 +141,18 @@ def node_pca_input():
         timesteps_per_slice = model_parameters["time_steps"]
         )
 
+    # File flags
+    upload_zip = False 
+    upload_onnx = False
+    upload_npy = True
+    clean_local_folder = True
+
     return [encode_decode_model,
             [feature_group_name,feature_input_version], # feature_selection,
             [data_bucketname, train_data_filename, test_data_filename], # data_locations
-            [save_model_local_path, model_bucketname, model_filename]# save_model_locations,
-            ]
+            [save_model_local_path, model_bucketname, model_filename], # save_model_locations,
+            [upload_zip, upload_onnx, upload_npy, clean_local_folder] # file_flags
+           ]
 
 def pod_autoencoder_input():
     """
@@ -193,11 +208,18 @@ def pod_autoencoder_input():
         epochs=1
         )
 
+    # File flags
+    upload_zip = True 
+    upload_onnx = True
+    upload_npy = False
+    clean_local_folder = True
+
     return [encode_decode_model,
             [feature_group_name,feature_input_version], # feature_selection,
             [data_bucketname, train_data_filename, test_data_filename], # data_locations
-            [save_model_local_path, model_bucketname, model_filename,]# save_model_locations,
-            ]
+            [save_model_local_path, model_bucketname, model_filename], # save_model_locations,
+            [upload_zip, upload_onnx, upload_npy, clean_local_folder] # file_flags
+           ]
 
 def pod_pca_input():
     """
@@ -255,11 +277,18 @@ def pod_pca_input():
         timesteps_per_slice = model_parameters["time_steps"]
         )
 
+    # File flags
+    upload_zip = False 
+    upload_onnx = False
+    upload_npy = True
+    clean_local_folder = True
+
     return [encode_decode_model,
             [feature_group_name,feature_input_version], # feature_selection,
             [data_bucketname, train_data_filename, test_data_filename], # data_locations
-            [save_model_local_path, model_bucketname, model_filename,]# save_model_locations,
-            ]
+            [save_model_local_path, model_bucketname, model_filename], # save_model_locations,
+            [upload_zip, upload_onnx, upload_npy, clean_local_folder] # file_flags
+           ]
 
 def container_autoencoder_input():
     """
@@ -315,11 +344,18 @@ def container_autoencoder_input():
         epochs=1
         )
 
+    # File flags
+    upload_zip = True 
+    upload_onnx = True
+    upload_npy = False
+    clean_local_folder = True
+
     return [encode_decode_model,
             [feature_group_name,feature_input_version], # feature_selection,
             [data_bucketname, train_data_filename, test_data_filename], # data_locations
-            [save_model_local_path, model_bucketname, model_filename,]# save_model_locations,
-            ]
+            [save_model_local_path, model_bucketname, model_filename], # save_model_locations,
+            [upload_zip, upload_onnx, upload_npy, clean_local_folder] # file_flags
+           ]
 
 def container_pca_input():
     """
@@ -375,8 +411,15 @@ def container_pca_input():
         timesteps_per_slice = model_parameters["time_steps"]
         )
 
+    # File flags
+    upload_zip = False 
+    upload_onnx = False
+    upload_npy = True
+    clean_local_folder = True
+
     return [encode_decode_model,
             [feature_group_name,feature_input_version], # feature_selection,
             [data_bucketname, train_data_filename, test_data_filename], # data_locations
-            [save_model_local_path, model_bucketname, model_filename,]# save_model_locations,
-            ]
+            [save_model_local_path, model_bucketname, model_filename], # save_model_locations,
+            [upload_zip, upload_onnx, upload_npy, clean_local_folder] # file_flags
+           ]
