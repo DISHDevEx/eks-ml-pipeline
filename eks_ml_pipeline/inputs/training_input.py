@@ -1,27 +1,19 @@
-
 """
-A script to feed inputs to the training pipeline.
+A script to feed inputs to training and testing pipelines for models.
 
 To use
-1. choose the function below corresponding to the model of your choice
-2. modify the data and model imput paramters as needed
-3. feed the input function to model_training_pipeline
+1. choose the function below corresponding to the model of your choice,
+2. modify the data and model imput paramters as needed,
+3. feed the input function to the class in train_test_pipelines.py.
 
 e.g. use
 
-model_training_pipeline(node_pca_input())
-
-Contributed by Evgeniya Dontsova, Vinayak Sharma, and David Cherney
-MSS Dish 5g - Pattern Detection
+TrainTestPipelines(node_pca_input())
 """
 
 from devex_sdk import get_features
 from ..models import AutoencoderModelDish5g
 from ..models import PcaModelDish5g
-
-# from ..secrets import data_bucketname as data_bucket
-# from ..secrets import model_bucketname as model_bucket
-# from ..secrets import secrets
 
 
 def node_autoencoder_input():
@@ -56,7 +48,7 @@ def node_autoencoder_input():
     model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     model_name = 'node_autoencoder_ad'
     model_version = "v0.0.1-test"
-    
+
     #Define model filename and path
     model_filename = '_'.join(
         [model_name,
@@ -78,9 +70,9 @@ def node_autoencoder_input():
         batch_size = model_parameters["batch_size"],
         epochs=1
         )
-    
+
     # File flags
-    upload_zip = True 
+    upload_zip = True
     upload_onnx = True
     upload_npy = False
     clean_local_folder = True
@@ -150,7 +142,7 @@ def node_pca_input():
         )
 
     # File flags
-    upload_zip = False 
+    upload_zip = False
     upload_onnx = False
     upload_npy = True
     clean_local_folder = True
@@ -217,7 +209,7 @@ def pod_autoencoder_input():
         )
 
     # File flags
-    upload_zip = True 
+    upload_zip = True
     upload_onnx = True
     upload_npy = False
     clean_local_folder = True
@@ -286,7 +278,7 @@ def pod_pca_input():
         )
 
     # File flags
-    upload_zip = False 
+    upload_zip = False
     upload_onnx = False
     upload_npy = True
     clean_local_folder = True
@@ -353,7 +345,7 @@ def container_autoencoder_input():
         )
 
     # File flags
-    upload_zip = True 
+    upload_zip = True
     upload_onnx = True
     upload_npy = False
     clean_local_folder = True
@@ -420,7 +412,7 @@ def container_pca_input():
         )
 
     # File flags
-    upload_zip = False 
+    upload_zip = False
     upload_onnx = False
     upload_npy = True
     clean_local_folder = True
