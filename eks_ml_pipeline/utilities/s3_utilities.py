@@ -98,7 +98,8 @@ class S3Utilities:
         """
         downloads a zip file from s3.
         """
-        print('Try to download from', self.bucket_name, f'{self.model_name}/{self.version}/{folder}/{type_}/{file_name}')
+        print('Try to download from', self.bucket_name,
+              f'{self.model_name}/{self.version}/{folder}/{type_}/{file_name}')
         with open(local_path, 'wb') as file:
             self.client.download_fileobj(self.bucket_name,
                                          f'{self.model_name}/{self.version}/'
@@ -123,10 +124,10 @@ class S3Utilities:
         path = shutil.make_archive(local_path, 'zip', local_path)
         try:
             self.client.upload_file(path, self.bucket_name,
-                                               f'{self.model_name}/{self.version}/'
-                                               f'{folder}/{type_}/{file_name}')
+                                    f'{self.model_name}/{self.version}/'
+                                    f'{folder}/{type_}/{file_name}')
             os.remove(path)
-            print(f"\n***Locally saved {path} was succesfully deleted.***\n")
+            print(f"\n***Locally saved {path} was successfully deleted.***\n")
 
 
         except ClientError as error:
@@ -138,16 +139,16 @@ class S3Utilities:
 
     def pandas_dataframe_to_s3(self, input_datafame, folder, type_, file_name):
         """
-        upload a pandas dataframe to s3.
+        upload a pandas dataframe as parquet to s3.
         """
         out_buffer = BytesIO()
         input_datafame.to_parquet(out_buffer, index=False)
 
         try:
             self.client.put_object(Bucket=self.bucket_name,
-                                              Key=f'{self.model_name}/{self.version}/{folder}'
-                                                  f'/{type_}/{file_name}',
-                                              Body=out_buffer.getvalue())
+                                   Key=f'{self.model_name}/{self.version}/{folder}'
+                                       f'/{type_}/{file_name}',
+                                   Body=out_buffer.getvalue())
         except ClientError as error:
             logging.error(error)
             return False
@@ -164,17 +165,17 @@ class S3Utilities:
         bytes_.seek(0)
         try:
             self.client.upload_fileobj(Fileobj=bytes_, Bucket=self.bucket_name,
-                                                  Key=f'{self.model_name}/{self.version}/'
-                                                      f'{folder}/{type_}/{file_name}')
+                                       Key=f'{self.model_name}/{self.version}/'
+                                           f'{folder}/{type_}/{file_name}')
         except ClientError as error:
             logging.error(error)
             return False
         return print(f'Uploaded Path: s3://{self.bucket_name}/{self.model_name}/'
-              f'{self.version}/{folder}/{type_}/{file_name}')
+                     f'{self.version}/{folder}/{type_}/{file_name}')
 
     def awswrangler_pandas_dataframe_to_s3(self, input_datafame, folder, type_, file_name):
         """
-        writes a pandas dataframe to s3.
+        writes a pandas dataframe as parquet to s3.
         """
         wr.s3.to_parquet(input_datafame,
                          path=f"s3://{self.bucket_name}/{self.model_name}/"
@@ -190,8 +191,8 @@ class S3Utilities:
         bytes_ = BytesIO()
         try:
             self.client.download_fileobj(Fileobj=bytes_, Bucket=self.bucket_name,
-                                                    Key=f'{self.model_name}/{self.version}/'
-                                                        f'{folder}/{type_}/{file_name}')
+                                         Key=f'{self.model_name}/{self.version}/'
+                                             f'{folder}/{type_}/{file_name}')
         except ClientError as error:
             logging.error(error)
             return False
@@ -214,9 +215,9 @@ class S3Utilities:
             for file in files:
                 try:
                     self.client.upload_file(os.path.join(root, file),
-                                                       Bucket=self.bucket_name,
-                                                       Key=f'{self.model_name}/{self.version}/'
-                                                           f'{folder}/{type_}/{file}')
+                                            Bucket=self.bucket_name,
+                                            Key=f'{self.model_name}/{self.version}/'
+                                                f'{folder}/{type_}/{file}')
                 except ClientError as error:
                     logging.error(error)
                     return False
@@ -225,9 +226,9 @@ class S3Utilities:
                     f'{self.version}/{folder}/{type_}/{file}')
         return print("Commpleted")
 
-    def pyspark_write_parquet(self, dataframe, folder, type_):
+    def pyspark_write_parquet(self, dataframe, folder, type_, ):
         """
-        use pyspark to write files to s3.
+        write pyspark dataframe as parquet to s3.
         """
         dataframe.write.mode('overwrite').parquet(
             f's3a://{self.bucket_name}/{self.model_name}/{self.version}/{folder}/{type_}/')
@@ -237,14 +238,33 @@ class S3Utilities:
 
     def read_parquet_to_pandas_df(self, folder, type_, file_name):
         """
-         reads parquet to df.
+         reads a single parquet file as pandas df.
         """
         # Read the parquet file
         buffer = BytesIO()
         object_ = self.resource.Object(self.bucket_name,
-                                    f'{self.model_name}/{self.version}/'
-                                    f'{folder}/{type_}/{file_name}')
+                                       f'{self.model_name}/{self.version}/'
+                                       f'{folder}/{type_}/{file_name}')
         object_.download_fileobj(buffer)
         dataframe = pd.read_parquet(buffer)
         return dataframe
-    
+
+    # Read single parquet file from S3
+    def pd_read_s3_parquet(self, key, **args):
+        obj = self.client.get_object(Bucket=self.bucket_name, Key=key)
+        return pd.read_parquet(BytesIO(obj['Body'].read()), **args)
+
+    # Read multiple parquets from a folder on S3 generated by spark
+    def pd_read_s3_multiple_parquets(self, filepath, verbose=False, **args):
+        if not filepath.endswith('/'):
+            filepath = filepath + '/'  # Add '/' to the end
+        s3_keys = [item.key for item in self.resource.Bucket(self.bucket_name).objects.filter(Prefix=filepath)
+                   if item.key.endswith('.parquet')]
+        if not s3_keys:
+            print('No parquet found in', self.bucket_name, filepath)
+        elif verbose:
+            print('Load parquets:')
+            for p in s3_keys:
+                print(p)
+        dfs = [self.pd_read_s3_parquet(self, **args) for key in s3_keys]  ## TODO modify input args
+        return pd.concat(dfs, ignore_index=True)
