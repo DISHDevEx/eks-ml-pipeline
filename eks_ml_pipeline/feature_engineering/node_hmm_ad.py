@@ -7,14 +7,11 @@ from pyspark.sql.functions import col, count
 from sklearn.preprocessing import StandardScaler
 from ..utilities import feature_processor, null_report, S3Utilities
 from ..inputs import feature_engineering_input
-from msspackages import Pyspark_data_ingestion, get_features
+from devex_sdk import Pyspark_data_ingestion, get_features
 from .train_test_split import all_rectypes_train_test_split
 
 
 """
-Contributed by Ruyi Yang and Praveen Mada
-MSS Dish 5g - Pattern Detection
-
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """
 def node_hmm_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):

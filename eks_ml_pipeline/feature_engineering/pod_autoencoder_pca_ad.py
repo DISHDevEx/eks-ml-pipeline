@@ -1,11 +1,9 @@
 import pandas as pd
 from pyspark.sql.functions import col, count, get_json_object
 from ..utilities import feature_processor
-from msspackages import Pyspark_data_ingestion, get_features
+from devex_sdk import Pyspark_data_ingestion, get_features
 
 """
-Contributed by Madhu Bandi, Evgeniya Dontsova and Praveen Mada
-MSS Dish 5g - Pattern Detection
 
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """

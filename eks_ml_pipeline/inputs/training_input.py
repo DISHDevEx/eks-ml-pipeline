@@ -10,11 +10,9 @@ e.g. use
 
 model_training_pipeline(*node_pca_input())
 
-Contributed by Evgeniya Dontsova and Vinayak Sharma
-MSS Dish 5g - Pattern Detection
 """
 
-from msspackages import get_features
+from devex_sdk import get_features
 from ..models import AutoencoderModelDish5g
 from ..models import PcaModelDish5g
 

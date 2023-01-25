@@ -18,13 +18,6 @@ setup(
                                     'eks_ml_pipeline.inputs',
                                     'eks_ml_pipeline.utilities']),
     include_package_data=True,
-#     entry_points = {
-#         'console_scripts': [
-#             'msspackages=msspackages.project_inital_setu:setup_runner',
-#         ]}
-#     scripts = [
-#         'msspackages/project_inital_setup/understanding_eks_setup.py'
-#         ],
     install_requires = [
         'pyspark',
         'pandas',

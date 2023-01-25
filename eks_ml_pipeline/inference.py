@@ -5,16 +5,13 @@ import ast
 from pandas import json_normalize
 import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
-from msspackages import Pyspark_data_ingestion, get_features
+from devex_sdk import Pyspark_data_ingestion, get_features
 from .utilities import S3Utilities
 from .inputs import training_input, inference_input
 from .evaluation import model_evaluation_pipeline
 
 
 """
-Contributed by Evgeniya Dontsova and Praveen Mada
-MSS Dish 5g - Pattern Detection
-
 this inference functions will be used for Anomaly Detection models
 """
 
