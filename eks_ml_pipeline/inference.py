@@ -5,7 +5,7 @@ import ast
 from pandas import json_normalize
 import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
-from devex_sdk import Pyspark_data_ingestion, get_features
+from devex_sdk import EKS_Connector, get_features
 from .utilities import S3Utilities
 from .inputs import training_input, inference_input
 from .train_test_pipelines import TrainTestPipelines
@@ -100,7 +100,7 @@ def inference_data_builder(input_year, input_month, input_day, input_hour, rec_t
     file_name = inference_data_naming(input_year, input_month,
                                       input_day, input_hour, rec_type)
 
-    pyspark_data = Pyspark_data_ingestion(year = input_year, month = input_month,
+    pyspark_data = EKS_Connector(year = input_year, month = input_month,
                                           day = input_day, hour = input_hour,
                                           setup = input_setup, filter_column_value = rec_type)
 
