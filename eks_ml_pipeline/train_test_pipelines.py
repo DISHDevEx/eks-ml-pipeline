@@ -5,6 +5,7 @@ Contributed by Evgeniya Dontsova, Vinayak Sharma, and David Cherney
 MSS Dish 5g - Pattern Detection
 """
 
+import os
 import numpy as np
 import tf2onnx
 from .utilities import S3Utilities
@@ -179,8 +180,23 @@ class TrainTestPipelines:
                 type_ = "predictions",
                 file_name = f'{test_data_filename.split(".")[-2]}_{label}.npy')
 
-    #######
-    ### methods to upload trained models
+        #Delete locally saved model
+        if self.file_flags[3]: # clean_local_folder
+
+            self.encode_decode_model.clean_model(
+                self.save_model_locations[0] #save_model_local_path
+                )
+            if self.file_flags[0]: # upload_zip
+
+                path = (self.save_model_locations[0] #save_model_local_path
+                        + '.zip')
+                os.remove(path)
+                print(f"\n***Locally saved {path} was succesfully deleted.***\n")
+
+    #####################################################
+    ######Methods to Upload Trained Models and Data######
+    #####################################################
+    ###
 
     def load_model(self):
         """
@@ -233,12 +249,6 @@ class TrainTestPipelines:
         self.encode_decode_model.load_model(
             self.save_model_locations[0], # save_model_local_path
             )
-
-        # Local file is no longer needed; delete it.
-        if self.file_flags[3]: # clean_local_folder:
-            self.encode_decode_model.clean_model(
-                self.save_model_locations[0] #save_model_local_path
-                )
 
 
     def load_data(self, data_purpose = 'training'):
