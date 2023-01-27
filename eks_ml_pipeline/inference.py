@@ -242,7 +242,9 @@ def build_processed_data(inference_input_parameters,
                               file_name = saved_file_name)
 
         #update training input parameters with new test_data_filename
-        training_input_parameters[2][1] = saved_file_name
+        #by overwriting
+        #training_input_parameters[2][2]=data_locations[2]=test_data_filename
+        training_input_parameters[2][2] = saved_file_name
 
     else:
         print(f"Exception occured: no unique values for {sampling_column} column.")
