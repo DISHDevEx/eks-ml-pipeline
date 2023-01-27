@@ -7,7 +7,7 @@ from pyspark.sql.functions import col, count
 from sklearn.preprocessing import StandardScaler
 from ..utilities import feature_processor, null_report, S3Utilities
 from ..inputs import feature_engineering_input
-from devex_sdk import Pyspark_data_ingestion, get_features
+from devex_sdk import EKS_Connector, get_features
 from .train_test_split import all_rectypes_train_test_split
 
 
@@ -49,7 +49,7 @@ def node_hmm_ad_preprocessing(input_feature_group_name, input_feature_group_vers
 
     """
 
-    pyspark_node_hmm_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Node')
+    pyspark_node_hmm_data = EKS_Connector(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Node')
     err, pyspark_node_hmm_df = pyspark_node_hmm_data.read()
 
     if err == 'PASS':
