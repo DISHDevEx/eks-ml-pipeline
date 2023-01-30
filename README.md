@@ -184,34 +184,53 @@ example_bucket
 
 ```
 
-### __Running Model Training jobs__
+### __Running Model Training and Testing Jobs__
 
-1. update model training input functions per required parameters (eks_ml_pipeline/inputs/training_input.py)
-2. run below function to start the model training job
+1. update model training input functions min eks_ml_pipeline/inputs/training_input.py
+2. run the functions below to start the model training and testing jobs
 
 The example below can be extended to any of the input functions listed in the imports.
 
 ```python
-from eks_ml_pipeline import ModelTraining
+from eks_ml_pipeline import TrainTestPipelines
 from eks_ml_pipeline import node_pca_input, pod_pca_input, container_pca_input
 from eks_ml_pipeline import node_autoencoder_input, pod_autoencoder_input, container_autoencoder_input
 
-# Create training object
-training = ModelTraining(node_autoencoder_input())
 
-# Train node autoencoder model on train data spectfied by input function.
-training.train()
+##***Autoencoder***###
 
-# Evaluate trained model on the test data specified in input function
-# with predictions and residuals saved to S3.
-training.evaluate()
+#Train+Test for node autoencoder model
+ttp = TrainTestPipelines(node_autoencoder_input())
+ttp.train()
+ttp.test()
 
-# Save model to S3 as a zip file without deleting local version of model.
-training.save_to_s3(
-    upload_zip=True,
-    upload_onnx=False,
-    upload_npy=False,
-    delete_local = False):
+#Train+Test for pod autoencoder model
+ttp = TrainTestPipelines(pod_autoencoder_input())
+ttp.train()
+ttp.test()
+
+#Train+Test for container autoencoder model
+ttp = TrainTestPipelines(container_autoencoder_input())
+ttp.train()
+ttp.test()
+
+###***PCA***###
+
+#Train+Test for node PCA model
+ttp = TrainTestPipelines(node_pca_input())
+ttp.train()
+ttp.test()
+
+#Train+Test for pod PCA model
+ttp = TrainTestPipelines(pod_pca_input())
+ttp.train()
+ttp.test()
+
+#Train+Test for container PCA model
+ttp = TrainTestPipelines(container_pca_input())
+ttp.train()
+ttp.test()
+
 ```
 
 ### __Running Model Inference jobs__
