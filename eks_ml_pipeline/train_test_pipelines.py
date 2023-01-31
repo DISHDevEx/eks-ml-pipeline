@@ -1,8 +1,5 @@
 """
 Streamlied train and save of Models for Encode Decode Residual Anomaly Scoring.
-
-Contributed by Evgeniya Dontsova, Vinayak Sharma, and David Cherney
-MSS Dish 5g - Pattern Detection
 """
 
 import os
@@ -21,7 +18,6 @@ class TrainTestPipelines:
 
     outputs
     -------
-    None
     """
 
     def __init__(self, training_inputs):
