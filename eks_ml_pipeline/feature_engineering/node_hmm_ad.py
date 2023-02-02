@@ -7,7 +7,7 @@ from pyspark.sql.functions import col, count
 from sklearn.preprocessing import StandardScaler
 from ..utilities import feature_processor, null_report, S3Utilities
 from ..inputs import feature_engineering_input
-from devex_sdk import Pyspark_data_ingestion, get_features
+from devex_sdk import EKS_Connector, get_features
 from .train_test_split import all_rectypes_train_test_split
 
 
@@ -20,10 +20,10 @@ def node_hmm_ad_preprocessing(input_feature_group_name, input_feature_group_vers
     ------
             input_feature_group_name: STRING
             json name to get the required features
-            
+
             input_feature_group_version: STRING
-            json version to get the latest features 
-            
+            json version to get the latest features
+
             input_year : STRING | Int
             the year from which to read data, leave empty for all years
 
@@ -35,18 +35,18 @@ def node_hmm_ad_preprocessing(input_feature_group_name, input_feature_group_vers
 
             input_hour: STRING | Int
             the hour from which to read data, leave empty for all hours
-            
-            input_setup: STRING 
+
+            input_setup: STRING
             kernel config
-    
+
     outputs
     -------
             features_df : processed features dataFrame
             processed_node_df: pre processed node dataframe
-            
+
     """
 
-    pyspark_node_hmm_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Node')
+    pyspark_node_hmm_data = EKS_Connector(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Node')
     err, pyspark_node_hmm_df = pyspark_node_hmm_data.read()
 
     if err == 'PASS':
@@ -55,14 +55,14 @@ def node_hmm_ad_preprocessing(input_feature_group_name, input_feature_group_vers
         features_df = get_features(input_feature_group_name,input_feature_group_version)
         features = features_df["feature_name"].to_list()
         processed_features = feature_processor.cleanup(features)
-        
+
         model_parameters = features_df["model_parameters"].iloc[0]
         time_steps = model_parameters["time_steps"]
 
         #filter inital node df based on request features
         node_hmm_df = pyspark_node_hmm_df.select("Timestamp", "InstanceId", *processed_features)
         node_hmm_df = node_hmm_df.withColumn("Timestamp",(col("Timestamp")/1000).cast("timestamp"))
-        
+
         # Drop NA
         cleaned_node_hmm_df = node_hmm_df.na.drop(subset=processed_features)
 
@@ -70,10 +70,10 @@ def node_hmm_ad_preprocessing(input_feature_group_name, input_feature_group_vers
         quality_filtered_node_hmm_df = cleaned_node_hmm_df.groupBy("InstanceId").agg(count("Timestamp").alias("timestamp_count"))
         # to get data that is closer to 1min apart
         quality_filtered_hmm_nodes = quality_filtered_node_hmm_df.filter(col("timestamp_count") >= 2*time_steps)
-        
-        #Processed Node DF                                                      
+
+        #Processed Node DF
         processed_node_hmm_df = cleaned_node_hmm_df.filter(col("InstanceId").isin(quality_filtered_hmm_nodes["InstanceId"]))
-        
+
         return features_df, processed_node_hmm_df
 
     else:
@@ -87,16 +87,16 @@ def node_hmm_ad_feature_engineering(instance_id, input_df, input_features, input
     ------
             instance_id: String
             randomly pick instance id
-            
+
             input_df: df
-            preprocessing and filtered node df 
-            
+            preprocessing and filtered node df
+
             input_features: list
             list of selected features
-            
+
             input_scaled_features: list
             list of tobe scaled features
-            
+
             input_time_steps: int
             model parameter time steps
 
@@ -104,7 +104,7 @@ def node_hmm_ad_feature_engineering(instance_id, input_df, input_features, input
     -------
             node_fe_df: df
             training data df for exposing it as data product
-            
+
     """
 
     ##pick random df, and normalize
@@ -129,24 +129,24 @@ def node_hmm_list_generator(input_data_type, input_split_ratio, input_node_hmm_d
     ------
             input_data_type: String
             builds n_samples based on input string
-            
+
             input_split_ratio: list
             list of split parameters
-            
+
             input_node_df: df
-            preprocessing and filtered node df 
-            
+            preprocessing and filtered node df
+
             input_node_features_df: df
             processed node features df
- 
+
     outputs
     -------
             node_list: list
             randomly selected list of node id's with replacement
-            
+
             input_node_df: df
             final node df with newly added columns
-            
+
     """
     model_parameters = input_node_features_df["model_parameters"].iloc[0]
     time_steps = model_parameters["time_steps"]
@@ -160,9 +160,9 @@ def node_hmm_list_generator(input_data_type, input_split_ratio, input_node_hmm_d
 
     input_node_hmm_df['freq'] = input_node_hmm_df.groupby('InstanceId')['InstanceId'].transform('count')
     input_node_hmm_df = input_node_hmm_df[input_node_hmm_df["freq"] > time_steps]
-    
+
     node_hmm_list = input_node_hmm_df['InstanceId'].sample(n_samples).to_list()
-    
+
     return node_hmm_list, input_node_hmm_df
 
 
@@ -170,7 +170,7 @@ def node_hmm_fe_pipeline(feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
             partition_hour, spark_config_setup,
             bucket):
-    
+
     ##building file name dynamically
     if partition_hour == -1:
         file_name = f'{partition_year}_{partition_month}_{partition_day}'
@@ -178,10 +178,10 @@ def node_hmm_fe_pipeline(feature_group_name, feature_version,
         file_name = f'{partition_year}_{partition_month}'
     else:
         file_name = f'{partition_year}_{partition_month}_{partition_day}_{partition_hour}'
-    
+
     #pre processing
     node_hmm_features_data, node_hmm_processed_data = node_hmm_ad_preprocessing(feature_group_name, feature_version, partition_year, partition_month, partition_day, partition_hour, spark_config_setup)
-    
+
     #parsing model parameters
     scaled_features = []
     model_parameters = node_hmm_features_data["model_parameters"].iloc[0]
@@ -214,20 +214,20 @@ def node_hmm_fe_pipeline(feature_group_name, feature_version,
     #generating random selected list of node id's
     selected_hmm_node_train_list, processed_node_hmm_train_data = node_hmm_list_generator( 'train', [node_hmm_train_split,node_hmm_test_split], node_hmm_train_data, node_hmm_features_data)
     selected_hmm_node_test_list, processed_node_hmm_test_data = node_hmm_list_generator( 'test', [node_hmm_train_split,node_hmm_test_split], node_hmm_test_data, node_hmm_features_data)
-    
+
     #getting number of cores per kernel
     num_cores = multiprocessing.cpu_count()
 
     #Train data feature engineering
-    node_hmm_training_list = multiprocessing.Pool(num_cores).map(partial(node_hmm_ad_feature_engineering, 
+    node_hmm_training_list = multiprocessing.Pool(num_cores).map(partial(node_hmm_ad_feature_engineering,
                          input_df=processed_node_hmm_train_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_hmm_node_train_list)
     node_hmm_training_df = pd.concat(node_hmm_training_list)
     s3_utils.awswrangler_pandas_dataframe_to_s3(node_hmm_training_df, "data" , "pandas_df", f'training_{file_name}.parquet')
 
 
     #Test data feature engineering
-    node_hmm_testing_list = multiprocessing.Pool(num_cores).map(partial(node_hmm_ad_feature_engineering, 
+    node_hmm_testing_list = multiprocessing.Pool(num_cores).map(partial(node_hmm_ad_feature_engineering,
                          input_df=processed_node_hmm_test_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_hmm_node_test_list)
     node_hmm_testing_df = pd.concat(node_hmm_testing_list)
-    s3_utils.awswrangler_pandas_dataframe_to_s3(node_hmm_testing_df, "data" , "pandas_df", f'testing_{file_name}.parquet')    
+    s3_utils.awswrangler_pandas_dataframe_to_s3(node_hmm_testing_df, "data" , "pandas_df", f'testing_{file_name}.parquet')
 

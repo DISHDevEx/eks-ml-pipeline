@@ -1,7 +1,13 @@
 import pandas as pd
 from pyspark.sql.functions import get_json_object, col, count, concat_ws
 from ..utilities import feature_processor
-from devex_sdk import Pyspark_data_ingestion, get_features
+from devex_sdk import EKS_Connector, get_features
+from sklearn.preprocessing import StandardScaler
+from ..utilities import feature_processor, null_report, S3Utilities
+from ..inputs import feature_engineering_input
+from devex_sdk import EKS_Connector, get_features
+from .train_test_split import all_rectypes_train_test_split
+
 
 """
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
@@ -15,10 +21,10 @@ def container_ad_preprocessing(input_feature_group_name, input_feature_group_ver
     ------
             input_feature_group_name: STRING
             json name to get the required features
-            
+
             input_feature_group_version: STRING
-            json version to get the latest features 
-            
+            json version to get the latest features
+
             input_year : STRING | Int
             the year from which to read data, leave empty for all years
 
@@ -30,19 +36,20 @@ def container_ad_preprocessing(input_feature_group_name, input_feature_group_ver
 
             input_hour: STRING | Int
             the hour from which to read data, leave empty for all hours
-            
-            input_setup: STRING 
+
+            input_setup: STRING
             kernel config
-    
+
     outputs
     -------
             features_df : processed features dataFrame
+            processed_container_df: pre processed container dataframe
+
             processed_container_df: pre-processed container dataframe
-            
+
     """
 
-    pyspark_container_data = Pyspark_data_ingestion(year=input_year, month=input_month, day=input_day, hour=input_hour,
-                                                    setup=input_setup, filter_column_value='Container')
+    pyspark_container_data = EKS_Connector(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup,  filter_column_value ='Container')
     err, pyspark_container_df = pyspark_container_data.read()
 
     if err == 'PASS':
@@ -62,6 +69,11 @@ def container_ad_preprocessing(input_feature_group_name, input_feature_group_ver
             "container_name_pod_id"), *processed_features)
         container_df = container_df.withColumn("Timestamp", (col("Timestamp") / 1000).cast("timestamp"))
 
+
+        #filter inital container df based on request features
+        container_df = pyspark_container_df.select("Timestamp", concat_ws("-", get_json_object(col("kubernetes"),"$.container_name"), get_json_object(col("kubernetes"),"$.pod_id")).alias("container_name_pod_id"), *processed_features)
+        container_df = container_df.withColumn("Timestamp",(col("Timestamp")/1000).cast("timestamp"))
+
         # Drop NA
         cleaned_container_df = container_df.na.drop(subset=processed_features)
 
@@ -74,6 +86,11 @@ def container_ad_preprocessing(input_feature_group_name, input_feature_group_ver
         # Processed Container DF
         processed_container_df = cleaned_container_df.filter(
             col("container_name_pod_id").isin(quality_filtered_containers["container_name_pod_id"]))
+
+        quality_filtered_containers = quality_filtered_container_df.filter(col("timestamp_count") >= 2*time_steps)
+
+        #Processed Container DF
+        processed_container_df = cleaned_container_df.filter(col("container_name_pod_id").isin(quality_filtered_containers["container_name_pod_id"]))
 
         return features_df, processed_container_df
 

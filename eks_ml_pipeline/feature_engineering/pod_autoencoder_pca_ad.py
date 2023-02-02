@@ -1,10 +1,9 @@
 import pandas as pd
 from pyspark.sql.functions import col, count, get_json_object
 from ..utilities import feature_processor
-from devex_sdk import Pyspark_data_ingestion, get_features
+from devex_sdk import EKS_Connector, get_features
 
 """
-
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """
 def pod_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
@@ -13,10 +12,10 @@ def pod_ad_preprocessing(input_feature_group_name, input_feature_group_version, 
     ------
             input_feature_group_name: STRING
             json name to get the required features
-            
+
             input_feature_group_version: STRING
-            json version to get the latest features 
-            
+            json version to get the latest features
+
             input_year : STRING | Int
             the year from which to read data, leave empty for all years
 
@@ -28,18 +27,18 @@ def pod_ad_preprocessing(input_feature_group_name, input_feature_group_version, 
 
             input_hour: STRING | Int
             the hour from which to read data, leave empty for all hours
-            
-            input_setup: STRING 
+
+            input_setup: STRING
             kernel config
-    
+
     outputs
     -------
             features_df : processed features dataFrame
             final_pod_df: pre processed pod dataframe
-            
+
     """
 
-    pod_data = Pyspark_data_ingestion(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Pod')
+    pod_data = EKS_Connector(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Pod')
     err, pod_df = pod_data.read()
 
     if err == 'PASS':
@@ -47,7 +46,7 @@ def pod_ad_preprocessing(input_feature_group_name, input_feature_group_version, 
         features_df = get_features(input_feature_group_name,input_feature_group_version)
         features = features_df["feature_name"].to_list()
         processed_features = feature_processor.cleanup(features)
-        
+
         model_parameters = features_df["model_parameters"].iloc[0]
         time_steps = model_parameters["time_steps"]
 
@@ -57,23 +56,23 @@ def pod_ad_preprocessing(input_feature_group_name, input_feature_group_version, 
                            "pod_status", *processed_features)
         pod_df = pod_df.withColumn("Timestamp",(col("Timestamp")/1000).cast("timestamp"))
         cleaned_pod_df = pod_df.na.drop(subset=processed_features)
-        
+
         #Quality(timestamp filtered) pods
         cleaned_pod_df = cleaned_pod_df.filter(col("pod_status") == "Running")
         quality_filtered_pod_df = cleaned_pod_df.groupBy("pod_id").agg(count("Timestamp").alias("timestamp_count"))
         quality_filtered_pods = quality_filtered_pod_df.filter(col("timestamp_count") >= 2*time_steps)
 
-        #Processed pod DF                                                      
+        #Processed pod DF
         final_pod_df = cleaned_pod_df.filter(col("pod_id").isin(quality_filtered_pods["pod_id"]))
         final_pod_df = final_pod_df.sort("Timestamp")
-                
+
         #Drop duplicates on Pod_ID and Timestamp and keep first
         final_pod_df = final_pod_df.dropDuplicates(['pod_id', 'Timestamp'])
-        
-        #Drop rows with nans 
+
+        #Drop rows with nans
         final_pod_df = final_pod_df.na.drop("all")
-           
-        
+
+
         return features_df, final_pod_df
     else:
         empty_df = pd.DataFrame()

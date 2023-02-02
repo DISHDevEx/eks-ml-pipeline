@@ -1,7 +1,7 @@
 import pandas as pd
 from pyspark.sql.functions import col, count, rand, row_number
 from ..utilities import feature_processor
-from devex_sdk import Pyspark_data_ingestion, get_features
+from devex_sdk import EKS_Connector, get_features
 
 """
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
@@ -15,10 +15,10 @@ def node_ad_preprocessing(input_feature_group_name, input_feature_group_version,
     ------
             input_feature_group_name: STRING
             json name to get the required features
-            
+
             input_feature_group_version: STRING
-            json version to get the latest features 
-            
+            json version to get the latest features
+
             input_year : STRING | Int
             the year from which to read data, leave empty for all years
 
@@ -30,10 +30,10 @@ def node_ad_preprocessing(input_feature_group_name, input_feature_group_version,
 
             input_hour: STRING | Int
             the hour from which to read data, leave empty for all hours
-            
-            input_setup: STRING 
+
+            input_setup: STRING
             kernel config
-    
+
     outputs
     -------
             features_df : processed features dataFrame (pandas df)
@@ -41,8 +41,7 @@ def node_ad_preprocessing(input_feature_group_name, input_feature_group_version,
             
     """
 
-    pyspark_node_data = Pyspark_data_ingestion(year=input_year, month=input_month, day=input_day, hour=input_hour,
-                                               setup=input_setup, filter_column_value='Node')
+    pyspark_node_data = EKS_Connector(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Node')
     err, pyspark_node_df = pyspark_node_data.read()
 
     if err == 'PASS':
