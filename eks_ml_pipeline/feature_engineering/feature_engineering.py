@@ -99,6 +99,9 @@ def rec_type_ad_feature_engineering(rec_type_list_element, input_df, aggregation
     rec_type_fe_df = rec_type_fe_df.withColumn('rn', row_number().over(Window.orderBy('Timestamp'))).filter(
         (col("rn") >= start) & (col("rn") < start + input_time_steps)).drop('rn').select("*")
 
+    print('individual sample tensor')
+    rec_type_tensor = rec_type_fe_df.select("scaled_features").rdd.flatMap(list).collect()
+
     spark.sparkContext.setLocalProperty("spark.scheduler.pool", None)
 
-    return rec_type_fe_df
+    return rec_type_fe_df, rec_type_tensor

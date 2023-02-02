@@ -13,8 +13,9 @@ def run_multithreading(function_to_run, input_df, aggregation_column, input_feat
                                            input_scaled_features=input_scaled_features,
                                            input_time_steps=input_time_steps, spark=spark), rec_type_list_element) for
                    rec_type_list_element in selected_rec_type_list]
-        df_list = [f.result() for f in futures]
-    return df_list
+        df_list = [f.result()[0] for f in futures]
+        tensor_list = [f.result()[1] for f in futures]
+    return df_list, tensor_list
 
 
 def unionAll(*dfs):
