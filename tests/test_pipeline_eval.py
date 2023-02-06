@@ -2,13 +2,13 @@ from eks_ml_pipeline import TrainTestPipelines
 import boto3
 import os
 
-def test_aePipelineEval(aeTestInput):
+def test_aePipelineEval(aeTestInput,Bucket_Name):
     s3 = boto3.client('s3')
     ttp_ae = TrainTestPipelines(aeTestInput)
     ttp_ae.test()
     
     errors = []
-    Bucket_Name = os.environ.get("BUCKET_NAME_PYTEST")
+
     try:
         preds_file_head = s3.head_object(Bucket=Bucket_Name, Key='pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_predictions.npy')
         s3.delete_object(Bucket=Bucket_Name, Key='pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_predictions.npy')
@@ -29,11 +29,10 @@ def test_aePipelineEval(aeTestInput):
     
     
     
-def test_pcaPipelineEval(pcaTestInput):
+def test_pcaPipelineEval(pcaTestInput,Bucket_Name):
     s3 = boto3.client('s3')
     ttp_pca = TrainTestPipelines(pcaTestInput)
     ttp_pca.test()
-    Bucket_Name = os.environ.get("BUCKET_NAME_PYTEST")
     errors = []
     
     try:
