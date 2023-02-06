@@ -29,11 +29,13 @@ jobs:
         - name: Install dependencies
           run: |
             python -m pip install --upgrade pip
-            pip install git+https://github.com/DISHDevEx/dish-devex-sdk.git
             pip install  pytest
             pip install s3fs
             pip install -r requirements.txt
             if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        - name: Install devex
+          run: |
+            pip install git+https://github.com/DISHDevEx/dish-devex-sdk.git
         - name: Test with pytest
           env:
             ROLE_TO_ASSUME: ${{ secrets.ROLE_TO_ASSUME }}
