@@ -31,6 +31,8 @@ from .feature_engineering import pod_ad_preprocessing
 
 from .feature_engineering import container_ad_preprocessing
 
+from .feature_engineering import rec_type_ad_preprocessing
+
 from .feature_engineering import node_hmm_ad_preprocessing
 from .feature_engineering import node_hmm_ad_feature_engineering
 from .feature_engineering import node_hmm_list_generator
