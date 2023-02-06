@@ -12,8 +12,12 @@ jobs:
     Pytest:
       runs-on: ubuntu-latest
       steps:
-        - uses: actions/checkout@v3
-        - uses: actions/setup-python@v4
+        - name: checkout eks ml pipeline
+          uses: actions/checkout@v3
+          with:
+            path: main
+        - name: setup python
+          uses: actions/setup-python@v4
           with:
             python-version: '3.9'
         - name: configure aws credentials
@@ -22,9 +26,9 @@ jobs:
             role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
             role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
             aws-region: ${{ env.AWS_REGION }}
-        # Upload a file to AWS s3
         - name: Install dependencies
-          run: |
+          run: 
+            pip3 install git+https://github.com/DISHDevEx/dish-devex-sdk.git
             python -m pip install --upgrade pip
             pip install  pytest
             pip install s3fs
