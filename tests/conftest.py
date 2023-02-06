@@ -2,6 +2,7 @@ import pytest
 from devex_sdk import get_features
 from eks_ml_pipeline import AutoencoderModelDish5g
 from eks_ml_pipeline import PcaModelDish5g
+import os
 
 # functions to mark slow tests and skip them.
 def pytest_addoption(parser):
@@ -19,7 +20,11 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "slow" in item.keywords:
             item.add_marker(skip_perf)
-            
+@pytest.fixture(scope="module")           
+def Bucket_Name():   
+    Bucket_Name = os.environ.get("BUCKET_NAME_PYTEST")
+    return Bucket_Name
+
 @pytest.fixture(scope="module")           
 def aeTrainInput():
     """
