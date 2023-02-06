@@ -27,9 +27,9 @@ jobs:
             role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
             aws-region: ${{ env.AWS_REGION }}
         - name: Install dependencies
-          run: 
-            pip3 install git+https://github.com/DISHDevEx/dish-devex-sdk.git
+          run: |
             python -m pip install --upgrade pip
+            pip install git+https://github.com/DISHDevEx/dish-devex-sdk.git
             pip install  pytest
             pip install s3fs
             pip install -r requirements.txt
