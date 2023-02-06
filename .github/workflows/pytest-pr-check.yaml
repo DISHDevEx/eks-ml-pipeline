@@ -20,7 +20,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
-          role-session-name: ${{ secrets.SAMPLE_ROLE_SESSION }}
+          role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
           aws-region: ${{ env.AWS_REGION }}
       # Upload a file to AWS s3
       - name: Install dependencies
@@ -34,7 +34,7 @@ jobs:
       - name: Test with pytest
         env:
            ROLE_TO_ASSUME: ${{ secrets.ROLE_TO_ASSUME }}
-           SAMPLE_ROLE_SESSION: ${{ secrets.SAMPLE_ROLE_SESSION }}
+           SAMPLE_ROLE_SESSION: ${{ secrets.ROLE_SESSION_NAME }}
            BUCKET_NAME_PYTEST: ${{ secrets.BUCKET_NAME_PYTEST }}
            PYTEST_FLAG:  "True"
         run: |

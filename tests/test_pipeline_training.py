@@ -1,5 +1,6 @@
 from eks_ml_pipeline import TrainTestPipelines
 import boto3
+import os
 
 def test_aePipelineTraining(aeTrainInput):
     s3 = boto3.client('s3')
