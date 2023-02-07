@@ -169,7 +169,7 @@ def node_list_generator(input_data_type, input_split_ratio, input_node_df, input
 def node_fe_pipeline(feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
             partition_hour, spark_config_setup,
-            bucket):
+            bucket,bucket_name_raw_data, folder_name_raw_data):
 
     ##building file name dynamically
     if partition_hour == -1:
@@ -180,7 +180,7 @@ def node_fe_pipeline(feature_group_name, feature_version,
         file_name = f'{partition_year}_{partition_month}_{partition_day}_{partition_hour}'
 
     #pre processing
-    node_features_data, node_processed_data = node_ad_preprocessing(feature_group_name, feature_version, partition_year, partition_month, partition_day, partition_hour, spark_config_setup)
+    node_features_data, node_processed_data = node_ad_preprocessing(bucket_name_raw_data, folder_name_raw_data,feature_group_name, feature_version, partition_year, partition_month, partition_day, partition_hour, spark_config_setup)
 
     #parsing model parameters
     scaled_features = []

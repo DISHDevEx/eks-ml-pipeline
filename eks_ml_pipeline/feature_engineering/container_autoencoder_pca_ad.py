@@ -168,7 +168,7 @@ def container_list_generator(input_data_type, input_split_ratio, input_container
 def container_fe_pipeline(feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
             partition_hour, spark_config_setup,
-            bucket):
+            bucket,bucket_name_raw_data, folder_name_raw_data):
 
     ##building file name dynamically
     if partition_hour == -1:
@@ -179,7 +179,7 @@ def container_fe_pipeline(feature_group_name, feature_version,
         file_name = f'{partition_year}_{partition_month}_{partition_day}_{partition_hour}'
 
     #pre processing
-    container_features_data, container_processed_data = container_ad_preprocessing(feature_group_name, feature_version, partition_year, partition_month, partition_day, partition_hour, spark_config_setup)
+    container_features_data, container_processed_data = container_ad_preprocessing(bucket_name_raw_data, folder_name_raw_data,feature_group_name, feature_version, partition_year, partition_month, partition_day, partition_hour, spark_config_setup)
 
     #parsing model parameters
     scaled_features = []
