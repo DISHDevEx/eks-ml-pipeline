@@ -28,6 +28,8 @@ def Bucket_Name():
 @pytest.fixture(scope="module")           
 def aeTrainInput(Bucket_Name):
     """
+    This fixture creates inputs to train the desired model. It includes all of bucket versioning and model versioning needed 
+    as well as the file locations for a pipeline. 
     Parameters
     ----------
     None
@@ -98,6 +100,8 @@ def aeTrainInput(Bucket_Name):
 @pytest.fixture(scope="module")  
 def aeTestInput(Bucket_Name):
     """
+    This fixture creates inputs to evaluate the desired model. It includes all of bucket versioning and model versioning needed 
+    as well as the file locations for a pipeline. 
     Parameters
     ----------
     None
@@ -168,6 +172,8 @@ def aeTestInput(Bucket_Name):
 @pytest.fixture(scope="module")           
 def pcaTrainInput(Bucket_Name):
     """
+    This fixture creates inputs to train the desired model. It includes all of bucket versioning and model versioning needed 
+    as well as the file locations for a pipeline. 
     Parameters
     ----------
     None
@@ -237,6 +243,8 @@ def pcaTrainInput(Bucket_Name):
 @pytest.fixture(scope="module")           
 def pcaTestInput(Bucket_Name):
     """
+    This fixture creates inputs to evaluate the desired model. It includes all of bucket versioning and model versioning needed 
+    as well as the file locations for a pipeline. 
     Parameters
     ----------
     None

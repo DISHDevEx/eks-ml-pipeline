@@ -3,6 +3,13 @@ import boto3
 
 
 def test_aePipelineTraining(aeTrainInput,Bucket_Name):
+    """
+    This testing module verifies the training logic for the autoencoder training pipeline. It checks if a model is saved to the correct s3 path after training.
+    And it also checks if the pipeline is able to read our presaved training tensor from s3. 
+
+     Inputs: fixtures of training input and bucket name. 
+     Output: None
+    """
     s3 = boto3.client('s3')
     ttp_ae = TrainTestPipelines(aeTrainInput)
     ttp_ae.train()
@@ -27,6 +34,13 @@ def test_aePipelineTraining(aeTrainInput,Bucket_Name):
     
     
 def test_pcaPipelineTraining(pcaTrainInput,Bucket_Name):
+    """
+    This testing module verifies the training logic for the pca training pipeline. It checks if a model is saved to the correct s3 path after training.
+    And it also checks if the pipeline is able to read our presaved training tensor from s3. 
+
+     Inputs: fixtures of training input and bucket name 
+     Output: None
+    """
     s3 = boto3.client('s3')
     ttp_pca = TrainTestPipelines(pcaTrainInput)
     ttp_pca.train()
