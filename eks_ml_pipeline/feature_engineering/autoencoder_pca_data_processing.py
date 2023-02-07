@@ -1,6 +1,6 @@
 import pandas as pd
 from pyspark.sql.functions import col, count, rand, row_number, get_json_object, concat_ws
-from ..utilities import feature_processor
+from utilities import cleanup
 from devex_sdk import EKS_Connector, get_features
 
 """
@@ -8,8 +8,7 @@ this feature engineering functions will help us run bach jobs that builds traini
 """
 
 
-def rec_type_ad_preprocessing(rec_type, input_feature_group_name, input_feature_group_version, input_year, input_month, input_day,
-                          input_hour, input_setup="default"):
+def rec_type_ad_preprocessing(rec_type, input_bucket_name, input_folder_name, input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup="default"):
     """
     inputs
     ------
@@ -44,7 +43,7 @@ def rec_type_ad_preprocessing(rec_type, input_feature_group_name, input_feature_
 
     """
 
-    pyspark_data = EKS_Connector(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value =rec_type)
+    pyspark_data = EKS_Connector(bucket_name = input_bucket_name, folder_name = input_folder_name, year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value =rec_type)
     err, pyspark_df = pyspark_data.read()
 
     if err == 'PASS':
@@ -52,7 +51,7 @@ def rec_type_ad_preprocessing(rec_type, input_feature_group_name, input_feature_
         # get features
         features_df = get_features(input_feature_group_name, input_feature_group_version)
         features = features_df["feature_name"].to_list()
-        processed_features = feature_processor.cleanup(features)
+        processed_features = cleanup(features)
 
         model_parameters = features_df["model_parameters"].iloc[0]
         time_steps = model_parameters["time_steps"]
@@ -61,7 +60,7 @@ def rec_type_ad_preprocessing(rec_type, input_feature_group_name, input_feature_
         if rec_type == 'Node':
             rec_type_df = pyspark_df.select("Timestamp", "InstanceId", *processed_features)
         elif rec_type == 'Container':
-            rec_type_df = pyspark_df.select("Timestamp", concat_ws("-", get_json_object(col("kubernetes"),"$.container_name"), get_json_object(col("kubernetes"),"$.pod_id")).alias("container_name_pod_id"), *processed_features)
+            rec_type_df = pyspark_df.select("Timestamp", concat_ws("-",get_json_object(col("kubernetes"),"$.container_name"),get_json_object(col("kubernetes"),"$.pod_id")).alias("container_name_pod_id"), *processed_features)
         elif rec_type == 'Pod':
             rec_type_df = pyspark_df.select("Timestamp", get_json_object(col("kubernetes"), "$.pod_id").alias("pod_id"), "pod_status", *processed_features)
 
