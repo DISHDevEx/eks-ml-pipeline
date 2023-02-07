@@ -54,9 +54,6 @@ def node_pca_fe_input():
 
     ##s3 bucket parameters
     bucket = os.environ.get("BUCKET_NAME_OUTPUT")
-
-    ##s3 bucket parameters
-    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
     bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
     folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
     return [feature_group_name, feature_version, partition_year, partition_month, partition_day,
@@ -82,9 +79,6 @@ def node_hmm_fe_input():
     partition_day = "29"
     partition_hour = "1"
     spark_config_setup = "384gb"
-
-    ##s3 bucket parameters
-    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
 
     ##s3 bucket parameters
     bucket = os.environ.get("BUCKET_NAME_OUTPUT")
