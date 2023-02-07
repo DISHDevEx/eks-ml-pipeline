@@ -2,7 +2,7 @@ from eks_ml_pipeline import TrainTestPipelines
 import boto3
 import os
 
-def test_ae_pipeline_eval(aeTeae_test_inputstInput,Bucket_Name):
+def test_ae_pipeline_eval(aeTeae_test_inputstInput,BUCKET_NAME):
     """
     This testing module verifies the evaluation logic for the autoencoder evaluation pipeline. It checks if a model is read from the correct s3 path after training.
     And it also checks if the pipeline is able to read our presaved evaluation tensor from s3. 
@@ -18,14 +18,14 @@ def test_ae_pipeline_eval(aeTeae_test_inputstInput,Bucket_Name):
     errors = []
 
     try:
-        preds_file_head = s3.head_object(Bucket=Bucket_Name, Key='pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_predictions.npy')
-        s3.delete_object(Bucket=Bucket_Name, Key='pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_predictions.npy')
+        preds_file_head = s3.head_object(Bucket=BUCKET_NAME, Key='pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_predictions.npy')
+        s3.delete_object(Bucket=BUCKET_NAME, Key='pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_predictions.npy')
     except Exception as e:
         errors.append(e)
         
     try:   
-        res_file_head = s3.head_object(Bucket=Bucket_Name, Key='pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_residuals.npy')
-        s3.delete_object(Bucket=Bucket_Name, Key='pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_residuals.npy')
+        res_file_head = s3.head_object(Bucket=BUCKET_NAME, Key='pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_residuals.npy')
+        s3.delete_object(Bucket=BUCKET_NAME, Key='pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_residuals.npy')
     except Exception as e:
         errors.append(e)
         
@@ -37,7 +37,7 @@ def test_ae_pipeline_eval(aeTeae_test_inputstInput,Bucket_Name):
     
     
     
-def test_pca_pipeline_eval(pca_test_input,Bucket_Name):
+def test_pca_pipeline_eval(pca_test_input,BUCKET_NAME):
     """
     This testing module verifies the evaluation logic for the pca evaluation pipeline. It checks if a model is read from the correct s3 path after training.
     And it also checks if the pipeline is able to read our presaved evaluation tensor from s3. 
@@ -52,14 +52,14 @@ def test_pca_pipeline_eval(pca_test_input,Bucket_Name):
     errors = []
     
     try:
-        preds_file_head = s3.head_object(Bucket=Bucket_Name, Key='pytest_pca_ad/v0.0.1/models/predictions/pcaDummyDataTest_predictions.npy')
-        s3.delete_object(Bucket=Bucket_Name, Key='pytest_pca_ad/v0.0.1/models/predictions/pcaDummyDataTest_predictions.npy')
+        preds_file_head = s3.head_object(Bucket=BUCKET_NAME, Key='pytest_pca_ad/v0.0.1/models/predictions/pcaDummyDataTest_predictions.npy')
+        s3.delete_object(Bucket=BUCKET_NAME, Key='pytest_pca_ad/v0.0.1/models/predictions/pcaDummyDataTest_predictions.npy')
     except Exception as e:
         errors.append(e)
         
     try:   
-        res_file_head = s3.head_object(Bucket= Bucket_Name, Key='pytest_pca_ad/v0.0.1/models/predictions/pcaDummyDataTest_residuals.npy')
-        s3.delete_object(Bucket= Bucket_Name, Key='pytest_pca_ad/v0.0.1/models/predictions/pcaDummyDataTest_residuals.npy')
+        res_file_head = s3.head_object(Bucket= BUCKET_NAME, Key='pytest_pca_ad/v0.0.1/models/predictions/pcaDummyDataTest_residuals.npy')
+        s3.delete_object(Bucket= BUCKET_NAME, Key='pytest_pca_ad/v0.0.1/models/predictions/pcaDummyDataTest_residuals.npy')
     except Exception as e:
         errors.append(e)
         
