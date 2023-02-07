@@ -1,3 +1,5 @@
+import os
+
 
 def node_autoencoder_fe_input():
     """
@@ -20,13 +22,14 @@ def node_autoencoder_fe_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket parameters
-    bucket = "dish-5g.core.pd.g.dp.eks.logs.e"
-
-
+    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
+    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
+    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
     return [feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
             partition_hour, spark_config_setup,
-            bucket]
+            bucket,bucket_name_raw_data,folder_name_raw_data]
+
 
 
 def node_pca_fe_input():
@@ -50,13 +53,14 @@ def node_pca_fe_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket parameters
-    bucket = "dish-5g.core.pd.g.dp.eks.logs.e"
+    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
 
-
-    return [feature_group_name, feature_version,
-            partition_year, partition_month, partition_day,
-            partition_hour, spark_config_setup,
-            bucket]
+    ##s3 bucket parameters
+    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
+    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
+    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
+    return [feature_group_name, feature_version, partition_year, partition_month, partition_day,
+            partition_hour, spark_config_setup, bucket, bucket_name_raw_data, folder_name_raw_data]
 
 
 def node_hmm_fe_input():
@@ -80,13 +84,14 @@ def node_hmm_fe_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket parameters
-    bucket = "dish-5g.core.pd.g.dp.eks.logs.e"
+    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
 
-
-    return [feature_group_name, feature_version,
-            partition_year, partition_month, partition_day,
-            partition_hour, spark_config_setup,
-            bucket]
+    ##s3 bucket parameters
+    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
+    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
+    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
+    return [feature_group_name, feature_version, partition_year, partition_month, partition_day,
+            partition_hour, spark_config_setup, bucket, bucket_name_raw_data, folder_name_raw_data]
 
 
 def pod_autoencoder_fe_input():
@@ -110,13 +115,11 @@ def pod_autoencoder_fe_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket parameters
-    bucket = "dish-5g.core.pd.g.dp.eks.logs.e"
-
-
-    return [feature_group_name, feature_version,
-            partition_year, partition_month, partition_day,
-            partition_hour, spark_config_setup,
-            bucket]
+    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
+    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
+    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
+    return [feature_group_name, feature_version, partition_year, partition_month, partition_day,
+            partition_hour, spark_config_setup, bucket, bucket_name_raw_data, folder_name_raw_data]
 
 
 def pod_pca_fe_input():
@@ -140,13 +143,13 @@ def pod_pca_fe_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket parameters
-    bucket = "dish-5g.core.pd.g.dp.eks.logs.e"
-
-
+    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
+    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
+    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
     return [feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
             partition_hour, spark_config_setup,
-            bucket]
+            bucket,bucket_name_raw_data,folder_name_raw_data]
 
 
 def container_autoencoder_fe_input():
@@ -170,13 +173,11 @@ def container_autoencoder_fe_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket parameters
-    bucket = "dish-5g.core.pd.g.dp.eks.logs.e"
-
-
-    return [feature_group_name, feature_version,
-            partition_year, partition_month, partition_day,
-            partition_hour, spark_config_setup,
-            bucket]
+    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
+    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
+    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
+    return [feature_group_name, feature_version, partition_year, partition_month, partition_day,
+            partition_hour, spark_config_setup, bucket, bucket_name_raw_data, folder_name_raw_data]
 
 
 def container_pca_fe_input():
@@ -200,11 +201,10 @@ def container_pca_fe_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket parameters
-    bucket = "dish-5g.core.pd.g.dp.eks.logs.e"
-
-
+    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
+    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
+    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
     return [feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
             partition_hour, spark_config_setup,
-            bucket]
-
+            bucket,bucket_name_raw_data,folder_name_raw_data]

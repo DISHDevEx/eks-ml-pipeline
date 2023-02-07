@@ -1,6 +1,7 @@
 """
 these are the parameters for inference pipeline
 """
+import os
 
 def node_inference_input():
 
@@ -25,7 +26,7 @@ def node_inference_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket for raw inference data
-    data_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
+    data_bucketname = os.environ.get("BUCKET_NAME_OUTPUT")
 
     return [rec_type, sampling_column,
             partition_year, partition_month,
@@ -55,7 +56,7 @@ def pod_inference_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket for raw inference data
-    data_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
+    data_bucketname = os.environ.get("BUCKET_NAME_OUTPUT")
 
     return [rec_type, sampling_column,
             partition_year, partition_month,
@@ -86,7 +87,7 @@ def container_inference_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket for raw inference data
-    data_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
+    data_bucketname = os.environ.get("BUCKET_NAME_OUTPUT")
 
     return [rec_type, sampling_column,
             partition_year, partition_month,

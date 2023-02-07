@@ -230,7 +230,6 @@ ttp.test()
 ttp = TrainTestPipelines(container_pca_input())
 ttp.train()
 ttp.test()
-
 ```
 
 ### __Running Model Inference jobs__

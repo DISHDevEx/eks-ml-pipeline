@@ -103,3 +103,4 @@ datasets
 core.18172
 dask-worker-space/
 *.parquet
+.env
