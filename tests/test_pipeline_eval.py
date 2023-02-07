@@ -19,9 +19,15 @@ def test_ae_pipeline_eval(ae_test_input, bucket_name):
     errors = []
 
     try:
-        pred_key = "pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_predictions.npy"
-        preds_file_head = s3.head_object(Bucket=bucket_name, Key=pred_key)
-        s3.delete_object(Bucket=bucket_name, Key=pred_key)
+
+        preds_file_head = s3.head_object(
+            Bucket=bucket_name,
+            Key="pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_predictions.npy",
+        )
+        s3.delete_object(
+            Bucket=bucket_name,
+            Key="pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_predictions.npy",
+        )
     except Exception as e:
         errors.append(e)
 
