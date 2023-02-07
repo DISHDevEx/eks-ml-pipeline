@@ -26,7 +26,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
-          role-session-name: samplerolesession
+          role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
           aws-region: ${{ env.AWS_REGION }}
       # Upload a file to AWS s3
       - name:  run docker build
