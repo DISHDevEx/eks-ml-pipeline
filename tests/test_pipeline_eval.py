@@ -2,7 +2,7 @@ from eks_ml_pipeline import TrainTestPipelines
 import boto3
 import os
 
-def test_aePipelineEval(aeTestInput,Bucket_Name):
+def test_ae_pipeline_eval(aeTeae_test_inputstInput,Bucket_Name):
     """
     This testing module verifies the evaluation logic for the autoencoder evaluation pipeline. It checks if a model is read from the correct s3 path after training.
     And it also checks if the pipeline is able to read our presaved evaluation tensor from s3. 
@@ -12,7 +12,7 @@ def test_aePipelineEval(aeTestInput,Bucket_Name):
      Output: None
     """
     s3 = boto3.client('s3')
-    ttp_ae = TrainTestPipelines(aeTestInput)
+    ttp_ae = TrainTestPipelines(ae_test_input)
     ttp_ae.test()
     
     errors = []
@@ -37,7 +37,7 @@ def test_aePipelineEval(aeTestInput,Bucket_Name):
     
     
     
-def test_pcaPipelineEval(pcaTestInput,Bucket_Name):
+def test_pca_pipeline_eval(pca_test_input,Bucket_Name):
     """
     This testing module verifies the evaluation logic for the pca evaluation pipeline. It checks if a model is read from the correct s3 path after training.
     And it also checks if the pipeline is able to read our presaved evaluation tensor from s3. 
@@ -47,7 +47,7 @@ def test_pcaPipelineEval(pcaTestInput,Bucket_Name):
      Output: None
     """
     s3 = boto3.client('s3')
-    ttp_pca = TrainTestPipelines(pcaTestInput)
+    ttp_pca = TrainTestPipelines(pca_test_input)
     ttp_pca.test()
     errors = []
     
