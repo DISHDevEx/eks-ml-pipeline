@@ -27,7 +27,7 @@ def test_ae_pipeline_eval(ae_test_input, bucket_name):
 
         preds_file_head = s3.head_object(
             Bucket=bucket_name,
-            Key="pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_predictions.npy",
+            Key="pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_predictions.np",
         )
         s3.delete_object(
             Bucket=bucket_name,
