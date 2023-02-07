@@ -235,7 +235,7 @@ def pcaTrainInput(Bucket_Name):
 
 
 @pytest.fixture(scope="module")           
-def pcaTestInput():
+def pcaTestInput(Bucket_Name):
     """
     Parameters
     ----------
