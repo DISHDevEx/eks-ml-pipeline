@@ -14,7 +14,7 @@ from .train_test_split import all_rectypes_train_test_split
 """
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """
-def node_hmm_ad_preprocessing(bucket_name_raw_data, folder_name_raw_data, input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
+def node_hmm_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup, bucket_name_raw_data, folder_name_raw_data):
     """
     inputs
     ------
@@ -180,7 +180,7 @@ def node_hmm_fe_pipeline(feature_group_name, feature_version,
         file_name = f'{partition_year}_{partition_month}_{partition_day}_{partition_hour}'
 
     #pre processing
-    node_hmm_features_data, node_hmm_processed_data = node_hmm_ad_preprocessing(bucket_name_raw_data, folder_name_raw_data,feature_group_name, feature_version, partition_year, partition_month, partition_day, partition_hour, spark_config_setup)
+    node_hmm_features_data, node_hmm_processed_data = node_hmm_ad_preprocessing(feature_group_name, feature_version, partition_year, partition_month, partition_day, partition_hour, spark_config_setup, bucket_name_raw_data, folder_name_raw_data)
 
     #parsing model parameters
     scaled_features = []

@@ -15,8 +15,8 @@ this feature engineering functions will help us run bach jobs that builds traini
 """
 def pod_ad_preprocessing(input_feature_group_name, input_feature_group_version,
                          input_year, input_month, input_day,
-                         input_hour, input_setup ,
-                         bucket_name_raw_data , folder_name_raw_data):
+                         input_hour, input_setup,
+                         bucket_name_raw_data , folder_name_raw_data,):
     """
     inputs
     ------
@@ -177,7 +177,7 @@ def pod_list_generator(input_data_type, input_split_ratio, input_pod_df, input_p
 def pod_fe_pipeline(feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
             partition_hour, spark_config_setup,
-            bucket,bucket_name_raw_data, folder_name_raw_data):
+            bucket, bucket_name_raw_data, folder_name_raw_data):
 
     ##building file name dynamically
     if partition_hour == -1:
@@ -188,7 +188,7 @@ def pod_fe_pipeline(feature_group_name, feature_version,
         file_name = f'{partition_year}_{partition_month}_{partition_day}_{partition_hour}'
 
     #pre processing
-    pod_features_data, pod_processed_data = pod_ad_preprocessing(bucket_name_raw_data, folder_name_raw_data,feature_group_name, feature_version, partition_year, partition_month, partition_day, partition_hour, spark_config_setup)
+    pod_features_data, pod_processed_data = pod_ad_preprocessing(feature_group_name, feature_version, partition_year, partition_month, partition_day, partition_hour, spark_config_setup, bucket_name_raw_data, folder_name_raw_data)
 
     #parsing model parameters
     scaled_features = []
