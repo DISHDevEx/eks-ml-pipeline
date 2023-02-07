@@ -26,12 +26,12 @@ def pytest_collection_modifyitems(config, items):
         if "slow" in item.keywords:
             item.add_marker(skip_perf)
 @pytest.fixture(scope="module")           
-def Bucket_Name():   
-    Bucket_Name = os.environ.get("BUCKET_NAME_PYTEST")
-    return Bucket_Name
+def BUCKET_NAME():   
+    BUCKET_NAME = os.environ.get("BUCKET_NAME_PYTEST")
+    return BUCKET_NAME
 
 @pytest.fixture(scope="module")           
-def ae_train_input(Bucket_Name):
+def ae_train_input(BUCKET_NAME):
     """
     This fixture creates inputs to train the desired model. It includes all of bucket versioning and model versioning needed 
     as well as the file locations for a pipeline. 
@@ -56,13 +56,13 @@ def ae_train_input(Bucket_Name):
     feature_input_version = "v0.0.1"
 
     # data_locations
-    data_bucketname = Bucket_Name
+    data_bucketname = BUCKET_NAME
     train_data_filename = "aeDummyDataTrain.npy"
     test_data_filename = "aeDummyDataTest.npy"
 
     # save_model_locations
     save_model_local_path = "../test_autoencoder"
-    model_bucketname = Bucket_Name
+    model_bucketname = BUCKET_NAME
     model_name = 'train_autoencoder_ad'
     model_version = "v0.0.1"
 
@@ -103,7 +103,7 @@ def ae_train_input(Bucket_Name):
             
 
 @pytest.fixture(scope="module")  
-def ae_test_input(Bucket_Name):
+def ae_test_input(BUCKET_NAME):
     """
     This fixture creates inputs to evaluate the desired model. It includes all of bucket versioning and model versioning needed 
     as well as the file locations for a pipeline. 
@@ -128,13 +128,13 @@ def ae_test_input(Bucket_Name):
     feature_input_version = "v0.0.1"
 
     # data_locations
-    data_bucketname = Bucket_Name
+    data_bucketname = BUCKET_NAME
     train_data_filename = "aeDummyDataTrain.npy"
     test_data_filename = "aeDummyDataTest.npy"
 
     # save_model_locations
     save_model_local_path = "../test_autoencoder"
-    model_bucketname = Bucket_Name
+    model_bucketname = BUCKET_NAME
     model_name = 'test_autoencoder_ad'
     model_version = "v0.0.1"
 
@@ -175,7 +175,7 @@ def ae_test_input(Bucket_Name):
 
 
 @pytest.fixture(scope="module")           
-def pca_train_input(Bucket_Name):
+def pca_train_input(BUCKET_NAME):
     """
     This fixture creates inputs to train the desired model. It includes all of bucket versioning and model versioning needed 
     as well as the file locations for a pipeline. 
@@ -201,13 +201,13 @@ def pca_train_input(Bucket_Name):
     feature_input_version = "v0.0.1"
 
     # data_locations
-    data_bucketname = Bucket_Name
+    data_bucketname = BUCKET_NAME
     train_data_filename = "pcaDummyDataTrain.npy"
     test_data_filename = "pcaDummyDataTest.npy"
 
     # save_model_locations
     save_model_local_path = "../test_pca.npy"
-    model_bucketname = Bucket_Name
+    model_bucketname = BUCKET_NAME
     model_name = "train_pca_ad"
     model_version = "v0.0.1"
     #Define model filename
@@ -246,7 +246,7 @@ def pca_train_input(Bucket_Name):
 
 
 @pytest.fixture(scope="module")           
-def pca_test_input(Bucket_Name):
+def pca_test_input(BUCKET_NAME):
     """
     This fixture creates inputs to evaluate the desired model. It includes all of bucket versioning and model versioning needed 
     as well as the file locations for a pipeline. 
@@ -272,13 +272,13 @@ def pca_test_input(Bucket_Name):
     feature_input_version = "v0.0.1"
 
     # data_locations
-    data_bucketname = Bucket_Name
+    data_bucketname = BUCKET_NAME
     train_data_filename = "pcaDummyDataTrain.npy"
     test_data_filename = "pcaDummyDataTest.npy"
 
     # save_model_locations
     save_model_local_path = "../test_pca.npy"
-    model_bucketname = Bucket_Name
+    model_bucketname = BUCKET_NAME
     model_name = "test_pca_ad"
     model_version = "v0.0.1"
     #Define model filename
