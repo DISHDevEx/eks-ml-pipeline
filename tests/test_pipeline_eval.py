@@ -37,7 +37,7 @@ def test_pcaPipelineEval(pcaTestInput,Bucket_Name):
     
     try:
         preds_file_head = s3.head_object(Bucket=Bucket_Name, Key='pytest_pca_ad/v0.0.1/models/predictions/pcaDummyDataTest_predictions.npy')
-        s3.delete_object(Bucket='dish-5g.core.pd.g.dp.eks.logs.e', Key='pytest_pca_ad/v0.0.1/models/predictions/pcaDummyDataTest_predictions.npy')
+        s3.delete_object(Bucket=Bucket_Name, Key='pytest_pca_ad/v0.0.1/models/predictions/pcaDummyDataTest_predictions.npy')
     except Exception as e:
         errors.append(e)
         
