@@ -31,8 +31,8 @@ def test_ae_pipeline_eval(ae_test_input, bucket_name):
             Bucket=bucket_name,
             Key="pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_predictions.npy",
         )
-    except Exception as e:
-        errors.append(e)
+    except Exception as error_message:
+        errors.append(error_message)
 
     try:
         res_file_head = s3.head_object(
@@ -43,8 +43,8 @@ def test_ae_pipeline_eval(ae_test_input, bucket_name):
             Bucket=bucket_name,
             Key="pytest_autoencoder_ad/v0.0.1/models/predictions/aeDummyDataTest_residuals.npy",
         )
-    except Exception as e:
-        errors.append(e)
+    except Exception as error_message:
+        errors.append(error_message)
 
     if os.path.exists("../test_autoencoder") == True:
         errors.append("AE Model not deleted correctly")
@@ -76,8 +76,8 @@ def test_pca_pipeline_eval(pca_test_input, bucket_name):
             Bucket=bucket_name,
             Key="pytest_pca_ad/v0.0.1/models/predictions/pcaDummyDataTest_predictions.npy",
         )
-    except Exception as e:
-        errors.append(e)
+    except Exception as error_message:
+        errors.append(error_message)
 
     try:
         res_file_head = s3.head_object(
@@ -88,8 +88,8 @@ def test_pca_pipeline_eval(pca_test_input, bucket_name):
             Bucket=bucket_name,
             Key="pytest_pca_ad/v0.0.1/models/predictions/pcaDummyDataTest_residuals.npy",
         )
-    except Exception as e:
-        errors.append(e)
+    except Exception as error_message:
+        errors.append(error_message)
 
     if os.path.exists("../test_pca.npy") == True:
         errors.append("AE Model not deleted correctly")

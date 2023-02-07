@@ -28,8 +28,8 @@ def test_ae_pipeline_training(ae_train_input, bucket_name):
             Bucket=bucket_name,
             Key="pytest_autoencoder_ad/v0.0.1/models/zipped_models/train_autoencoder_ad_model_v0.0.1_aeDummyDataTrain.zip",
         )
-    except Exception as e:
-        errors.append(e)
+    except Exception as error_message:
+        errors.append(error_message)
 
     try:
         onnx_file_head = s3.head_object(
@@ -40,8 +40,8 @@ def test_ae_pipeline_training(ae_train_input, bucket_name):
             Bucket=bucket_name,
             Key="pytest_autoencoder_ad/v0.0.1/models/onnx_models/train_autoencoder_ad_model_v0.0.1_aeDummyDataTrain.onnx",
         )
-    except Exception as e:
-        errors.append(e)
+    except Exception as error_message:
+        errors.append(error_message)
 
     assert len(errors) == 0
 
@@ -69,7 +69,7 @@ def test_pca_pipeline_training(pca_train_input, bucket_name):
             Bucket=bucket_name,
             Key="pytest_pca_ad/v0.0.1/models/npy_models/train_pca_ad_model_v0.0.1_pcaDummyDataTrain.npy",
         )
-    except Exception as e:
-        errors.append(e)
+    except Exception as error_message:
+        errors.append(error_message)
 
     assert len(errors) == 0
