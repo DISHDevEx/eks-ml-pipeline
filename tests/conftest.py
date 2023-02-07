@@ -11,23 +11,36 @@ It also defines the configurations for pytest.
 
 # functions to mark slow tests and skip them.
 def pytest_addoption(parser):
+    """
+    parser to read slow 
+    """
     parser.addoption(
         "--slow", action="store_true", default=False, help="run (slow) performance tests"
     )
 
 def pytest_configure(config):
+    """
+        add markers to the pytest configure 
+    """
     config.addinivalue_line("markers", "slow: mark test as a (potentially slow) performance test")
 
 def pytest_collection_modifyitems(config, items):
+    """
+        tell pytest to skip modules marked as slow
+    """
     if config.getoption("--slow"):
         return
     skip_perf = pytest.mark.skip(reason="need --slow option to run")
     for item in items:
         if "slow" in item.keywords:
             item.add_marker(skip_perf)
+
 @pytest.fixture(scope="module")           
-def bucket_name():   
-    BUCKET_NAME = os.environ.get("bucket_name_PYTEST")
+def bucket_name(): 
+    """
+    get bucket name from the github workflow runner secrets
+    """  
+    BUCKET_NAME = os.environ.get("BUCKET_NAME_PYTEST")
     return BUCKET_NAME
 
 @pytest.fixture(scope="module")           
