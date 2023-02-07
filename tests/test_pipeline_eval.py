@@ -14,6 +14,8 @@ def test_ae_pipeline_eval(ae_test_input, bucket_name):
     
     Inputs: fixtures of training input and bucket name. 
     Output: None
+
+    multiple try catch added to save time, test() can take 45seconds+
     """
     s3 = boto3.client("s3")
     ttp_ae = TrainTestPipelines(ae_test_input)
@@ -49,7 +51,7 @@ def test_ae_pipeline_eval(ae_test_input, bucket_name):
     if os.path.exists("../test_autoencoder") == True:
         errors.append("AE Model not deleted correctly")
 
-    assert len(errors) == 0
+    assert len(errors) == 0, f"{errors}"
 
 
 def test_pca_pipeline_eval(pca_test_input, bucket_name):
@@ -61,6 +63,8 @@ def test_pca_pipeline_eval(pca_test_input, bucket_name):
 
     Inputs: fixtures of training input and bucket name. 
     Output: None
+
+    multiple try catch added to save time, test() can take 45seconds+
     """
     s3 = boto3.client("s3")
     ttp_pca = TrainTestPipelines(pca_test_input)
@@ -94,4 +98,4 @@ def test_pca_pipeline_eval(pca_test_input, bucket_name):
     if os.path.exists("../test_pca.npy") == True:
         errors.append("AE Model not deleted correctly")
 
-    assert len(errors) == 0
+    assert len(errors) == 0, f"{errors}"
