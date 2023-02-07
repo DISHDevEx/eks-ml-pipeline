@@ -67,7 +67,7 @@ def inference_data_naming(input_year, input_month, input_day, input_hour, rec_ty
     return file_name
 
 
-def inference_data_builder(input_year, input_month, input_day, input_hour, rec_type,
+def inference_data_builder(bucket_name_raw_data, folder_name_raw_data, input_year, input_month, input_day, input_hour, rec_type,
                            input_setup, bucket):
 
     """
@@ -100,7 +100,7 @@ def inference_data_builder(input_year, input_month, input_day, input_hour, rec_t
     file_name = inference_data_naming(input_year, input_month,
                                       input_day, input_hour, rec_type)
 
-    pyspark_data = EKS_Connector(year = input_year, month = input_month,
+    pyspark_data = EKS_Connector(bucket_name = bucket_name_raw_data ,folder_name = folder_name_raw_data, year = input_year, month = input_month,
                                           day = input_day, hour = input_hour,
                                           setup = input_setup, filter_column_value = rec_type)
 

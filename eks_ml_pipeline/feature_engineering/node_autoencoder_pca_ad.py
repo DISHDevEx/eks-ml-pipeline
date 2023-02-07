@@ -14,7 +14,7 @@ from .train_test_split import all_rectypes_train_test_split
 """
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """
-def node_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
+def node_ad_preprocessing(bucket_name_raw_data, folder_name_raw_data, input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
     """
     inputs
     ------
@@ -46,7 +46,7 @@ def node_ad_preprocessing(input_feature_group_name, input_feature_group_version,
 
     """
 
-    pyspark_node_data = EKS_Connector(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Node')
+    pyspark_node_data = EKS_Connector(bucket_name = bucket_name_raw_data ,folder_name = folder_name_raw_data, year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Node')
     err, pyspark_node_df = pyspark_node_data.read()
 
     if err == 'PASS':
