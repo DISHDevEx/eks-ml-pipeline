@@ -2,7 +2,7 @@ from eks_ml_pipeline import TrainTestPipelines
 import boto3
 import os
 
-def test_ae_pipeline_eval(aeTeae_test_inputstInput,bucket_name):
+def test_ae_pipeline_eval(ae_test_input,bucket_name):
     """
     This testing module verifies the evaluation logic for the autoencoder evaluation pipeline. It checks if a model is read from the correct s3 path after training.
     And it also checks if the pipeline is able to read our presaved evaluation tensor from s3. 
