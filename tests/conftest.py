@@ -26,7 +26,7 @@ def Bucket_Name():
     return Bucket_Name
 
 @pytest.fixture(scope="module")           
-def aeTrainInput():
+def aeTrainInput(Bucket_Name):
     """
     Parameters
     ----------
@@ -49,13 +49,13 @@ def aeTrainInput():
     feature_input_version = "v0.0.1"
 
     # data_locations
-    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    data_bucketname = Bucket_Name
     train_data_filename = "aeDummyDataTrain.npy"
     test_data_filename = "aeDummyDataTest.npy"
 
     # save_model_locations
     save_model_local_path = "../test_autoencoder"
-    model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    model_bucketname = Bucket_Name
     model_name = 'train_autoencoder_ad'
     model_version = "v0.0.1"
 
@@ -96,7 +96,7 @@ def aeTrainInput():
             
 
 @pytest.fixture(scope="module")  
-def aeTestInput():
+def aeTestInput(Bucket_Name):
     """
     Parameters
     ----------
@@ -119,13 +119,13 @@ def aeTestInput():
     feature_input_version = "v0.0.1"
 
     # data_locations
-    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    data_bucketname = Bucket_Name
     train_data_filename = "aeDummyDataTrain.npy"
     test_data_filename = "aeDummyDataTest.npy"
 
     # save_model_locations
     save_model_local_path = "../test_autoencoder"
-    model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    model_bucketname = Bucket_Name
     model_name = 'test_autoencoder_ad'
     model_version = "v0.0.1"
 
@@ -166,7 +166,7 @@ def aeTestInput():
 
 
 @pytest.fixture(scope="module")           
-def pcaTrainInput():
+def pcaTrainInput(Bucket_Name):
     """
     Parameters
     ----------
@@ -190,13 +190,13 @@ def pcaTrainInput():
     feature_input_version = "v0.0.1"
 
     # data_locations
-    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    data_bucketname = Bucket_Name
     train_data_filename = "pcaDummyDataTrain.npy"
     test_data_filename = "pcaDummyDataTest.npy"
 
     # save_model_locations
     save_model_local_path = "../test_pca.npy"
-    model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    model_bucketname = Bucket_Name
     model_name = "train_pca_ad"
     model_version = "v0.0.1"
     #Define model filename
@@ -259,13 +259,13 @@ def pcaTestInput():
     feature_input_version = "v0.0.1"
 
     # data_locations
-    data_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    data_bucketname = Bucket_Name
     train_data_filename = "pcaDummyDataTrain.npy"
     test_data_filename = "pcaDummyDataTest.npy"
 
     # save_model_locations
     save_model_local_path = "../test_pca.npy"
-    model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
+    model_bucketname = Bucket_Name
     model_name = "test_pca_ad"
     model_version = "v0.0.1"
     #Define model filename
