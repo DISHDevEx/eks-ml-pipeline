@@ -1,13 +1,14 @@
+"""
+This module intends to define static variables that can be reused throughout pytest without redefinition. 
+It also defines the configurations for pytest.
+"""
 import pytest
 from devex_sdk import get_features
 from eks_ml_pipeline import AutoencoderModelDish5g
 from eks_ml_pipeline import PcaModelDish5g
 import os
 
-"""
-This module intends to define static variables that can be reused throughout pytest without redefinition. 
-It also defines the configurations for pytest.
-"""
+
 
 # functions to mark slow tests and skip them.
 def pytest_addoption(parser):
@@ -25,7 +26,7 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "slow: mark test as a (potentially slow) performance test")
 
 def pytest_collection_modifyitems(config, items):
-    """
+        """
         tell pytest to skip modules marked as slow
     """
     if config.getoption("--slow"):
