@@ -1,11 +1,15 @@
 from eks_ml_pipeline import TrainTestPipelines
 import boto3
+"""
+Module to contain all tests pertaining to pipelines that train models
+"""
 
 
 def test_ae_pipeline_training(ae_train_input, bucket_name):
     """
-    This testing module verifies the training logic for the autoencoder training pipeline. It checks if a model is saved to the correct s3 path after training.
-    And it also checks if the pipeline is able to read our presaved training tensor from s3. 
+    Verifies the training logic for the autoencoder training pipeline. 
+    Checks if a model is saved to the correct s3 path after training.
+    Checks if the pipeline is able to read our presaved training tensor from s3. 
 
      Inputs: fixtures of training input and bucket name. 
      Output: None
@@ -44,8 +48,9 @@ def test_ae_pipeline_training(ae_train_input, bucket_name):
 
 def test_pca_pipeline_training(pca_train_input, bucket_name):
     """
-    This testing module verifies the training logic for the pca training pipeline. It checks if a model is saved to the correct s3 path after training.
-    And it also checks if the pipeline is able to read our presaved training tensor from s3. 
+    Verifies the training logic for the pca training pipeline. 
+    Checks if a model is saved to the correct s3 path after training.
+    Checks if the pipeline is able to read our presaved training tensor from s3. 
 
      Inputs: fixtures of training input and bucket name 
      Output: None
