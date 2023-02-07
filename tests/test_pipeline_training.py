@@ -2,7 +2,7 @@ from eks_ml_pipeline import TrainTestPipelines
 import boto3
 
 
-def test_aePipelineTraining(aeTrainInput,Bucket_Name):
+def test_ae_pipeline_training(ae_train_input,Bucket_Name):
     """
     This testing module verifies the training logic for the autoencoder training pipeline. It checks if a model is saved to the correct s3 path after training.
     And it also checks if the pipeline is able to read our presaved training tensor from s3. 
@@ -11,7 +11,7 @@ def test_aePipelineTraining(aeTrainInput,Bucket_Name):
      Output: None
     """
     s3 = boto3.client('s3')
-    ttp_ae = TrainTestPipelines(aeTrainInput)
+    ttp_ae = TrainTestPipelines(ae_train_input)
     ttp_ae.train()
     
     errors = []
@@ -33,7 +33,7 @@ def test_aePipelineTraining(aeTrainInput,Bucket_Name):
     
     
     
-def test_pcaPipelineTraining(pcaTrainInput,Bucket_Name):
+def test_pca_pipeline_training(pca_train_input,Bucket_Name):
     """
     This testing module verifies the training logic for the pca training pipeline. It checks if a model is saved to the correct s3 path after training.
     And it also checks if the pipeline is able to read our presaved training tensor from s3. 
@@ -42,7 +42,7 @@ def test_pcaPipelineTraining(pcaTrainInput,Bucket_Name):
      Output: None
     """
     s3 = boto3.client('s3')
-    ttp_pca = TrainTestPipelines(pcaTrainInput)
+    ttp_pca = TrainTestPipelines(pca_train_input)
     ttp_pca.train()
     errors = []
     

@@ -4,6 +4,11 @@ from eks_ml_pipeline import AutoencoderModelDish5g
 from eks_ml_pipeline import PcaModelDish5g
 import os
 
+"""
+This module intends to define static variables that can be reused throughout pytest without redefinition. 
+It also defines the configurations for pytest.
+"""
+
 # functions to mark slow tests and skip them.
 def pytest_addoption(parser):
     parser.addoption(
@@ -26,7 +31,7 @@ def Bucket_Name():
     return Bucket_Name
 
 @pytest.fixture(scope="module")           
-def aeTrainInput(Bucket_Name):
+def ae_train_input(Bucket_Name):
     """
     This fixture creates inputs to train the desired model. It includes all of bucket versioning and model versioning needed 
     as well as the file locations for a pipeline. 
@@ -98,7 +103,7 @@ def aeTrainInput(Bucket_Name):
             
 
 @pytest.fixture(scope="module")  
-def aeTestInput(Bucket_Name):
+def ae_test_input(Bucket_Name):
     """
     This fixture creates inputs to evaluate the desired model. It includes all of bucket versioning and model versioning needed 
     as well as the file locations for a pipeline. 
@@ -170,7 +175,7 @@ def aeTestInput(Bucket_Name):
 
 
 @pytest.fixture(scope="module")           
-def pcaTrainInput(Bucket_Name):
+def pca_train_input(Bucket_Name):
     """
     This fixture creates inputs to train the desired model. It includes all of bucket versioning and model versioning needed 
     as well as the file locations for a pipeline. 
@@ -241,7 +246,7 @@ def pcaTrainInput(Bucket_Name):
 
 
 @pytest.fixture(scope="module")           
-def pcaTestInput(Bucket_Name):
+def pca_test_input(Bucket_Name):
     """
     This fixture creates inputs to evaluate the desired model. It includes all of bucket versioning and model versioning needed 
     as well as the file locations for a pipeline. 
