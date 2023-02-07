@@ -1,13 +1,16 @@
 from eks_ml_pipeline import TrainTestPipelines
 import boto3
 import os
-
+"""
+Module to contain all tests pertaining to pipelines that evaluate models
+"""
 
 def test_ae_pipeline_eval(ae_test_input, bucket_name):
     """
-    This testing module verifies the evaluation logic for the autoencoder evaluation pipeline. It checks if a model is read from the correct s3 path after training.
-    And it also checks if the pipeline is able to read our presaved evaluation tensor from s3. 
-    Then the test checks if the residuals and predictions are stored in the correct s3 path. 
+    Verify the evaluation logic for the autoencoder evaluation pipeline. 
+    Check if a model is read from the correct s3 path after training.
+    Check if the pipeline is able to read our presaved evaluation tensor from s3. 
+    Checks if the residuals and predictions are stored in the correct s3 path. 
     
     Inputs: fixtures of training input and bucket name. 
     Output: None
@@ -51,12 +54,13 @@ def test_ae_pipeline_eval(ae_test_input, bucket_name):
 
 def test_pca_pipeline_eval(pca_test_input, bucket_name):
     """
-    This testing module verifies the evaluation logic for the pca evaluation pipeline. It checks if a model is read from the correct s3 path after training.
-    And it also checks if the pipeline is able to read our presaved evaluation tensor from s3. 
-    Then the test checks if the residuals and predictions are stored in the correct s3 path. 
+    Verifies the evaluation logic for the pca evaluation pipeline. 
+    Checks if a model is read from the correct s3 path after training.
+    Checks if the pipeline is able to read our presaved evaluation tensor from s3. 
+    Checks if the residuals and predictions are stored in the correct s3 path. 
 
-     Inputs: fixtures of training input and bucket name. 
-     Output: None
+    Inputs: fixtures of training input and bucket name. 
+    Output: None
     """
     s3 = boto3.client("s3")
     ttp_pca = TrainTestPipelines(pca_test_input)

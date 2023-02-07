@@ -11,6 +11,9 @@ import os
 
 # functions to mark slow tests and skip them.
 def pytest_addoption(parser):
+    """
+    Parser for pytest to read --slow in testing
+    """
     parser.addoption(
         "--slow",
         action="store_true",
@@ -20,12 +23,18 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
+    """
+    Configure markers that may be needed in our testing framework
+    """
     config.addinivalue_line(
         "markers", "slow: mark test as a (potentially slow) performance test"
     )
 
 
 def pytest_collection_modifyitems(config, items):
+    """
+    If the slow marker is seen from the config, then skip that test
+    """
     if config.getoption("--slow"):
         return
     skip_perf = pytest.mark.skip(reason="need --slow option to run")
@@ -46,7 +55,8 @@ def bucket_name():
 @pytest.fixture(scope="module")
 def ae_train_input(bucket_name):
     """
-    This fixture creates inputs to train the desired model. It includes all of bucket versioning and model versioning needed 
+    Creates inputs to train the desired model. 
+    Includes all of bucket versioning and model versioning needed 
     as well as the file locations for a pipeline. 
     Parameters
     ----------
@@ -125,7 +135,8 @@ def ae_train_input(bucket_name):
 @pytest.fixture(scope="module")
 def ae_test_input(bucket_name):
     """
-    This fixture creates inputs to evaluate the desired model. It includes all of bucket versioning and model versioning needed 
+    Creates inputs to evaluate the desired model. 
+    Includes all of bucket versioning and model versioning needed 
     as well as the file locations for a pipeline. 
     Parameters
     ----------
@@ -204,7 +215,8 @@ def ae_test_input(bucket_name):
 @pytest.fixture(scope="module")
 def pca_train_input(bucket_name):
     """
-    This fixture creates inputs to train the desired model. It includes all of bucket versioning and model versioning needed 
+    Create inputs to train the desired model. 
+    Includes all of bucket versioning and model versioning needed 
     as well as the file locations for a pipeline. 
     Parameters
     ----------
@@ -283,7 +295,8 @@ def pca_train_input(bucket_name):
 @pytest.fixture(scope="module")
 def pca_test_input(bucket_name):
     """
-    This fixture creates inputs to evaluate the desired model. It includes all of bucket versioning and model versioning needed 
+    Creates inputs to evaluate the desired model. 
+    Includes all of bucket versioning and model versioning needed 
     as well as the file locations for a pipeline. 
     Parameters
     ----------
