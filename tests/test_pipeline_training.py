@@ -13,6 +13,8 @@ def test_ae_pipeline_training(ae_train_input, bucket_name):
 
      Inputs: fixtures of training input and bucket name. 
      Output: None
+
+     multiple try catch added to save time, train() can take 45seconds+
     """
     s3 = boto3.client("s3")
     ttp_ae = TrainTestPipelines(ae_train_input)
@@ -43,7 +45,7 @@ def test_ae_pipeline_training(ae_train_input, bucket_name):
     except Exception as error_message:
         errors.append(error_message)
 
-    assert len(errors) == 0
+    assert len(errors) == 0, f"{errors}"
 
 
 def test_pca_pipeline_training(pca_train_input, bucket_name):
@@ -54,6 +56,8 @@ def test_pca_pipeline_training(pca_train_input, bucket_name):
 
      Inputs: fixtures of training input and bucket name 
      Output: None
+
+     multiple try catch added to save time, train() can take 45seconds+
     """
     s3 = boto3.client("s3")
     ttp_pca = TrainTestPipelines(pca_train_input)
@@ -72,4 +76,4 @@ def test_pca_pipeline_training(pca_train_input, bucket_name):
     except Exception as error_message:
         errors.append(error_message)
 
-    assert len(errors) == 0
+    assert len(errors) == 0 , f"{errors}"
