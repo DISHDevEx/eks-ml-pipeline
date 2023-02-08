@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def node_autoencoder_fe_input():
@@ -12,7 +15,7 @@ def node_autoencoder_fe_input():
     """
     ##feature parameters
     feature_group_name = "node_autoencoder_ad"
-    feature_version = "v0.0.2"
+    feature_version = "v0.0.1"
 
     ##eks s3 bucket parameters
     partition_year = "2022"

@@ -142,13 +142,16 @@ def build_processed_data(inference_input_parameters,
     #inference input
     rec_type, sampling_column, \
     partition_year, partition_month, partition_day, partition_hour, \
-    spark_config_setup, data_bucketname = inference_input_parameters
+    spark_config_setup, data_bucketname, bucket_name_raw_data, folder_name_raw_data = inference_input_parameters
 
     #training input
     encode_decode_model = training_input_parameters[0]
     feature_group_name, feature_input_version = training_input_parameters[1]
     data_bucketname, train_data_filename, test_data_filename = training_input_parameters[2]
     save_model_local_path, model_bucketname, model_filename = training_input_parameters[3]
+    
+    print(feature_group_name)
+    print(feature_input_version)
 
 
     #raw inference data path

@@ -14,7 +14,9 @@ import os
 from devex_sdk import get_features
 from ..models import AutoencoderModelDish5g
 from ..models import PcaModelDish5g
+from dotenv import load_dotenv
 
+load_dotenv()
 
 def node_autoencoder_input():
     """
