@@ -1,5 +1,5 @@
 """
-This module intends to define static variables
+Define fixtures and configuration
 that can be reused throughout pytest without redefinition.
 It also defines the configurations for pytest.
 """
@@ -13,7 +13,7 @@ from eks_ml_pipeline import PcaModelDish5g
 # functions to mark slow tests and skip them.
 def pytest_addoption(parser):
     """
-    Parser for pytest to read --slow in testing
+    Parse pytest to read --slow in testing
     """
     parser.addoption(
         "--slow",
@@ -34,7 +34,7 @@ def pytest_configure(config):
 
 def pytest_collection_modifyitems(config, items):
     """
-    If the slow marker is seen from the config, then skip that test
+    Modify items from config
     """
     if config.getoption("--slow"):
         return
@@ -47,7 +47,7 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture(scope="module")
 def bucket_name():
     """
-    get bucket name from the github workflow runner secrets
+    Get bucket name from the github workflow runner secrets
     """
     BUCKET_NAME = os.environ.get("BUCKET_NAME_PYTEST")
     return BUCKET_NAME
@@ -56,7 +56,7 @@ def bucket_name():
 @pytest.fixture(scope="module")
 def ae_train_input(bucket_name):
     """
-    Creates inputs to train the desired model.
+    Create inputs to train the desired model.
     Includes all of bucket versioning and model versioning needed
     as well as the file locations for a pipeline.
     Parameters
@@ -136,7 +136,7 @@ def ae_train_input(bucket_name):
 @pytest.fixture(scope="module")
 def ae_test_input(bucket_name):
     """
-    Creates inputs to evaluate the desired model.
+    Create inputs to evaluate the desired model.
     Includes all of bucket versioning and model versioning needed
     as well as the file locations for a pipeline.
     Parameters
@@ -296,7 +296,7 @@ def pca_train_input(bucket_name):
 @pytest.fixture(scope="module")
 def pca_test_input(bucket_name):
     """
-    Creates inputs to evaluate the desired model.
+    Create inputs to evaluate the desired model.
     Includes all of bucket versioning and model versioning needed
     as well as the file locations for a pipeline.
     Parameters
