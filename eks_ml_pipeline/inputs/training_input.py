@@ -27,15 +27,15 @@ def node_autoencoder_input():
     #*****************************************************#
 
     feature_group_name = "node_autoencoder_ad"
-    feature_input_version = "v0.0.2"  
+    feature_input_version = "v0.0.3"  
     data_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
-    train_data_filename = "training_2022_9_29_1.npy"
-    test_data_filename = "testing_2022_9_29_1.npy"
+    train_data_filename = "training_2022_9_-1.npy"
+    test_data_filename = "training_2022_9_-1.npy"
     
     save_model_local_path = "../node_autoencoder"
     model_bucketname = 'dish-5g.core.pd.g.dp.eks.logs.e'
     model_name = 'node_autoencoder_ad'
-    model_version = "v0.0.1-test"
+    model_version = "v0.0.3"
     
     #model s3 bucket upload format
     upload_zip = True 
@@ -64,7 +64,7 @@ def node_autoencoder_input():
     
     #Initialize autoencoder model class with specific parameters
     encode_decode_model = AutoencoderModelDish5g(time_steps=model_parameters["time_steps"], 
-                                                 batch_size=model_parameters["batch_size"], epochs=1)
+                                                 batch_size=model_parameters["batch_size"], epochs=250)
 
     
     return [encode_decode_model,
