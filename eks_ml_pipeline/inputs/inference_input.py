@@ -2,6 +2,9 @@
 these are the parameters for inference pipeline
 """
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def node_inference_input():
 
