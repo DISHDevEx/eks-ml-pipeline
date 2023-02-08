@@ -263,5 +263,11 @@ inference_pipeline(pod_inference_input(), pod_pca_input())
 
 #Inference for container pca model
 inference_pipeline(container_inference_input(), container_pca_input())
-
+```
+### Setting up environment variables.
+And create a new file named as ```.env``` in the root of the project and copy variables names from ```.env.SAMPLE```
+```python
+BUCKET_NAME_RAW_DATA =
+FOLDER_NAME_RAW_DATA =
+BUCKET_NAME_OUTPUT =
 ```
