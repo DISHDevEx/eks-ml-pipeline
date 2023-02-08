@@ -149,10 +149,6 @@ def build_processed_data(inference_input_parameters,
     feature_group_name, feature_input_version = training_input_parameters[1]
     data_bucketname, train_data_filename, test_data_filename = training_input_parameters[2]
     save_model_local_path, model_bucketname, model_filename = training_input_parameters[3]
-    
-    print(feature_group_name)
-    print(feature_input_version)
-
 
     #raw inference data path
     raw_inference_file_name = inference_data_naming(input_year = partition_year,
