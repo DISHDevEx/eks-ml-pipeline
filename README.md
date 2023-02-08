@@ -46,9 +46,9 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 ```console
 !pwd
 ```
-2. If not already installed, install devex_sdk by using the .whl file (this assumes that the whl file already exists in the below location)
+2. If not already installed, install devex_sdk 
 ```console
-!pip install /root/dish-devex-sdk/dist/devex_sdk-0.0.1-py3-none-any.whl
+pip install git+https://github.com/DISHDevEx/dish-devex-sdk.git
 ```
 3. Install the necessary requirements
 ```console
