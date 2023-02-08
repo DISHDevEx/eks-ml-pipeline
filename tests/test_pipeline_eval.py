@@ -55,7 +55,7 @@ def test_ae_pipeline_eval(ae_test_input, bucket_name):
 
 def test_pca_pipeline_eval(pca_test_input, bucket_name):
     """
-    Verifies the evaluation logic for the pca evaluation pipeline.
+    Verify the evaluation logic for the pca evaluation pipeline.
     Checks if a model is read from the correct s3 path after training.
     Checks if the pipeline is able to read our presaved evaluation tensor from s3.
     Checks if the residuals and predictions are stored in the correct s3 path.
