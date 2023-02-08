@@ -1,4 +1,4 @@
-from devex_sdk import EKS_Connector
+from devex_sdk import EKS_Connector, Spark_Utils
 # from eks_ml_pipeline imp
 # from eks_ml_pipeline import unionAll, rec_type_ad_feature_engineering, rec_type_list_generator, run_multithreading
 # from eks_ml_pipeline import S3Utilities, cleanup, all_rectypes_train_test_split
@@ -38,10 +38,10 @@ def rec_type_fe_pipeline(rec_type, compute_type, feature_group_name, feature_ver
                                                                                 spark_config_setup)
 
     print(f'processed data column s: {processed_data.columns}')
-    # caching
+    print('caching')
     processed_data.cache()
 
-    # parsing model parameters
+    parsing model parameters
     scaled_features = []
     model_parameters = features_data["model_parameters"].iloc[0]
     features = feature_processor.cleanup(features_data["feature_name"].to_list())
@@ -73,22 +73,25 @@ def rec_type_fe_pipeline(rec_type, compute_type, feature_group_name, feature_ver
     
     print('saving raw test to s3')
     # s3_utils.pyspark_write_parquet(node_test_data, "raw_testing_data/sparkdf", "parquet")
-    # test_data.coalesce(10).write.mode("overwrite").parquet(
-    #     f's3a://{output_bucket_name}/{feature_group_name}/{feature_version}/data/spark_df/raw_testing_data_{file_name}/')
+    # test_data.coalesce(10).write.mode("overwrite").parquet(f's3a://{output_bucket_name}/{feature_group_name}/{feature_version}/data/spark_df/raw_testing_data_{file_name}/')
     s3_utils.pyspark_write_parquet(train_data, 'data/spark_df/', f'raw_testing_data_from_run/')
 
-    # un-persisting processed data
+    un-persisting processed data
     processed_data.unpersist()
 
     ###### Node list generator and feature engineering in same step
+    
+    # Create a spark session to read files from s3
+    spark = Spark_Utils().get_spark()
 
-    train_data = spark.read.parquet(f's3a://{output_bucket_name}/{feature_group_name}/{feature_version}/data/spark_df/raw_training_data_{file_name}/')
+    train_data = spark.read.parquet(f's3a://{output_bucket_name}/{feature_group_name}/{feature_version}/data/spark_df/raw_training_data_from_run/')
     print(f'train data shape: {train_data.columns}')
 
-    test_data = spark.read.parquet(f's3a://{output_bucket_name}/{feature_group_name}/{feature_version}/data/spark_df/raw_testing_data_{file_name}/')
+    test_data = spark.read.parquet(f's3a://{output_bucket_name}/{feature_group_name}/{feature_version}/data/spark_df/raw_testing_data_from_run/')
     print(f'train data shape: {test_data.columns}')
 
     features_data = s3_utils.read_parquet_to_pandas_df("data", "pandas_df", f'raw_features_{file_name}.parquet')
+
 
     print('generating random selected list of container ids')
     selected_train_list, processed_train_data = rec_type_list_generator('train', [train_split, test_split], train_data, aggregation_column, features_data)
