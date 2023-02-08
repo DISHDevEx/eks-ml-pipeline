@@ -1,12 +1,13 @@
 """
-This module intends to define static variables that can be reused throughout pytest without redefinition. 
+This module intends to define static variables
+that can be reused throughout pytest without redefinition.
 It also defines the configurations for pytest.
 """
+import os
 import pytest
 from devex_sdk import get_features
 from eks_ml_pipeline import AutoencoderModelDish5g
 from eks_ml_pipeline import PcaModelDish5g
-import os
 
 
 # functions to mark slow tests and skip them.
@@ -55,9 +56,9 @@ def bucket_name():
 @pytest.fixture(scope="module")
 def ae_train_input(bucket_name):
     """
-    Creates inputs to train the desired model. 
-    Includes all of bucket versioning and model versioning needed 
-    as well as the file locations for a pipeline. 
+    Creates inputs to train the desired model.
+    Includes all of bucket versioning and model versioning needed
+    as well as the file locations for a pipeline.
     Parameters
     ----------
     None
@@ -135,9 +136,9 @@ def ae_train_input(bucket_name):
 @pytest.fixture(scope="module")
 def ae_test_input(bucket_name):
     """
-    Creates inputs to evaluate the desired model. 
-    Includes all of bucket versioning and model versioning needed 
-    as well as the file locations for a pipeline. 
+    Creates inputs to evaluate the desired model.
+    Includes all of bucket versioning and model versioning needed
+    as well as the file locations for a pipeline.
     Parameters
     ----------
     None
@@ -215,9 +216,9 @@ def ae_test_input(bucket_name):
 @pytest.fixture(scope="module")
 def pca_train_input(bucket_name):
     """
-    Create inputs to train the desired model. 
-    Includes all of bucket versioning and model versioning needed 
-    as well as the file locations for a pipeline. 
+    Create inputs to train the desired model.
+    Includes all of bucket versioning and model versioning needed
+    as well as the file locations for a pipeline.
     Parameters
     ----------
     None
@@ -295,9 +296,9 @@ def pca_train_input(bucket_name):
 @pytest.fixture(scope="module")
 def pca_test_input(bucket_name):
     """
-    Creates inputs to evaluate the desired model. 
-    Includes all of bucket versioning and model versioning needed 
-    as well as the file locations for a pipeline. 
+    Creates inputs to evaluate the desired model.
+    Includes all of bucket versioning and model versioning needed
+    as well as the file locations for a pipeline.
     Parameters
     ----------
     None
