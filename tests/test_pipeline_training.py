@@ -1,5 +1,5 @@
 """
-Module to contain all tests pertaining to pipelines that train models
+Contain all tests pertaining to pipelines that train models
 """
 from eks_ml_pipeline import TrainTestPipelines
 import boto3
@@ -7,7 +7,7 @@ import boto3
 
 def test_ae_pipeline_training(ae_train_input, bucket_name):
     """
-    Verifies the training logic for the autoencoder training pipeline.
+    Verify the training logic for the autoencoder training pipeline.
     Checks if a model is saved to the correct s3 path after training.
     Checks if the pipeline is able to read our presaved training tensor from s3.
 
@@ -50,7 +50,7 @@ def test_ae_pipeline_training(ae_train_input, bucket_name):
 
 def test_pca_pipeline_training(pca_train_input, bucket_name):
     """
-    Verifies the training logic for the pca training pipeline.
+    Verify the training logic for the pca training pipeline.
     Checks if a model is saved to the correct s3 path after training.
     Checks if the pipeline is able to read our presaved training tensor from s3.
 
