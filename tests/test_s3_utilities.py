@@ -85,7 +85,7 @@ def test_download_zip(
     # Instantiate the class with fixtures from conftest.py.
     s3_util = S3Utilities(
         bucket_name = bucket_name,
-        model_name = 'pytest_s3_utilities'
+        model_name = 'pytest_s3_utilities',
         version = 'version',
         )
 
