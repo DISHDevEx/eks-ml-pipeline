@@ -165,7 +165,7 @@ def test_pandas_dataframe_to_s3(bucket_name):
         model_name = 'pytest_s3_utilities',
         version = 'version',
         )
-    pandas_file_name = 'test_pandas_to_s3'
+    pandas_file_name = 'test_pandas_to_s3.parquet'
     s3_util.pandas_dataframe_to_s3(
         input_datafame = df, 
         folder = 'folder', 
@@ -187,17 +187,16 @@ def test_pandas_dataframe_to_s3(bucket_name):
         )
 
 
-
 def test_write_tensor(bucket_name):
     # generate tensor
-    test_tesnsor = np.zeros((2,3,4,5))
+    test_tensor = np.zeros((2,3,4,5))
     # write to s3 with method
     s3_util = S3Utilities(
         bucket_name = bucket_name,
         model_name = 'pytest_s3_utilities',
         version = 'version',
         )
-    numpy_file_name = 'test_numpy_to_s3'
+    numpy_file_name = 'test_numpy_to_s3.npy'
     s3_util.write_tensor(
         tensor = test_tensor, 
         folder = 'folder', 
