@@ -268,8 +268,8 @@ def test_upload_directory(bucket_name):
     # populate directory with files
     fnames = ['file1.txt','file2.txt']
     for fname in fnames:
-        with open(pre_zip_dir + fname, 'a'):
-            os.utime(pre_zip_dir + fname)
+        with open(test_directory + fname, 'a'):
+            os.utime(test_directory + fname)
     # instantiate object under test 
     s3_util = S3Utilities(
         bucket_name = bucket_name,
@@ -282,7 +282,15 @@ def test_upload_directory(bucket_name):
         folder = 'folder', 
         type_  = "type", 
     )
-    # check that both files are present
+    # use s3_client.head_object(that file) to make sure the file is in s3
+    for fname in fnames:
+        s3_util.client.head_object(
+            Bucket = bucket_name,
+            Key = ("pytest_s3_utilities/version/folder/type/" 
+                   + test_directory
+                  + fname)
+            )
+
     # delete dir from s3
 
 # def test_pyspark_write_parquet():
