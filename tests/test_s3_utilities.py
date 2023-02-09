@@ -1,5 +1,5 @@
 """Test the methods of the class S3Utilities in utilities/s3_utilities.py."""
-
+import os
 from eks_ml_pipeline import S3Utilities
 import numpy as np
 import boto3
@@ -10,7 +10,7 @@ def test_upload_file(
     ):
 
     # generate a file to be uploaded
-    filename = 'test_download_file.npy'
+    filename = 'test_upload_file.npy'
     np.save(filename, np.array([1,2,3]))
 
     # Instantiate the class with fixtures from conftest.py.
@@ -27,17 +27,17 @@ def test_upload_file(
         key = "pytest_s3_utilities/" + filename
         )
 
-#     # use s3_client.head_object(that file) to make sure the file is in s3
-#     s3_util.client.head_object(
-#         Bucket=bucket_name,
-#         Key = "pytest_s3_utilities/" + filename
-#         )
+    # use s3_client.head_object(that file) to make sure the file is in s3
+    s3_util.client.head_object(
+        Bucket=bucket_name,
+        Key = "pytest_s3_utilities/" + filename
+        )
 
-#     # delete file from s3
-#     s3_util.client.delete_object(
-#         Bucket=bucket_name,
-#         Key = "pytest_s3_utilities/" + filename
-#         )
+    # delete file from s3
+    s3_util.client.delete_object(
+        Bucket=bucket_name,
+        Key = "pytest_s3_utilities/" + filename
+        )
 
 
 #     # check that file has been deleted.
@@ -50,23 +50,31 @@ def test_upload_file(
 #         print('Test file sucessfully deleted')
 
 
-# def test_download_file(
-#     ae_train_input, # for instantiating the S3Utilities class
-#     bucket_name
-#     ):
+def test_download_file(
+    ae_train_input, # for instantiating the S3Utilities class
+    bucket_name
+    ):
 
-#     # Instantiate the class with fixtures from conftest.py.
-#     s3_util = S3Utilities(
-#         bucket_name = bucket_name,
-#         model_name = ae_train_input[1][0], #self.feature_selection[0] = feature_group_name
-#         version = ae_train_input[1][1], #self.feature_selection[1], # feature_input_version
-#         )
-#     # download file
-#     s3_util.download_file()
-#     # check that file is local
+    local_dir = './'
+    local_fname = 'test_download_file.npy'
 
-#     # delete local file
+    # Instantiate the class with fixtures from conftest.py.
+    s3_util = S3Utilities(
+        bucket_name = bucket_name,
+        model_name = ae_train_input[1][0], #self.feature_selection[0] = feature_group_name
+        version = ae_train_input[1][1], #self.feature_selection[1], # feature_input_version
+        )
+    # download file
+    s3_util.download_file(
+        local_path = local_dir + local_fname,
+        bucket_name = bucket_name,
+        key = "pytest_s3_utilities/test_download_file.npy",
+        )
+    # check that file is local
+    assert local_fname in os.listdir(local_path)
 
+    # delete local file
+    os.remove(local_dir + local_fname)
 
 
 # def test_download_zip(
