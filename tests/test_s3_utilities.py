@@ -71,29 +71,41 @@ def test_download_file(
         key = "pytest_s3_utilities/test_download_file.npy",
         )
     # check that file is local
-    assert local_fname in os.listdir(local_path)
+    assert local_fname in os.listdir(local_dir)
 
     # delete local file
     os.remove(local_dir + local_fname)
 
 
-# def test_download_zip(
-#     ae_train_input, # for instantiating the S3Utilities class
-#     bucket_name
-#     ):
+def test_download_zip(
+    ae_train_input, # for instantiating the S3Utilities class
+    bucket_name
+    ):
 
-#     # Instantiate the class with fixtures from conftest.py.
-#     s3_util = S3Utilities(
-#         bucket_name = bucket_name,
-#         model_name = ae_train_input[1][0], #self.feature_selection[0] = feature_group_name
-#         version = ae_train_input[1][1], #self.feature_selection[1], # feature_input_version
-#         )
+    # Instantiate the class with fixtures from conftest.py.
+    s3_util = S3Utilities(
+        bucket_name = bucket_name,
+        model_name = 'pytest_s3_utilities'
+        version = 'version',
+        )
 
-#     # download file
+    # download file with method
+    local_dir = './'
+    local_fname = 'test_download_zip_file.zip'
+    # from bucket/pytest_s3_utilities/version/folder/type/test_download_zip_file.zip
+    s3_util.download_zip(
+        local_path = local_dir + local_fname,
+        folder = 'folder',
+        type_ = "type",
+        file_name = "test_download_zip_file.zip" # test data in s3
+        )
 
-#     # check that file is local
+    # check that file is local
+    assert local_fname in os.listdir(local_dir)
 
-#     # delete local file
+    # delete local file
+    os.remove(local_dir + local_fname)
+
 
 # def test_unzip():
 #     # generate local zip file
