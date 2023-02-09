@@ -10,6 +10,7 @@ def test_upload_file(
     ae_train_input, # for instantiating the S3Utilities class
     bucket_name
     ):
+    """"""
 
     # generate a file to be uploaded
     filename = 'test_upload_file.npy'
@@ -215,8 +216,6 @@ def test_write_tensor(bucket_name):
         )
 
 def test_awswrangler_pandas_dataframe_to_s3(bucket_name):
-    # ??how is this different than pandas_dataframe_to_s3?
-
     # generate pandas df in memory
     data = {'col1': [1, 2], 'col2': [3, 4]}
     df = pd.DataFrame(data=data)
@@ -297,14 +296,10 @@ def test_upload_directory(bucket_name):
             Key = ("pytest_s3_utilities/version/folder/type/" 
                   + fname)
             )
-        
-# def test_pyspark_write_parquet():
-    # create pyspark dataframe
-    # use method to upload to s3
-    # check that file is in s3
-    # delete file from s3
 
-    
+#### NOTE ####      
+# test_pyspark_write_parquet() need not exist 
+# because it would test only a pyspark funcion.  
     
 def test_read_parquet_to_pandas_df(bucket_name):
     # instantiate object to be tested
