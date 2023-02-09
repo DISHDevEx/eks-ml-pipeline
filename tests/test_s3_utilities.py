@@ -107,10 +107,42 @@ def test_download_zip(
     os.remove(local_dir + local_fname)
 
 
-# def test_unzip():
-#     # generate local zip file
-#     # unip with the method
-#     # delete local zip file
+def test_unzip():
+    ## generate two files to zip together
+    # create a direcory to zip
+    pre_zip_dir = 'pre_zip_test_files/'
+    os.makedirs(pre_zip_dir)
+    # populate directory with files
+    fnames = ['file1.txt','file2.txt']
+    for fname in fnames:
+        with open(pre_zip_dir + fname, 'a'):
+            os.utime(pre_zip_dir + fname)
+    # zip file to new directory
+    # post_zip_dir = 'zipped_test_files/'
+    # os.makedirs(post_zip_dir)
+    shutil.make_archive('zip_test_file',
+                        'zip',
+    #                     root_dir = post_zip_dir,
+    #                     base_dir = post_zip_dir
+                       )
+    # clean up
+    for fname in fnames:
+        os.remove(pre_zip_dir + fname)
+    os.rmdir(pre_zip_dir)
+
+    ## unip with the method under test
+    # Instantiate the class with fixtures from conftest.py.
+    s3_util = S3Utilities(
+        bucket_name = bucket_name,
+        model_name = ae_train_input[1][0], #self.feature_selection[0] = feature_group_name
+        version = ae_train_input[1][1], #self.feature_selection[1], # feature_input_version
+        )
+    s3_util.unzip(path_to_zip = 'zip_test_file.zip' )
+
+    # delete local zip file
+    os.remove('zip_test_file.zip')
+    # delete unzipped directory
+    os.rmdir('zip_test_file')
 
 
 # def test_zip_and_upload():
