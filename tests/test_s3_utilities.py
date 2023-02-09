@@ -20,16 +20,26 @@ def test_upload_file(
         )
 
     # upload that file to s3 bucket specified in conftest
-
-    # use s3_client.head_object(that file) to make sure the file is in s3
-    # delete file from s3
-    # check that file has been deleted.
-
     s3_util.upload_file(
         local_path = 'test_upload_array.npy',
         bucket_name = bucket_name,
-        key = "pytest_pca_ad/v0.0.1/data/data/tesnors/test_upload_array.npy",
+        key = "pytest_s3_utilities/test_upload_array.npy"
         )
+
+    # use s3_client.head_object(that file) to make sure the file is in s3
+    s3_util.client.head_object(
+        Bucket=bucket_name,
+        key = "pytest_s3_utilities/test_upload_array.npy"
+        )
+    # delete file from s3
+    s3_util.client.delete_object(
+        Bucket=bucket_name,
+        key = "pytest_s3_utilities/test_upload_array.npy".
+    )
+
+
+    # check that file has been deleted.
+
 
 
 #                 self.s3_utilities.upload_file( # end of .join args
