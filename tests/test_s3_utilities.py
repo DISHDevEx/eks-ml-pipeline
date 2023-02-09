@@ -173,16 +173,20 @@ def test_pandas_dataframe_to_s3():
         file_name = pandas_file_name
         )
 
+    # check that file is in s3
+    s3_util.client.head_object(
+        Bucket=bucket_name,
+        Key = "pytest_s3_utilities/version/folder/type/" + pandas_file_name
+        )
+
+
     # delete file from s3
     s3_util.client.delete_object(
         Bucket=bucket_name,
         Key = "pytest_s3_utilities/version/folder/type/" + pandas_file_name
         )
-    
 
 
-#     # check that file is in s3
-#     # delete uploaded file from s3
 
 # def test_write_tensor():
 #     # generate tensor
