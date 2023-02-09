@@ -34,8 +34,8 @@ def test_upload_file(
     # delete file from s3
     s3_util.client.delete_object(
         Bucket=bucket_name,
-        key = "pytest_s3_utilities/test_upload_array.npy".
-    )
+        key = "pytest_s3_utilities/test_upload_array.npy"
+        )
 
 
     # check that file has been deleted.
