@@ -50,6 +50,8 @@ from .emr_serverless import EMRServerless
 
 from .train_test_pipelines import TrainTestPipelines
 
+from .feature_engineering_pipeline import FeatureEngineeringPipeline
+
 from .inference import inference_data_builder
 from .inference import build_processed_data
 from .inference import inference_pipeline

@@ -1,6 +1,6 @@
 import pandas as pd
 from pyspark.sql.functions import col, count, rand, row_number, get_json_object, concat_ws
-from utilities import cleanup
+from ..utilities import feature_processor
 from devex_sdk import EKS_Connector, get_features
 
 """
@@ -43,16 +43,19 @@ def rec_type_ad_preprocessing(rec_type, input_bucket_name, input_folder_name, in
 
     """
 
-    pyspark_data = EKS_Connector(bucket_name = input_bucket_name, folder_name = input_folder_name, year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value =rec_type)
+    pyspark_data = EKS_Connector(bucket_name = input_bucket_name, folder_name = input_folder_name, year = input_year, month = input_month, day = input_day, hour = input_hour, filter_column_value =rec_type, setup = input_setup)
     err, pyspark_df = pyspark_data.read()
 
     if err == 'PASS':
 
         # get features
+        print(input_feature_group_name, input_feature_group_version)
         features_df = get_features(input_feature_group_name, input_feature_group_version)
         features = features_df["feature_name"].to_list()
-        processed_features = cleanup(features)
-
+        print(f' features df: {features_df.columns}')
+        processed_features = feature_processor.cleanup(features)
+        print(processed_features)
+        print(features_df["model_parameters"])
         model_parameters = features_df["model_parameters"].iloc[0]
         time_steps = model_parameters["time_steps"]
 
