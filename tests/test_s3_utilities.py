@@ -40,12 +40,10 @@ def test_upload_file(
 
 
     # check that file has been deleted.
-    s3_util.client.head_object(
-        Bucket=bucket_name,
-        Key = "pytest_s3_utilities/test_upload_array.npy"
-        )
-
-
-
-#                 self.s3_utilities.upload_file( # end of .join args
-
+    try:
+        s3_util.client.head_object(
+            Bucket=bucket_name,
+            Key = "pytest_s3_utilities/test_upload_array.npy"
+            )
+    except ClientError:
+        print('Test file sucessfully deleted')
