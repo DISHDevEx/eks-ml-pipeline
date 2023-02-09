@@ -125,7 +125,7 @@ def test_zip_and_upload(bucket_name):
         )
     s3_filename = "test_upload_zip_file.zip"
     s3_util.zip_and_upload(
-        local_path = fp, 
+        local_path = tmpdir, 
         folder = 'folder',
         type_ = "type",
         file_name = s3_filename 
