@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import boto3
 
+
 def test_upload_file(
     ae_train_input, # for instantiating the S3Utilities class
     bucket_name
@@ -165,27 +166,24 @@ def test_pandas_dataframe_to_s3(bucket_name):
         model_name = 'pytest_s3_utilities',
         version = 'version',
         )
-#     pandas_file_name = 'test_pandas_to_s3.parquet'
-    pandas_file_name = 'test_read_parquet_to_pandas_df.parquet'
+    pandas_file_name = 'test_pandas_to_s3.parquet' #custom test data
     s3_util.pandas_dataframe_to_s3(
         input_datafame = df, 
         folder = 'folder', 
         type_  = "type", 
         file_name = pandas_file_name
         )
+    # check that file is in s3
+    s3_util.client.head_object(
+        Bucket=bucket_name,
+        Key = "pytest_s3_utilities/version/folder/type/" + pandas_file_name
+        )
 
-#     # check that file is in s3
-#     s3_util.client.head_object(
-#         Bucket=bucket_name,
-#         Key = "pytest_s3_utilities/version/folder/type/" + pandas_file_name
-#         )
-
-
-#     # delete file from s3
-#     s3_util.client.delete_object(
-#         Bucket=bucket_name,
-#         Key = "pytest_s3_utilities/version/folder/type/" + pandas_file_name
-#         )
+    # delete file from s3
+    s3_util.client.delete_object(
+        Bucket=bucket_name,
+        Key = "pytest_s3_utilities/version/folder/type/" + pandas_file_name
+        )
 
 
 def test_write_tensor(bucket_name):
@@ -197,25 +195,24 @@ def test_write_tensor(bucket_name):
         model_name = 'pytest_s3_utilities',
         version = 'version',
         )
-#     numpy_file_name = 'test_numpy_to_s3.npy'
-    numpy_file_name = 'test_read_tensor.npy'
+    numpy_file_name = 'test_numpy_to_s3.npy'
     s3_util.write_tensor(
         tensor = test_tensor, 
         folder = 'folder', 
         type_  = "type", 
         file_name = numpy_file_name
         )
-#     # check that file is in s3
-#     s3_util.client.head_object(
-#         Bucket=bucket_name,
-#         Key = "pytest_s3_utilities/version/folder/type/" + numpy_file_name
-#         )
+    # check that file is in s3
+    s3_util.client.head_object(
+        Bucket=bucket_name,
+        Key = "pytest_s3_utilities/version/folder/type/" + numpy_file_name
+        )
 
-#     # delete file from s3
-#     s3_util.client.delete_object(
-#         Bucket=bucket_name,
-#         Key = "pytest_s3_utilities/version/folder/type/" + numpy_file_name
-#         )
+    # delete file from s3
+    s3_util.client.delete_object(
+        Bucket=bucket_name,
+        Key = "pytest_s3_utilities/version/folder/type/" + numpy_file_name
+        )
 
 def test_awswrangler_pandas_dataframe_to_s3(bucket_name):
     # ??how is this different than pandas_dataframe_to_s3?
@@ -232,10 +229,10 @@ def test_awswrangler_pandas_dataframe_to_s3(bucket_name):
         )
     pandas_file_name = 'test_wrangler_pandas_to_s3.parquet'
     s3_util.awswrangler_pandas_dataframe_to_s3(
-        tensor = test_tensor, 
+        tensor = df, 
         folder = 'folder', 
         type_  = "type", 
-        file_name = numpy_file_name
+        file_name = pandas_file_name
         )
     # check that file is in s3
     s3_util.client.head_object(
@@ -248,21 +245,51 @@ def test_awswrangler_pandas_dataframe_to_s3(bucket_name):
         Key = "pytest_s3_utilities/version/folder/type/" + numpy_file_name
         )
     
-# def test_read_tensor():
-#     # read test tensor
-#     # check that tensor is in memory
+def test_read_tensor(bucket_name):
+    # instantiate object to be tested
+    s3_util = S3Utilities(
+        bucket_name = bucket_name,
+        model_name = 'pytest_s3_utilities',
+        version = 'version',
+        )
+    # read test tensor with method under test
+    numpy_file_name = 'test_read_tensor.npy'
+    test_tensor = s3_util.read_tensor(
+        folder = 'folder', 
+        type_  = "type", 
+        file_name = numpy_file_name)
+    # check that tensor is in memory
+    test_tensor.shape 
 
-# def test_upload_directory():
-#     # create directory with two files in it
-#     # use method to upload dir with contents
-#     # check that both files are present
-#     # delete dir from s3
+def test_upload_directory(bucket_name):
+    # create directory with two files in it
+    test_directory = 'test_directory/'
+    os.makedirs(test_directory)
+    # populate directory with files
+    fnames = ['file1.txt','file2.txt']
+    for fname in fnames:
+        with open(pre_zip_dir + fname, 'a'):
+            os.utime(pre_zip_dir + fname)
+    # instantiate object under test 
+    s3_util = S3Utilities(
+        bucket_name = bucket_name,
+        model_name = 'pytest_s3_utilities',
+        version = 'version',
+        )
+    # use method under test to upload dir with contents
+    s3_util.upload_directory(
+        local_path = test_directory, 
+        folder = 'folder', 
+        type_  = "type", 
+    )
+    # check that both files are present
+    # delete dir from s3
 
 # def test_pyspark_write_parquet():
-#     # create pyspark dataframe
-#     # use method to upload to s3
-#     # check that file is in s3
-#     # delete file from s3
+    # create pyspark dataframe
+    # use method to upload to s3
+    # check that file is in s3
+    # delete file from s3
 
 # def test_read_parquet_to_pandas_df():
 #     # read test parquet file with method
