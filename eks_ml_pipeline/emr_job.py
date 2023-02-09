@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from .feature_engineering_pipeline import FeatureEngineeringPipeline
+from eks_ml_pipeline import FeatureEngineeringPipeline
 from eks_ml_pipeline import node_autoencoder_fe_input
 
 
