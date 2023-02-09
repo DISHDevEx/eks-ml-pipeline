@@ -247,4 +247,3 @@ class S3Utilities:
         object_.download_fileobj(buffer)
         dataframe = pd.read_parquet(buffer)
         return dataframe
-    
