@@ -12,27 +12,30 @@ def test_upload_file(
     ):
     """Generate file, upload, and check for uploaded file."""
 
-    # generate a file to be uploaded
+    # generate a file to be uploaded and save it in a temp path
     filename = 'test_upload_file.npy'
-    np.save(filename, np.array([1,2,3]))
+    tmpdir = tempfile.mkdtemp()
+    file_path = f'{tmpdir}/{filename}'
+
+    np.save(file_path, np.array([1,2,3]))
 
     # Instantiate the class with fixtures from conftest.py.
     s3_util = S3Utilities(
         bucket_name = bucket_name,
-        model_name = ae_train_input[1][0], #self.feature_selection[0] = feature_group_name
+        model_name = ae_train_input[1][0], #feature_selection[0] = feature_group_name
         version = ae_train_input[1][1], #self.feature_selection[1], # feature_input_version
         )
 
     # upload that file to s3 bucket specified in conftest
     s3_util.upload_file(
-        local_path = filename,
+        local_path = file_path,
         bucket_name = bucket_name,
         key = "pytest_s3_utilities/" + filename
         )
 
     # use s3_client.head_object(that file) to make sure the file is in s3
     s3_util.client.head_object(
-        Bucket=bucket_name,
+        Bucket = bucket_name,
         Key = "pytest_s3_utilities/" + filename
         )
 
@@ -41,17 +44,6 @@ def test_upload_file(
         Bucket=bucket_name,
         Key = "pytest_s3_utilities/" + filename
         )
-
-
-#     # check that file has been deleted.
-#     try:
-#         s3_util.client.head_object(
-#             Bucket=bucket_name,
-#             Key = "pytest_s3_utilities/" + filename
-#             )
-#     except ClientError:
-#         print('Test file sucessfully deleted')
-
 
 def test_download_file(
     ae_train_input, # for instantiating the S3Utilities class
@@ -125,7 +117,7 @@ def test_zip_and_upload(bucket_name):
         )
     s3_filename = "test_upload_zip_file.zip"
     s3_util.zip_and_upload(
-        local_path = tmpdir, 
+        local_path = tmpdir, #directory containing the files to zip
         folder = 'folder',
         type_ = "type",
         file_name = s3_filename 
