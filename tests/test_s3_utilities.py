@@ -2,6 +2,7 @@
 import os
 from eks_ml_pipeline import S3Utilities
 import numpy as np
+import pandas as pd
 import boto3
 
 def test_upload_file(
@@ -154,9 +155,32 @@ def test_download_zip_and_unzip(
     # check that file is in s3
     # delete uploaded file from s3
 
-# def test_pandas_dataframe_to_s3():
+def test_pandas_dataframe_to_s3():
 #     # create pandas df in memory
-#     # upload to s3 with method
+    data = {'col1': [1, 2], 'col2': [3, 4]}
+    df = pd.DataFrame(data=data)
+    # upload to s3 with method
+    s3_util = S3Utilities(
+        bucket_name = bucket_name,
+        model_name = 'pytest_s3_utilities',
+        version = 'version',
+        )
+    pandas_file_name = 'test_pandas_to_s3'
+    s3_util.pandas_dataframe_to_s3(
+        input_datafame = df, 
+        folder = 'folder', 
+        type_  = "type", 
+        file_name = pandas_file_name
+        )
+
+    # delete file from s3
+    s3_util.client.delete_object(
+        Bucket=bucket_name,
+        Key = "pytest_s3_utilities/version/folder/type/" + pandas_file_name
+        )
+    
+
+
 #     # check that file is in s3
 #     # delete uploaded file from s3
 
