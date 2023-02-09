@@ -6,7 +6,7 @@ ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN pip3 install git+https://github.com/DISHDevEx/dish-devex-sdk.git
-RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git
+RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/emr-pr
 WORKDIR /app
 COPY . .
 RUN pip3 install venv-pack==0.2.0
