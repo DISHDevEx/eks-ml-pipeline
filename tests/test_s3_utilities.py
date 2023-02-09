@@ -10,7 +10,7 @@ def test_upload_file(
     ae_train_input, # for instantiating the S3Utilities class
     bucket_name
     ):
-    """"""
+    """Generate file, upload, and check for uploaded file."""
 
     # generate a file to be uploaded
     filename = 'test_upload_file.npy'
@@ -113,9 +113,10 @@ def test_download_zip_and_unzip(
     os.remove(local_dir + local_fname)
 
 def test_zip_and_upload(bucket_name):
-    # generate local file
+    # generate local file in a tempdir
     tmpdir = tempfile.mkdtemp()
-    fp = open(f'{tmpdir}/test_file_to_zip_and_upload.txt', 'w')
+    fp = f'{tmpdir}/test_file_to_zip.txt'
+    open(fp, 'w')
     # zip and upload to s3 with method
     s3_util = S3Utilities(
         bucket_name = bucket_name,
