@@ -287,19 +287,37 @@ def test_upload_directory(bucket_name):
         s3_util.client.head_object(
             Bucket = bucket_name,
             Key = ("pytest_s3_utilities/version/folder/type/" 
-                   + test_directory
                   + fname)
             )
 
-    # delete dir from s3
-
+    # delete files from s3
+    for fname in fnames:
+        s3_util.client.delete_object(
+            Bucket=bucket_name,
+            Key = ("pytest_s3_utilities/version/folder/type/" 
+                  + fname)
+            )
+        
 # def test_pyspark_write_parquet():
     # create pyspark dataframe
     # use method to upload to s3
     # check that file is in s3
     # delete file from s3
 
-# def test_read_parquet_to_pandas_df():
-#     # read test parquet file with method
-#     # check that there is a pandas data frame
-
+    
+    
+def test_read_parquet_to_pandas_df(bucket_name):
+    # instantiate object to be tested
+    s3_util = S3Utilities(
+        bucket_name = bucket_name,
+        model_name = 'pytest_s3_utilities',
+        version = 'version',
+        )
+    # read test parquet with method under test
+    parquet_file_name = 'test_read_parquet_to_pandas_df.parquet'
+    test_df = s3_util.read_parquet_to_pandas_df(
+        folder = 'folder', 
+        type_  = "type", 
+        file_name = parquet_file_name)
+    # check that tensor is in memory
+    test_df.shape 
