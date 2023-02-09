@@ -4,7 +4,7 @@ from eks_ml_pipeline import S3Utilities
 import numpy as np
 import pandas as pd
 import boto3
-import pyspark 
+import tempfile
 
 def test_upload_file(
     ae_train_input, # for instantiating the S3Utilities class
@@ -112,7 +112,7 @@ def test_download_zip_and_unzip(
     # delete local_zip file
     os.remove(local_dir + local_fname)
 
-def test_zip_and_upload():
+def test_zip_and_upload(bucket_name):
     # generate local file
     tmpdir = tempfile.mkdtemp()
     fp = open(f'{tmpdir}/test_file_to_zip_and_upload.txt', 'w')
@@ -221,12 +221,12 @@ def test_awswrangler_pandas_dataframe_to_s3(bucket_name):
     # check that file is in s3
     s3_util.client.head_object(
         Bucket=bucket_name,
-        Key = "pytest_s3_utilities/version/folder/type/" + numpy_file_name
+        Key = "pytest_s3_utilities/version/folder/type/" + pandas_file_name
         )
     # delete file from s3
     s3_util.client.delete_object(
         Bucket=bucket_name,
-        Key = "pytest_s3_utilities/version/folder/type/" + numpy_file_name
+        Key = "pytest_s3_utilities/version/folder/type/" + pandas_file_name
         )
     
 def test_read_tensor(bucket_name):
