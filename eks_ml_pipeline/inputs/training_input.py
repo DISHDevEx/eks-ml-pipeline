@@ -49,7 +49,7 @@ def node_autoencoder_input():
     save_model_local_path = "../node_autoencoder"
     model_bucketname = os.environ.get("BUCKET_NAME_OUTPUT")
     model_name = 'node_autoencoder_ad'
-    model_version = "v0.0.1-test"
+    model_version = "v0.0.0"
 
     #Define model filename and path
     model_filename = '_'.join(
@@ -119,7 +119,7 @@ def node_pca_input():
     save_model_local_path = "../node_pca.npy"
     model_bucketname = os.environ.get("BUCKET_NAME_OUTPUT")
     model_name = "node_pca_ad"
-    model_version = "v0.0.1-test"
+    model_version = "v0.0.0"
 
     #Define model filename
     model_filename = '_'.join(
@@ -187,7 +187,7 @@ def pod_autoencoder_input():
     save_model_local_path = "../pod_autoencoder"
     model_bucketname = os.environ.get("BUCKET_NAME_OUTPUT")
     model_name = 'pod_autoencoder_ad'
-    model_version = "v0.0.1-test"
+    model_version = "v0.0.0"
     #Define model filename
     model_filename = '_'.join(
         [model_name,
@@ -256,7 +256,7 @@ def pod_pca_input():
     save_model_local_path = "../pod_pca.npy"
     model_bucketname = os.environ.get("BUCKET_NAME_OUTPUT")
     model_name = "pod_pca_ad"
-    model_version = "v0.0.1-test"
+    model_version ="v0.0.0"
     #Define model filename
     model_filename = '_'.join(
         [model_name,
@@ -323,7 +323,7 @@ def container_autoencoder_input():
     save_model_local_path = "../container_autoencoder"
     model_bucketname = os.environ.get("BUCKET_NAME_OUTPUT")
     model_name = 'container_autoencoder_ad'
-    model_version = "v0.0.1-test"
+    model_version = "v0.0.0"
     #Define model filename
     model_filename = '_'.join(
         [model_name,
@@ -391,7 +391,7 @@ def container_pca_input():
     save_model_local_path = "../container_pca.npy"
     model_bucketname = os.environ.get("BUCKET_NAME_OUTPUT")
     model_name = "container_pca_ad"
-    model_version = "v0.0.1-test"
+    model_version = "v0.0.0"
     #Define model filename
     model_filename = '_'.join(
         [model_name, "model",
