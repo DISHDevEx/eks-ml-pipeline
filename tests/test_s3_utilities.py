@@ -77,7 +77,7 @@ def test_download_file(
     os.remove(local_dir + local_fname)
 
 
-def test_download_zip(
+def test_download_zip_and_unzip(
     ae_train_input, # for instantiating the S3Utilities class
     bucket_name
     ):
@@ -103,7 +103,10 @@ def test_download_zip(
     # check that file is local
     assert local_fname in os.listdir(local_dir)
 
-    # delete local file
+    # test unzip method
+    s3_util.unzip(path_to_zip = local_fname)
+
+    # delete local_zip file
     os.remove(local_dir + local_fname)
 
 
@@ -145,7 +148,7 @@ def test_download_zip(
 #     os.rmdir('zip_test_file')
 
 
-def test_zip_and_upload():
+# def test_zip_and_upload():
     # generate local file
     # zip and upload to s3 with method
     # check that file is in s3
