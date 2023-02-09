@@ -4,7 +4,7 @@ from eks_ml_pipeline import S3Utilities
 import numpy as np
 import pandas as pd
 import boto3
-
+import pyspark 
 
 def test_upload_file(
     ae_train_input, # for instantiating the S3Utilities class
@@ -112,51 +112,36 @@ def test_download_zip_and_unzip(
     # delete local_zip file
     os.remove(local_dir + local_fname)
 
-
-# def test_unzip(): #1.0 does not run
-#     ## generate two files to zip together
-#     # create a direcory to zip
-#     pre_zip_dir = 'pre_zip_test_files/'
-#     os.makedirs(pre_zip_dir)
-#     # populate directory with files
-#     fnames = ['file1.txt','file2.txt']
-#     for fname in fnames:
-#         with open(pre_zip_dir + fname, 'a'):
-#             os.utime(pre_zip_dir + fname)
-#     # zip file to new directory
-#     # post_zip_dir = 'zipped_test_files/'
-#     # os.makedirs(post_zip_dir)
-#     shutil.make_archive('zip_test_file',
-#                         'zip',
-#     #                     root_dir = post_zip_dir,
-#     #                     base_dir = post_zip_dir
-#                        )
-#     # clean up
-#     for fname in fnames:
-#         os.remove(pre_zip_dir + fname)
-#     os.rmdir(pre_zip_dir)
-
-#     ## unip with the method under test
-#     # Instantiate the class with fixtures from conftest.py.
-#     s3_util = S3Utilities(
-#         bucket_name = bucket_name,
-#         model_name = ae_train_input[1][0], #self.feature_selection[0] = feature_group_name
-#         version = ae_train_input[1][1], #self.feature_selection[1], # feature_input_version
-#         )
-#     s3_util.unzip(path_to_zip = 'zip_test_file.zip' )
-
-#     # delete local zip file
-#     os.remove('zip_test_file.zip')
-#     # delete unzipped directory
-#     os.rmdir('zip_test_file')
-
-
-# def test_zip_and_upload():
+def test_zip_and_upload():
     # generate local file
+    tmpdir = tempfile.mkdtemp()
+    fp = open(f'{tmpdir}/test_file_to_zip_and_upload.txt', 'w')
     # zip and upload to s3 with method
+    s3_util = S3Utilities(
+        bucket_name = bucket_name,
+        model_name = 'pytest_s3_utilities',
+        version = 'version',
+        )
+    s3_filename = "test_upload_zip_file.zip"
+    s3_util.zip_and_upload(
+        local_path = fp, 
+        folder = 'folder',
+        type_ = "type",
+        file_name = s3_filename 
+        )
     # check that file is in s3
-    # delete uploaded file from s3
+        # check that file is in s3
+    s3_util.client.head_object(
+        Bucket=bucket_name,
+        Key = "pytest_s3_utilities/version/folder/type/" + s3_filename
+        )
 
+    # delete uploaded file from s3
+    s3_util.client.delete_object(
+        Bucket=bucket_name,
+        Key = "pytest_s3_utilities/version/folder/type/" + s3_filename
+        )
+    
 def test_pandas_dataframe_to_s3(bucket_name):
 #     # create pandas df in memory
     data = {'col1': [1, 2], 'col2': [3, 4]}
@@ -228,7 +213,7 @@ def test_awswrangler_pandas_dataframe_to_s3(bucket_name):
         )
     pandas_file_name = 'test_wrangler_pandas_to_s3.parquet'
     s3_util.awswrangler_pandas_dataframe_to_s3(
-        tensor = df, 
+        input_datafame = df, 
         folder = 'folder', 
         type_  = "type", 
         file_name = pandas_file_name
@@ -300,6 +285,7 @@ def test_upload_directory(bucket_name):
 #### NOTE ####      
 # test_pyspark_write_parquet() need not exist 
 # because it would test only a pyspark funcion.  
+
     
 def test_read_parquet_to_pandas_df(bucket_name):
     # instantiate object to be tested
