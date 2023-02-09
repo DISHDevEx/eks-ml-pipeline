@@ -27,7 +27,7 @@ def test_upload_file(
 
     s3_util.upload_file(
         local_path = 'test_upload_array.npy',
-        bucket_name = self.save_model_locations[1],
+        bucket_name = bucket_name,
         key = "pytest_pca_ad/v0.0.1/data/data/tesnors/test_upload_array.npy",
         )
 
