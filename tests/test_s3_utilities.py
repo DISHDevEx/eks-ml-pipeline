@@ -155,7 +155,7 @@ def test_download_zip_and_unzip(
     # check that file is in s3
     # delete uploaded file from s3
 
-def test_pandas_dataframe_to_s3():
+def test_pandas_dataframe_to_s3(bucket_name):
 #     # create pandas df in memory
     data = {'col1': [1, 2], 'col2': [3, 4]}
     df = pd.DataFrame(data=data)
@@ -188,11 +188,34 @@ def test_pandas_dataframe_to_s3():
 
 
 
-# def test_write_tensor():
-#     # generate tensor
-#     # write to s3 with method
-#     # check that file is in s3
-#     # delete uploaded file from s3
+def test_write_tensor(bucket_name):
+    # generate tensor
+    test_tesnsor = np.zeros((2,3,4,5))
+    # write to s3 with method
+    s3_util = S3Utilities(
+        bucket_name = bucket_name,
+        model_name = 'pytest_s3_utilities',
+        version = 'version',
+        )
+    numpy_file_name = 'test_numpy_to_s3'
+    s3_util.write_tensor(
+        tensor = test_tensor, 
+        folder = 'folder', 
+        type_  = "type", 
+        file_name = numpy_file_name
+        )
+    # check that file is in s3
+    s3_util.client.head_object(
+        Bucket=bucket_name,
+        Key = "pytest_s3_utilities/version/folder/type/" + numpy_file_name
+        )
+
+
+    # delete file from s3
+    s3_util.client.delete_object(
+        Bucket=bucket_name,
+        Key = "pytest_s3_utilities/version/folder/type/" + numpy_file_name
+        )
 
 # def test_awswrangler_pandas_dataframe_to_s3():
 #     # ??how is this different than pandas_dataframe_to_s3?
