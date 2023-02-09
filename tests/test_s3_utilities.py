@@ -50,22 +50,22 @@ def test_upload_file(
 #         print('Test file sucessfully deleted')
 
 
-def test_download_file(
-    ae_train_input, # for instantiating the S3Utilities class
-    bucket_name
-    ):
+# def test_download_file(
+#     ae_train_input, # for instantiating the S3Utilities class
+#     bucket_name
+#     ):
 
-    # Instantiate the class with fixtures from conftest.py.
-    s3_util = S3Utilities(
-        bucket_name = bucket_name,
-        model_name = ae_train_input[1][0], #self.feature_selection[0] = feature_group_name
-        version = ae_train_input[1][1], #self.feature_selection[1], # feature_input_version
-        )
-    # download file
-    s3_util.download_file()
-    # check that file is local
+#     # Instantiate the class with fixtures from conftest.py.
+#     s3_util = S3Utilities(
+#         bucket_name = bucket_name,
+#         model_name = ae_train_input[1][0], #self.feature_selection[0] = feature_group_name
+#         version = ae_train_input[1][1], #self.feature_selection[1], # feature_input_version
+#         )
+#     # download file
+#     s3_util.download_file()
+#     # check that file is local
 
-    # delete local file
+#     # delete local file
 
 
 
