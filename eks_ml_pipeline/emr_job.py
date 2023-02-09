@@ -1,0 +1,16 @@
+import os
+from dotenv import load_dotenv
+from .feature_engineering_pipeline import FeatureEngineeringPipeline
+from eks_ml_pipeline import node_autoencoder_fe_input
+
+
+
+if __name__ == "__main__":
+    load_dotenv()
+    rec_type = 'Node'
+    compute_type = 'sagemaker'
+    aggregation_column = 'InstanceId'
+
+    dpfep = FeatureEngineeringPipeline(node_autoencoder_fe_input(), aggregation_column, rec_type, compute_type)
+
+    dpfep.run_preproceesing()

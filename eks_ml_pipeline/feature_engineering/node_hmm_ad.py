@@ -5,8 +5,8 @@ import multiprocessing
 from functools import partial
 from pyspark.sql.functions import col, count
 from sklearn.preprocessing import StandardScaler
-from utilities import feature_processor, null_report, S3Utilities
-#from ..inputs import feature_engineering_input
+from ..utilities import feature_processor, null_report, S3Utilities
+from ..inputs import feature_engineering_input
 from devex_sdk import EKS_Connector, get_features
 from .train_test_split import all_rectypes_train_test_split
 

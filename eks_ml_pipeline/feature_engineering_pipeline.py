@@ -2,6 +2,7 @@ from devex_sdk import EKS_Connector, Spark_Utils
 from eks_ml_pipeline.utilities import feature_processor, null_report, S3Utilities, run_multithreading, unionAll
 from eks_ml_pipeline import rec_type_ad_preprocessing, rec_type_ad_feature_engineering, rec_type_list_generator, \
     all_rectypes_train_test_split
+from eks_ml_pipeline import EMRServerless
 
 import numpy as np
 from functools import partial, reduce
@@ -38,14 +39,14 @@ class FeatureEngineeringPipeline:
                                                                   input_bucket_name=self.bucket_name_raw_data,
                                                                   input_folder_name=self.folder_name_raw_data,
                                                                   input_feature_group_name=self.feature_group_name,
-                                                                  input_feature_group_version=self.feature_group_name,
+                                                                  input_feature_group_version=self.feature_version,
                                                                   input_year=self.partition_year,
                                                                   input_month=self.partition_month,
                                                                   input_day=self.partition_day,
                                                                   input_hour=self.partition_hour,
                                                                   input_setup=self.spark_config_setup)
 
-        print(f'processed data column s: {processed_data.columns}')
+        print(f'processed data columns: {processed_data.columns}')
         print('caching')
         processed_data.cache()
 
@@ -68,7 +69,6 @@ class FeatureEngineeringPipeline:
 
         # writing dfs to s3 bucket
         print('saving pre-processed to s3')
-        # s3_utils.pyspark_write_parquet(node_processed_data, "raw_data/sparkdf", "parquet")
         # processed_data.write.mode("overwrite").parquet(f's3a://{output_bucket_name}/{feature_group_name}/{feature_version}/data/spark_df/raw_data_{file_name}/')
         s3_utils.pyspark_write_parquet(processed_data, 'data/spark_df/', 'raw_data_from_run/')
 
@@ -80,7 +80,6 @@ class FeatureEngineeringPipeline:
         s3_utils.pyspark_write_parquet(train_data, 'data/spark_df/', f'raw_training_data_from_run/')
 
         print('saving raw test to s3')
-        # s3_utils.pyspark_write_parquet(node_test_data, "raw_testing_data/sparkdf", "parquet")
         # test_data.coalesce(10).write.mode("overwrite").parquet(f's3a://{output_bucket_name}/{feature_group_name}/{feature_version}/data/spark_df/raw_testing_data_{file_name}/')
         s3_utils.pyspark_write_parquet(train_data, 'data/spark_df/', f'raw_testing_data_from_run/')
 
@@ -101,7 +100,8 @@ class FeatureEngineeringPipeline:
 
         s3_utils = S3Utilities(self.bucket, self.feature_group_name, self.feature_version)
 
-        features_data = s3_utils.read_parquet_to_pandas_df("data", "pandas_df", f'raw_features_{file_name}.parquet')
+        #features_data = s3_utils.read_parquet_to_pandas_df("data", "pandas_df", f'raw_features_{file_name}.parquet')
+        features_data = s3_utils.read_parquet_to_pandas_df("data", "pandas_df", 'raw_features_rom_run.parquet')
 
         # parsing model parameters
         scaled_features = []
@@ -159,19 +159,53 @@ class FeatureEngineeringPipeline:
 
 
     def run_in_sagemaker(self):
-        self.run_preproceesing(self)
-        self.run_feature_engineering(self)
-
+        self.run_preproceesing()
+        self.run_feature_engineering()
+        
     def run_in_emr(self):
+        application_id = '00f6mv29kbd4e10l'
+        s3_bucket_name = self.bucket
+        zipped_env_path = 's3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
+        #emr_entry_point = '/home/sagemaker-user/github/eks-ml-pipeline/eks_ml_pipeline/emr_job.py'
+        #emr_entry_point = 's3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/emr_entry_point/emr_job.py'
+        #emr_entry_point = 's3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
+        emr_entry_point = 'local:///usr/pyspark_deps_github/lib/python3.7/site-packages/eks_ml_pipeline/emr_job.py'
+        
+        #zipped_env_path = f's3://{s3_bucket_name}/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
+        
+        # if rec_type == 'Node':
+        #     emr_entry_point = 
+        # elif rec_type == 'Pod':
+        #     emr_entry_point = 
+        # elif rec_type == 'Container':
+        #     emr_entry_point = 
+        
+        
+        emr_serverless = EMRServerless()
+        print("Starting EMR Serverless Spark App")
+        # Start the application; skips this step automatically if the application is already in 'Started' state
+        emr_serverless.start_application(application_id)
+        print(emr_serverless)
+        
+        
+        # Run (and wait for) a Spark job
+        print("Submitting new Spark job")
+        job_run_id = emr_serverless.run_spark_job(
+            script_location=emr_entry_point,
+            #job_role_arn=serverless_job_role_arn,
+            application_id = application_id,
+            #arguments=[f"s3://{s3_bucket_name}/emr_serverless/output"],
+            s3_bucket_name=s3_bucket_name,
+            zipped_env_path = zipped_env_path
+        )
+        
+        emr_serverless.fetch_driver_log(s3_bucket_name)
 
 
-
-
-
-    # if compute_type = 'sagemaker':
-    #     run_preproceesing()
-    #     run_feature_engineering()
-    # elif compute_type = 'emr_serverless':
-    #
-    #     run_in_emr(run_preproceesing())
-    #     run_in_emr(run_feature_engineering())
+#     if compute_type = 'sagemaker':
+#         run_preproceesing()
+#         run_feature_engineering()
+#     elif compute_type = 'emr_serverless':
+    
+#         run_in_emr(run_preproceesing())
+#         run_in_emr(run_feature_engineering())
