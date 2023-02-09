@@ -6,7 +6,10 @@ from devex_sdk import EKS_Connector, get_features
 """
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """
-def pod_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
+def pod_ad_preprocessing(input_feature_group_name, input_feature_group_version,
+                         input_year, input_month, input_day,
+                         input_hour, input_setup,
+                         bucket_name_raw_data , folder_name_raw_data,):
     """
     inputs
     ------
@@ -38,7 +41,7 @@ def pod_ad_preprocessing(input_feature_group_name, input_feature_group_version, 
 
     """
 
-    pod_data = EKS_Connector(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Pod')
+    pod_data = EKS_Connector(bucket_name = bucket_name_raw_data ,folder_name = folder_name_raw_data, year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Pod')
     err, pod_df = pod_data.read()
 
     if err == 'PASS':

@@ -6,7 +6,7 @@ from devex_sdk import EKS_Connector, get_features
 """
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """
-def container_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
+def container_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup, bucket_name_raw_data, folder_name_raw_data):
     """
     inputs
     ------
@@ -34,11 +34,11 @@ def container_ad_preprocessing(input_feature_group_name, input_feature_group_ver
     outputs
     -------
             features_df : processed features dataFrame
-            processed_container_df: pre-processed container dataframe
-            
+            processed_container_df: pre processed container dataframe
+
     """
 
-    pyspark_container_data = EKS_Connector(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup,  filter_column_value ='Container')
+    pyspark_container_data = EKS_Connector(bucket_name = bucket_name_raw_data ,folder_name = folder_name_raw_data, year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup,  filter_column_value ='Container')
     err, pyspark_container_df = pyspark_container_data.read()
 
     if err == 'PASS':

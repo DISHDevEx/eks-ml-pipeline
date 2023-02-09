@@ -1,6 +1,10 @@
 """
 these are the parameters for inference pipeline
 """
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def node_inference_input():
 
@@ -25,12 +29,15 @@ def node_inference_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket for raw inference data
-    data_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
+    data_bucketname = os.environ.get("BUCKET_NAME_OUTPUT")
+    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
+    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
 
     return [rec_type, sampling_column,
             partition_year, partition_month,
             partition_day, partition_hour,
-            spark_config_setup, data_bucketname]
+            spark_config_setup, data_bucketname,
+            bucket_name_raw_data,folder_name_raw_data]
 
 def pod_inference_input():
 
@@ -55,12 +62,15 @@ def pod_inference_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket for raw inference data
-    data_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
+    data_bucketname = os.environ.get("BUCKET_NAME_OUTPUT")
+    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
+    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
 
     return [rec_type, sampling_column,
             partition_year, partition_month,
             partition_day, partition_hour,
-            spark_config_setup, data_bucketname]
+            spark_config_setup, data_bucketname,
+            bucket_name_raw_data,folder_name_raw_data]
 
 
 def container_inference_input():
@@ -86,9 +96,12 @@ def container_inference_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket for raw inference data
-    data_bucketname = "dish-5g.core.pd.g.dp.eks.logs.e"
+    data_bucketname = os.environ.get("BUCKET_NAME_OUTPUT")
+    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
+    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
 
     return [rec_type, sampling_column,
             partition_year, partition_month,
             partition_day, partition_hour,
-            spark_config_setup, data_bucketname]
+            spark_config_setup, data_bucketname,
+            bucket_name_raw_data,folder_name_raw_data]

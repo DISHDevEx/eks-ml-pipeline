@@ -14,7 +14,7 @@ from .train_test_split import all_rectypes_train_test_split
 """
 this feature engineering functions will help us run bach jobs that builds training data for Anomaly Detection models
 """
-def node_hmm_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup = "default"):
+def node_hmm_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup, bucket_name_raw_data, folder_name_raw_data):
     """
     inputs
     ------
@@ -46,7 +46,7 @@ def node_hmm_ad_preprocessing(input_feature_group_name, input_feature_group_vers
 
     """
 
-    pyspark_node_hmm_data = EKS_Connector(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Node')
+    pyspark_node_hmm_data = EKS_Connector(bucket_name = bucket_name_raw_data ,folder_name = folder_name_raw_data, year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Node')
     err, pyspark_node_hmm_df = pyspark_node_hmm_data.read()
 
     if err == 'PASS':
@@ -169,7 +169,7 @@ def node_hmm_list_generator(input_data_type, input_split_ratio, input_node_hmm_d
 def node_hmm_fe_pipeline(feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
             partition_hour, spark_config_setup,
-            bucket):
+            bucket,bucket_name_raw_data, folder_name_raw_data):
 
     ##building file name dynamically
     if partition_hour == -1:
@@ -180,7 +180,7 @@ def node_hmm_fe_pipeline(feature_group_name, feature_version,
         file_name = f'{partition_year}_{partition_month}_{partition_day}_{partition_hour}'
 
     #pre processing
-    node_hmm_features_data, node_hmm_processed_data = node_hmm_ad_preprocessing(feature_group_name, feature_version, partition_year, partition_month, partition_day, partition_hour, spark_config_setup)
+    node_hmm_features_data, node_hmm_processed_data = node_hmm_ad_preprocessing(feature_group_name, feature_version, partition_year, partition_month, partition_day, partition_hour, spark_config_setup, bucket_name_raw_data, folder_name_raw_data)
 
     #parsing model parameters
     scaled_features = []
@@ -230,4 +230,3 @@ def node_hmm_fe_pipeline(feature_group_name, feature_version,
                          input_df=processed_node_hmm_test_data, input_features=features, input_scaled_features=scaled_features, input_time_steps=time_steps), selected_hmm_node_test_list)
     node_hmm_testing_df = pd.concat(node_hmm_testing_list)
     s3_utils.awswrangler_pandas_dataframe_to_s3(node_hmm_testing_df, "data" , "pandas_df", f'testing_{file_name}.parquet')
-

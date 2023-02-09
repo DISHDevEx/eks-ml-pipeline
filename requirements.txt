@@ -12,3 +12,4 @@ awswrangler>=2.18.0
 pyarrow>=10.0.0
 fast-arrow>=1.0.3
 tf2onnx>=1.13.0
+python-dotenv>=0.21.0

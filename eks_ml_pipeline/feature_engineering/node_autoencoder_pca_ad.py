@@ -44,29 +44,28 @@ def node_ad_preprocessing(input_feature_group_name, input_feature_group_version,
 
     """
 
-    pyspark_node_data = EKS_Connector(year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Node')
+    pyspark_node_data = EKS_Connector(bucket_name = bucket_name_raw_data ,folder_name = folder_name_raw_data, year = input_year, month = input_month, day = input_day, hour = input_hour, setup = input_setup, filter_column_value ='Node')
     err, pyspark_node_df = pyspark_node_data.read()
 
     if err == 'PASS':
 
-        # get features
-        features_df = get_features(input_feature_group_name, input_feature_group_version)
+        #get features
+        features_df = get_features(input_feature_group_name,input_feature_group_version)
         features = features_df["feature_name"].to_list()
         processed_features = feature_processor.cleanup(features)
 
         model_parameters = features_df["model_parameters"].iloc[0]
         time_steps = model_parameters["time_steps"]
 
-        # filter inital node df based on request features
+        #filter inital node df based on request features
         node_df = pyspark_node_df.select("Timestamp", "InstanceId", *processed_features)
         node_df = node_df.withColumn("Timestamp",(col("Timestamp")/1000).cast("timestamp"))
 
         # Drop NA
         cleaned_node_df = node_df.na.drop(subset=processed_features)
 
-        # Quality(timestamp filtered) nodes
-        quality_filtered_node_df = cleaned_node_df.groupBy("InstanceId").agg(
-            count("Timestamp").alias("timestamp_count"))
+        #Quality(timestamp filtered) nodes
+        quality_filtered_node_df = cleaned_node_df.groupBy("InstanceId").agg(count("Timestamp").alias("timestamp_count"))
         # to get data that is closer to 1min apart
         quality_filtered_nodes = quality_filtered_node_df.filter(col("timestamp_count") >= 2*time_steps)
 

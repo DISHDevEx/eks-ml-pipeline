@@ -4,7 +4,7 @@ on:
     types:
       - closed
 env:
-  BUCKET_NAME : ${{ secrets.EKS_BUCKET_NAME }}
+  BUCKET_NAME : ${{ secrets.BUCKET_NAME_PYTEST }}
   AWS_REGION : ${{ secrets.AWS_REGION }}
 # permission can be added at job level or workflow level
 permissions:
@@ -26,7 +26,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
-          role-session-name: samplerolesession
+          role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
           aws-region: ${{ env.AWS_REGION }}
       # Upload a file to AWS s3
       - name:  run docker build
@@ -34,4 +34,4 @@ jobs:
           DOCKER_BUILDKIT=1 docker build --output . .
       - name: upload to s3
         run: |
-          aws s3 cp ./pyspark_deps_github.tar.gz s3://${{ env.BUCKET_NAME }}/emr_serverless/code/spark_dependency/
+          aws s3 cp ./pyspark_deps_github.tar.gz s3://${{ env.BUCKET_NAME_PYTEST }}/emr_serverless/code/spark_dependency/
