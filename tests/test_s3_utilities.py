@@ -29,12 +29,12 @@ def test_upload_file(
     # use s3_client.head_object(that file) to make sure the file is in s3
     s3_util.client.head_object(
         Bucket=bucket_name,
-        key = "pytest_s3_utilities/test_upload_array.npy"
+        Key = "pytest_s3_utilities/test_upload_array.npy"
         )
     # delete file from s3
     s3_util.client.delete_object(
         Bucket=bucket_name,
-        key = "pytest_s3_utilities/test_upload_array.npy"
+        Key = "pytest_s3_utilities/test_upload_array.npy"
         )
 
 
