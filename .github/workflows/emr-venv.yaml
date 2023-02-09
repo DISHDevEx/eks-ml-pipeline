@@ -10,7 +10,7 @@ permissions:
       id-token: write   # This is required for requesting the JWT
       contents: read    # This is required for actions/checkout
 jobs:
-  Pytest:
+  emr:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -29,6 +29,5 @@ jobs:
           DOCKER_BUILDKIT=1 docker build --output . .
       - name: upload to s3
         run: |
-          echo ${{ secrets.BUCKET_NAME_PYTEST }}
           aws s3 cp ./pyspark_deps_github.tar.gz s3://${{ secrets.BUCKET_NAME_PYTEST }}/emr_serverless/code/spark_dependency/
           aws s3 cp ./eks_ml_pipeline/run_test.py s3://${{ secrets.BUCKET_NAME_PYTEST }}/emr_serverless/code/emr_entry_point/
