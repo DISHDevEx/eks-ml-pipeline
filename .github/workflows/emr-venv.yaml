@@ -1,8 +1,7 @@
 name: emr-venv
 on:
-  push:
-    branches:
-      - "*"
+  pull_request:
+    branches: [main]
 env:
   BUCKET_NAME : ${{ secrets.BUCKET_NAME_PYTEST }}
   AWS_REGION : ${{ secrets.AWS_REGION }}
