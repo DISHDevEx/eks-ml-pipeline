@@ -167,9 +167,11 @@ class FeatureEngineeringPipeline:
         s3_bucket_name = self.bucket
         zipped_env_path = 's3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
         #emr_entry_point = '/home/sagemaker-user/github/eks-ml-pipeline/eks_ml_pipeline/emr_job.py'
-        #emr_entry_point = 's3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/emr_entry_point/emr_job.py'
+        emr_entry_point = 's3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/emr_entry_point/emr_job.py'
         #emr_entry_point = 's3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
-        emr_entry_point = 'local:///usr/pyspark_deps_github/lib/python3.7/site-packages/eks_ml_pipeline/emr_job.py'
+        # emr_entry_point = 'local:/home/hadoop/environment/bin/python3.7/site-packages/eks_ml_pipeline/emr_job.py'
+        #emr_entry_point = 'local:///site-packages/eks_ml_pipeline/emr_job.py'
+        
         
         #zipped_env_path = f's3://{s3_bucket_name}/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
         
