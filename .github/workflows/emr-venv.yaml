@@ -10,26 +10,26 @@ permissions:
       id-token: write   # This is required for requesting the JWT
       contents: read    # This is required for actions/checkout
 jobs:
-  runs-on: ubuntu-latest
-  strategy:
-    matrix:
-      python-version: [ "3.9" ]
-  steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-    - name: configure aws credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-        role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
-        role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
-        aws-region: ${{ env.AWS_REGION }}
-    # Upload a file to AWS s3
-    - name:  run docker build
-      run: |
-        DOCKER_BUILDKIT=1 docker build --output . .
-    - name: upload to s3
-      run: |
-        aws s3 cp ./pyspark_deps_github.tar.gz s3://${{ env.BUCKET_NAME_PYTEST }}/emr_serverless/code/spark_dependency/
-        aws s3 cp ./eks_ml_pipeline/run_test.py s3://${{ env.BUCKET_NAME_PYTEST }}/emr_serverless/code/emr_entry_point/
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.9" ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
+          aws-region: ${{ env.AWS_REGION }}
+      # Upload a file to AWS s3
+      - name:  run docker build
+        run: |
+          DOCKER_BUILDKIT=1 docker build --output . .
+      - name: upload to s3
+        run: |
+          aws s3 cp ./pyspark_deps_github.tar.gz s3://${{ env.BUCKET_NAME_PYTEST }}/emr_serverless/code/spark_dependency/
+          aws s3 cp ./eks_ml_pipeline/run_test.py s3://${{ env.BUCKET_NAME_PYTEST }}/emr_serverless/code/emr_entry_point/
