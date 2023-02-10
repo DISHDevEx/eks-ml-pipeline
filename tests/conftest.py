@@ -238,7 +238,7 @@ def pca_train_input(bucket_name):
 
     # feature_selection
     feature_group_name = "pytest_pca_ad"
-    feature_input_version = "v0.0.0"
+    feature_input_version = "v0.0.1"
 
     # data_locations
     data_bucketname = bucket_name
