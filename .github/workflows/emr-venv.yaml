@@ -27,9 +27,10 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       # Upload a file to AWS s3
       - name:  run docker build
-        secrets: |
-          "BUCKET_NAME_RAW_DATA=${{ secrets.BUCKET_NAME_RAW_DATA }}"
-          "FOLDER_NAME_RAW_DATA=${{ secrets.FOLDER_NAME_RAW_DATA }}"
+        with:
+          secrets: |
+            "BUCKET_NAME_RAW_DATA=${{ secrets.BUCKET_NAME_RAW_DATA }}"
+            "FOLDER_NAME_RAW_DATA=${{ secrets.FOLDER_NAME_RAW_DATA }}"
         run: |
           DOCKER_BUILDKIT=1 docker build --output . .
       - name: upload to s3
