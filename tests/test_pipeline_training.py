@@ -24,11 +24,11 @@ def test_ae_pipeline_training(ae_train_input, bucket_name):
     try:
         s3_client.head_object(
             Bucket=bucket_name,
-            Key="pytest_autoencoder_ad/v0.0.1/models/zipped_models/train_autoencoder_ad_model_v0.0.0Test_aeDummyDataTrain.zip",
+            Key="pytest_autoencoder_ad/v0.0.1/models/zipped_models/train_autoencoder_ad_model_v0.0.0Pytest_aeDummyDataTrain.zip",
         )
         s3_client.delete_object(
             Bucket=bucket_name,
-            Key="pytest_autoencoder_ad/v0.0.1/models/zipped_models/train_autoencoder_ad_model_v0.0.0Test_aeDummyDataTrain.zip",
+            Key="pytest_autoencoder_ad/v0.0.1/models/zipped_models/train_autoencoder_ad_model_v0.0.0Pytest_aeDummyDataTrain.zip",
         )
     except Exception as error_message:
         errors.append(error_message)
@@ -36,11 +36,11 @@ def test_ae_pipeline_training(ae_train_input, bucket_name):
     try:
         s3_client.head_object(
             Bucket=bucket_name,
-            Key="pytest_autoencoder_ad/v0.0.1/models/onnx_models/train_autoencoder_ad_model_v0.0.0Test_aeDummyDataTrain.onnx",
+            Key="pytest_autoencoder_ad/v0.0.1/models/onnx_models/train_autoencoder_ad_model_v0.0.0Pytest_aeDummyDataTrain.onnx",
         )
         s3_client.delete_object(
             Bucket=bucket_name,
-            Key="pytest_autoencoder_ad/v0.0.1/models/onnx_models/train_autoencoder_ad_model_v0.0.0Test_aeDummyDataTrain.onnx",
+            Key="pytest_autoencoder_ad/v0.0.1/models/onnx_models/train_autoencoder_ad_model_v0.0.0Pytest_aeDummyDataTrain.onnx",
         )
     except Exception as error_message:
         errors.append(error_message)
@@ -67,11 +67,11 @@ def test_pca_pipeline_training(pca_train_input, bucket_name):
     try:
         s3_client.head_object(
             Bucket=bucket_name,
-            Key="pytest_pca_ad/v0.0.1/models/npy_models/train_pca_ad_model_v0.0.0Test_pcaDummyDataTrain.npy",
+            Key="pytest_pca_ad/v0.0.1/models/npy_models/train_pca_ad_model_v0.0.0Pytest_pcaDummyDataTrain.npy",
         )
         s3_client.delete_object(
             Bucket=bucket_name,
-            Key="pytest_pca_ad/v0.0.1/models/npy_models/train_pca_ad_model_v0.0.0Test_pcaDummyDataTrain.npy",
+            Key="pytest_pca_ad/v0.0.1/models/npy_models/train_pca_ad_model_v0.0.0Pytest_pcaDummyDataTrain.npy",
         )
     except Exception as error_message:
         errors.append(error_message)
