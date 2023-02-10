@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import boto3
 import tempfile
+import shutil
 
 def test_upload_file(
     ae_train_input, # for instantiating the S3Utilities class
@@ -51,7 +52,7 @@ def test_download_file(
     ae_train_input, # for instantiating the S3Utilities class
     bucket_name
     ):
-    """Create local tmpdir+filename, download to """
+    """Download with method under test, and check for file locally."""
     local_dir = tempfile.mkdtemp()
     local_fname = 'test_download_file.npy'
 
