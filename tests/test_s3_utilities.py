@@ -23,21 +23,23 @@ def test_upload_file(
     s3_util = S3Utilities(
         bucket_name = bucket_name,
         model_name = ae_train_input[1][0], #feature_selection[0] = feature_group_name
-        version = ae_train_input[1][1], #self.feature_selection[1], # feature_input_version
+        version = ae_train_input[1][1], #feature_selection[1] =  feature_input_version
         )
 
-    # upload that file to s3 bucket specified in conftest
+    # use the method under test to upload that file to s3
     s3_util.upload_file(
         local_path = file_path,
         bucket_name = bucket_name,
         key = "pytest_s3_utilities/" + filename
         )
 
-    # use s3_client.head_object(that file) to make sure the file is in s3
-    s3_util.client.head_object(
+    # test that the file is in s3
+    head = s3_util.client.head_object(
         Bucket = bucket_name,
         Key = "pytest_s3_utilities/" + filename
         )
+    # HTTP status code 200 indicates request succeeded
+    assert head['ResponseMetadata']['HTTPStatusCode'] == 200 
 
     # delete file from s3
     s3_util.client.delete_object(
@@ -49,8 +51,8 @@ def test_download_file(
     ae_train_input, # for instantiating the S3Utilities class
     bucket_name
     ):
-
-    local_dir = './'
+    """Create local tmpdir+filename, download to """
+    local_dir = tempfile.mkdtemp()
     local_fname = 'test_download_file.npy'
 
     # Instantiate the class with fixtures from conftest.py.
@@ -84,25 +86,35 @@ def test_download_zip_and_unzip(
         version = 'version',
         )
 
-    # download file with method
-    local_dir = './'
-    local_fname = 'test_download_zip_file.zip'
-    # from bucket/pytest_s3_utilities/version/folder/type/test_download_zip_file.zip
+    # download file with method under test
+    tmpdir = tempfile.mkdtemp()
+    local_fname = 'local_test_download_zip_file.zip' # what to locally name .zip file
+    local_path = f'{tmpdir}/{local_fname}'  # local destination + name
+    s3_fname = "test_download_zip_file.zip" # test data in s3 
     s3_util.download_zip(
-        local_path = local_dir + local_fname,
-        folder = 'folder',
-        type_ = "type",
-        file_name = "test_download_zip_file.zip" # test data in s3
-        )
+            local_path = local_path,
+            folder = 'folder', # directory in s3 bucket
+            type_ = "type", # directory in s3 bucket
+            file_name = s3_fname # test data in s3 
+            )
+    # test .download_zip method
+    # i.e. that the .zip file is local
+    assert local_fname in os.listdir(tmpdir)
 
-    # check that file is local
-    assert local_fname in os.listdir(local_dir)
+    # test .unzip method
+    # i.e. that sfile is been extracted
+    s3_util.unzip(path_to_zip = local_path)
+    unziped_dir = tmpdir # directory where the files are placed
+    file_list = os.listdir(unziped_dir) # files in that directory 
+    # Two files were generated for this test and zipped into s3_fname
+    # 'test_download_zip_file_1.txt' and 'test_download_zip_file_2.txt' 
+    test_file_names = ['test_download_zip_file_1.txt',
+                       'test_download_zip_file_2.txt']
+    for file_name in test_file_names:
+        assert file_name in file_list
 
-    # test unzip method
-    s3_util.unzip(path_to_zip = local_fname)
-
-    # delete local_zip file
-    os.remove(local_dir + local_fname)
+    # clean up
+    shutil.rmtree(tmpdir) # remove tempdir
 
 def test_zip_and_upload(bucket_name):
     # generate local file in a tempdir
