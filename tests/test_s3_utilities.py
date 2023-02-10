@@ -202,8 +202,8 @@ def test_write_tensor(bucket_name):
     # Instantiate the class with fixtures from conftest.py.
     s3_util = S3Utilities(
         bucket_name = bucket_name,
-        model_name = 'pytest_s3_utilities',
-        version = 'version',
+        model_name = 'pytest_s3_utilities', # destination dir
+        version = 'version', # destination dir
         )
 
     # generate tensor
@@ -213,8 +213,8 @@ def test_write_tensor(bucket_name):
     numpy_file_name = 'test_numpy_to_s3.npy'
     s3_util.write_tensor(
         tensor = test_tensor, 
-        folder = 'folder', 
-        type_  = "type", 
+        folder = 'folder', # destination dir
+        type_  = "type", # destination dir
         file_name = numpy_file_name
         )
 
@@ -268,57 +268,71 @@ def test_awswrangler_pandas_dataframe_to_s3(bucket_name):
         )
     
 def test_read_tensor(bucket_name):
-    # instantiate object to be tested
+    """Download tensor from S3 with method under test, check tensor is in memory."""
+    # Instantiate the class with fixtures from conftest.py.
     s3_util = S3Utilities(
         bucket_name = bucket_name,
         model_name = 'pytest_s3_utilities',
         version = 'version',
         )
+
     # read test tensor with method under test
     numpy_file_name = 'test_read_tensor.npy'
     test_tensor = s3_util.read_tensor(
-        folder = 'folder', 
-        type_  = "type", 
+        folder = 'folder', # destination dir
+        type_  = "type", # destination dir
         file_name = numpy_file_name)
     # check that tensor is in memory
-    test_tensor.shape 
+
+    assert test_tensor.shape == (2,3,4,5)
 
 def test_upload_directory(bucket_name):
-    # create directory with two files in it
-    test_directory = 'test_directory/'
-    os.makedirs(test_directory)
-    # populate directory with files
-    fnames = ['file1.txt','file2.txt']
-    for fname in fnames:
-        with open(test_directory + fname, 'a'):
-            os.utime(test_directory + fname)
-    # instantiate object under test 
+    """Create a directory, place two files in that directory, 
+    upload all files in that directory with method under test, 
+    and check that both files have been uploaded.
+    """
+    # Instantiate the class with fixtures from conftest.py.
     s3_util = S3Utilities(
         bucket_name = bucket_name,
-        model_name = 'pytest_s3_utilities',
-        version = 'version',
+        model_name = 'pytest_s3_utilities', # destination dir
+        version = 'version', # destination dir
         )
+
+    # create directory and create two files in it
+    test_directory = tempfile.mkdtemp()
+    fnames = ['file1.txt','file2.txt']
+    for fname in fnames:
+        with open(f"{test_directory}/{fname}", 'a'):
+            os.utime(f"{test_directory}/{fname}") # creates files
+
     # use method under test to upload dir with contents
     s3_util.upload_directory(
         local_path = test_directory, 
         folder = 'folder', 
         type_  = "type", 
-    )
-    # use s3_client.head_object(that file) to make sure the file is in s3
-    for fname in fnames:
-        s3_util.client.head_object(
-            Bucket = bucket_name,
-            Key = ("pytest_s3_utilities/version/folder/type/" 
-                  + fname)
-            )
+        )
 
+
+    # use s3_client.head_object(that file) to make sure the file is in s3
+    test_bools = []
+    for fname in fnames:
+        head = s3_util.client.head_object(
+            Bucket = bucket_name,
+            Key = ("pytest_s3_utilities/version/folder/type/" + fname)
+            )
+        test_bools.append(head['ResponseMetadata']['HTTPStatusCode'] == 200)
+
+    assert all(test_bools)
+
+    # Clean up: 
     # delete files from s3
     for fname in fnames:
         s3_util.client.delete_object(
             Bucket=bucket_name,
-            Key = ("pytest_s3_utilities/version/folder/type/" 
-                  + fname)
+            Key = ("pytest_s3_utilities/version/folder/type/" + fname)
             )
+    # remove tempdir
+    shutil.rmtree(test_directory) 
 
 #### NOTE ####      
 # test_pyspark_write_parquet() need not exist 
@@ -326,17 +340,21 @@ def test_upload_directory(bucket_name):
 
     
 def test_read_parquet_to_pandas_df(bucket_name):
-    # instantiate object to be tested
+    """Use the method under test to put dataframe into memory, 
+    and check that dataframe is in memory.
+    """
     s3_util = S3Utilities(
         bucket_name = bucket_name,
         model_name = 'pytest_s3_utilities',
         version = 'version',
         )
+
     # read test parquet with method under test
     parquet_file_name = 'test_read_parquet_to_pandas_df.parquet'
     test_df = s3_util.read_parquet_to_pandas_df(
         folder = 'folder', 
         type_  = "type", 
         file_name = parquet_file_name)
+
     # check that tensor is in memory
-    test_df.shape 
+    assert test_df.shape == (2,2)
