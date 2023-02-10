@@ -48,7 +48,7 @@ Initial project structure for the eks-ml-pipeline. This will evolve over the tim
 ```
 2. If not already installed, install devex_sdk 
 ```console
-pip install git+https://github.com/DISHDevEx/dish-devex-sdk.git
+!pip install git+https://github.com/DISHDevEx/dish-devex-sdk.git
 ```
 3. Install the necessary requirements
 ```console
