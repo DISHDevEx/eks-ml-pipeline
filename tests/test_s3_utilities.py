@@ -120,16 +120,20 @@ def test_download_zip_and_unzip(
     shutil.rmtree(tmpdir) # remove tempdir
 
 def test_zip_and_upload(bucket_name):
-    # generate local file in a tempdir
-    tmpdir = tempfile.mkdtemp()
-    fp = f'{tmpdir}/test_file_to_zip.txt'
-    open(fp, 'w')
-    # zip and upload to s3 with method
+    """Create a file, zip and upload with method under test."""
+    # Instantiate the class with fixtures from conftest.py.
     s3_util = S3Utilities(
         bucket_name = bucket_name,
-        model_name = 'pytest_s3_utilities',
-        version = 'version',
+        model_name = 'pytest_s3_utilities', # destination dir
+        version = 'version', # destination dir
         )
+
+    #create file to be zipped
+    tmpdir = tempfile.mkdtemp()
+    local_file_path = f'{tmpdir}/local_test_file_to_zip.txt'
+    open(local_file_path, 'w') # creates file
+
+    # zip and upload to s3 with method under test
     s3_filename = "test_upload_zip_file.zip"
     s3_util.zip_and_upload(
         local_path = tmpdir, #directory containing the files to zip
@@ -137,18 +141,24 @@ def test_zip_and_upload(bucket_name):
         type_ = "type",
         file_name = s3_filename 
         )
-    # check that file is in s3
-        # check that file is in s3
-    s3_util.client.head_object(
-        Bucket=bucket_name,
-        Key = "pytest_s3_utilities/version/folder/type/" + s3_filename
-        )
 
+    # check that file is in s3
+    head = s3_util.client.head_object(
+        Bucket=bucket_name,
+        Key = ("pytest_s3_utilities/version/folder/type/" + s3_filename)
+        )
+    # HTTP status code 200 indicates request succeeded
+    assert head['ResponseMetadata']['HTTPStatusCode'] == 200 
+
+    # Cleanup: 
     # delete uploaded file from s3
     s3_util.client.delete_object(
         Bucket=bucket_name,
         Key = "pytest_s3_utilities/version/folder/type/" + s3_filename
         )
+    # delete temp folder
+    shutil.rmtree(tmpdir) # remove tempdir
+
     
 def test_pandas_dataframe_to_s3(bucket_name):
 #     # create pandas df in memory
