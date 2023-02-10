@@ -5,6 +5,8 @@ on:
 env:
   BUCKET_NAME : ${{ secrets.BUCKET_NAME_PYTEST }}
   AWS_REGION : ${{ secrets.AWS_REGION }}
+  BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
+  FOLDER_NAME_RAW_DATA : ${{ secrets.FOLDER_NAME_RAW_DATA }}
 # permission can be added at job level or workflow level
 permissions:
       id-token: write   # This is required for requesting the JWT
@@ -25,6 +27,9 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       # Upload a file to AWS s3
       - name:  run docker build
+        secrets: |
+          "BUCKET_NAME_RAW_DATA=${{ secrets.BUCKET_NAME_RAW_DATA }}"
+          "FOLDER_NAME_RAW_DATA=${{ secrets.FOLDER_NAME_RAW_DATA }}"
         run: |
           DOCKER_BUILDKIT=1 docker build --output . .
       - name: upload to s3
