@@ -9,7 +9,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 WORKDIR /app
 RUN pip3 install git+https://github.com/DISHDevEx/dish-devex-sdk.git
 RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/emr-pr
-RUN sudo apt install yarn
+RUN apt install yarn
 RUN ls
 RUN --mount=type=secret,id=BUCKET_NAME_RAW_DATA \
   --mount=type=secret,id=FOLDER_NAME_RAW_DATA \
