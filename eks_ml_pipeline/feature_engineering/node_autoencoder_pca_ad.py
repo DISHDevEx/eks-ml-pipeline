@@ -8,8 +8,7 @@ this feature engineering functions will help us run bach jobs that builds traini
 """
 
 
-def node_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day,
-                          input_hour, input_setup="default"):
+def node_ad_preprocessing(input_feature_group_name, input_feature_group_version, input_year, input_month, input_day, input_hour, input_setup, bucket_name_raw_data, folder_name_raw_data):
     """
     inputs
     ------
@@ -38,9 +37,6 @@ def node_ad_preprocessing(input_feature_group_name, input_feature_group_version,
     -------
             features_df : processed features dataFrame
             processed_node_df: pre processed node dataframe
-
-            features_df : processed features dataFrame (pandas df)
-            processed_node_df: pre processed node dataframe (pyspark df)
 
     """
 
