@@ -4,7 +4,9 @@ from pyspark.ml.feature import VectorAssembler, StandardScaler
 from pyspark.ml import Pipeline
 import random
 
-
+"""
+feature engineering functions to help us run jobs that build training data for Anomaly Detection models
+"""
 
 def rec_type_list_generator(input_data_type, input_split_ratio, input_rec_type_df, aggregation_column,
                             input_rec_type_features_df):
@@ -18,18 +20,21 @@ def rec_type_list_generator(input_data_type, input_split_ratio, input_rec_type_d
             list of split parameters
 
             input_rec_type_df: df
-            preprocessing and filtered node df
+            preprocessing and filtered df
+
+            aggregation_column: String
+            column to perform aggregation on
 
             input_rec_type_features_df: df
-            processed node features df
+            processed features df
 
     outputs
     -------
-            node_list: list
-            randomly selected list of node id's with replacement
+            rec_type_list: list
+            randomly selected list of record type id's with replacement
 
             input_rec_type_df: df
-            final node df with newly added columns (pyspark df)
+            final rec_type df with newly added columns (pyspark df)
 
     """
     model_parameters = input_rec_type_features_df["model_parameters"].iloc[0]
@@ -61,7 +66,7 @@ def rec_type_ad_feature_engineering(rec_type_list_element, input_df, aggregation
              randomly pick instance id
 
              input_df: df
-             preprocessing and filtered node df
+             preprocessing and filtered rec_type df
 
              input_features: list
              list of selected features
@@ -76,6 +81,9 @@ def rec_type_ad_feature_engineering(rec_type_list_element, input_df, aggregation
      -------
              rec_type_fe_df: df
              training data df for exposing it as data product (pyspark df)
+
+             rec_type_tensor : tensor
+             training tensor for training the model on
 
      """
 
