@@ -11,7 +11,7 @@ def test_upload_file(
     ae_train_input, # for instantiating the S3Utilities class
     bucket_name
     ):
-    """Generate file, upload, and check for uploaded file."""
+    """Upload file wtih method under test, and check for uploaded file."""
 
     # generate a file to be uploaded and save it in a temp path
     filename = 'test_upload_file.npy'
@@ -42,7 +42,7 @@ def test_upload_file(
     # HTTP status code 200 indicates request succeeded
     assert head['ResponseMetadata']['HTTPStatusCode'] == 200 
 
-    # delete file from s3
+    # Cleanup by deleting file from s3.
     s3_util.client.delete_object(
         Bucket=bucket_name,
         Key = "pytest_s3_utilities/" + filename
@@ -54,31 +54,33 @@ def test_download_file(
     ):
     """Download with method under test, and check for file locally."""
     local_dir = tempfile.mkdtemp()
-    local_fname = 'test_download_file.npy'
+    local_fname = 'local_test_download_file.npy'
+    local_path = f'{local_dir}/{local_fname}'
 
     # Instantiate the class with fixtures from conftest.py.
     s3_util = S3Utilities(
         bucket_name = bucket_name,
-        model_name = ae_train_input[1][0], #self.feature_selection[0] = feature_group_name
-        version = ae_train_input[1][1], #self.feature_selection[1], # feature_input_version
+        model_name = '', # irrelevant for this test
+        version = '' # irrelevant for this test
         )
     # download file
     s3_util.download_file(
-        local_path = local_dir + local_fname,
+        local_path = local_path,
         bucket_name = bucket_name,
         key = "pytest_s3_utilities/test_download_file.npy",
         )
     # check that file is local
     assert local_fname in os.listdir(local_dir)
 
-    # delete local file
-    os.remove(local_dir + local_fname)
+    # Cleanup
+    shutil.rmtree(local_dir) # remove tempdir
 
 
 def test_download_zip_and_unzip(
     ae_train_input, # for instantiating the S3Utilities class
     bucket_name
     ):
+    """Downlad a zip, check that it is local, unzip, and check for contents."""
 
     # Instantiate the class with fixtures from conftest.py.
     s3_util = S3Utilities(
@@ -106,13 +108,13 @@ def test_download_zip_and_unzip(
     # i.e. that sfile is been extracted
     s3_util.unzip(path_to_zip = local_path)
     unziped_dir = tmpdir # directory where the files are placed
-    file_list = os.listdir(unziped_dir) # files in that directory 
+    local_file_list = os.listdir(unziped_dir) # files in that directory 
     # Two files were generated for this test and zipped into s3_fname
     # 'test_download_zip_file_1.txt' and 'test_download_zip_file_2.txt' 
     test_file_names = ['test_download_zip_file_1.txt',
                        'test_download_zip_file_2.txt']
-    for file_name in test_file_names:
-        assert file_name in file_list
+    test_bools = [file_name in local_file_list for file_name in test_file_names]
+    assert all(test_bools)
 
     # clean up
     shutil.rmtree(tmpdir) # remove tempdir
