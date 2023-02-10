@@ -161,34 +161,41 @@ def test_zip_and_upload(bucket_name):
 
     
 def test_pandas_dataframe_to_s3(bucket_name):
-#     # create pandas df in memory
-    data = {'col1': [1, 2], 'col2': [3, 4]}
-    df = pd.DataFrame(data=data)
-    # upload to s3 with method
+    """Create df, upload with method uner test, and check for file in S3."""
+    # Instantiate the class with fixtures from conftest.py.
     s3_util = S3Utilities(
         bucket_name = bucket_name,
-        model_name = 'pytest_s3_utilities',
-        version = 'version',
+        model_name = 'pytest_s3_utilities', # destination dir
+        version = 'version', # destination dir
         )
-    pandas_file_name = 'test_pandas_to_s3.parquet' #custom test data
+
+    # create pandas df in memory
+    data = {'col1': [1, 2], 'col2': [3, 4]}
+    df = pd.DataFrame(data=data)
+
+    # upload to s3 with method under test
+    pandas_file_name = 'test_pandas_to_s3.parquet' 
     s3_util.pandas_dataframe_to_s3(
         input_datafame = df, 
-        folder = 'folder', 
-        type_  = "type", 
+        folder = 'folder', # destination dir
+        type_  = "type", #destination dir
         file_name = pandas_file_name
         )
+
     # check that file is in s3
-    s3_util.client.head_object(
-        Bucket=bucket_name,
+    head = s3_util.client.head_object(
+        Bucket = bucket_name,
         Key = "pytest_s3_utilities/version/folder/type/" + pandas_file_name
         )
 
-    # delete file from s3
+    # HTTP status code 200 indicates request succeeded
+    assert head['ResponseMetadata']['HTTPStatusCode'] == 200 
+
+    # Cleanup : delete file from s3
     s3_util.client.delete_object(
         Bucket=bucket_name,
         Key = "pytest_s3_utilities/version/folder/type/" + pandas_file_name
         )
-
 
 def test_write_tensor(bucket_name):
     # generate tensor
