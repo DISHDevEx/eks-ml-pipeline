@@ -26,11 +26,11 @@ def test_ae_pipeline_eval(ae_test_input, bucket_name):
     try:
         s3_client.head_object(
             Bucket=bucket_name,
-            Key="pytest_autoencoder_ad/v0.0.1/models/predictions/test_autoencoder_ad_model_v0.0.1_aeDummyDataTrain_aeDummyDataTest_predictions.npy",
+            Key="pytest_autoencoder_ad/v0.0.1/models/predictions/test_autoencoder_ad_model_v0.0.0_aeDummyDataTrain_aeDummyDataTest_predictions.npy",
         )
         s3_client.delete_object(
             Bucket=bucket_name,
-            Key="pytest_autoencoder_ad/v0.0.1/models/predictions/test_autoencoder_ad_model_v0.0.1_aeDummyDataTrain_aeDummyDataTest_predictions.npy",
+            Key="pytest_autoencoder_ad/v0.0.1/models/predictions/test_autoencoder_ad_model_v0.0.0_aeDummyDataTrain_aeDummyDataTest_predictions.npy",
         )
     except Exception as error_message:
         errors.append(error_message)
@@ -38,11 +38,11 @@ def test_ae_pipeline_eval(ae_test_input, bucket_name):
     try:
         s3_client.head_object(
             Bucket=bucket_name,
-            Key="pytest_autoencoder_ad/v0.0.1/models/predictions/test_autoencoder_ad_model_v0.0.1_aeDummyDataTrain_aeDummyDataTest_residuals.npy",
+            Key="pytest_autoencoder_ad/v0.0.1/models/predictions/test_autoencoder_ad_model_v0.0.0_aeDummyDataTrain_aeDummyDataTest_residuals.npy",
         )
         s3_client.delete_object(
             Bucket=bucket_name,
-            Key="pytest_autoencoder_ad/v0.0.1/models/predictions/test_autoencoder_ad_model_v0.0.1_aeDummyDataTrain_aeDummyDataTest_residuals.npy",
+            Key="pytest_autoencoder_ad/v0.0.1/models/predictions/test_autoencoder_ad_model_v0.0.0_aeDummyDataTrain_aeDummyDataTest_residuals.npy",
         )
     except Exception as error_message:
         errors.append(error_message)
@@ -73,11 +73,11 @@ def test_pca_pipeline_eval(pca_test_input, bucket_name):
     try:
         s3_client.head_object(
             Bucket=bucket_name,
-            Key="pytest_pca_ad/v0.0.1/models/predictions/test_pca_ad_model_v0.0.1_pcaDummyDataTrain_pcaDummyDataTest_predictions.npy",
+            Key="pytest_pca_ad/v0.0.1/models/predictions/test_pca_ad_model_v0.0.0_pcaDummyDataTrain_pcaDummyDataTest_predictions.npy",
         )
         s3_client.delete_object(
             Bucket=bucket_name,
-            Key="pytest_pca_ad/v0.0.1/models/predictions/test_pca_ad_model_v0.0.1_pcaDummyDataTrain_pcaDummyDataTest_predictions.npy",
+            Key="pytest_pca_ad/v0.0.1/models/predictions/test_pca_ad_model_v0.0.0_pcaDummyDataTrain_pcaDummyDataTest_predictions.npy",
         )
     except Exception as error_message:
         errors.append(error_message)
@@ -85,11 +85,11 @@ def test_pca_pipeline_eval(pca_test_input, bucket_name):
     try:
         s3_client.head_object(
             Bucket=bucket_name,
-            Key="pytest_pca_ad/v0.0.1/models/predictions/test_pca_ad_model_v0.0.1_pcaDummyDataTrain_pcaDummyDataTest_residuals.npy",
+            Key="pytest_pca_ad/v0.0.1/models/predictions/test_pca_ad_model_v0.0.0_pcaDummyDataTrain_pcaDummyDataTest_residuals.npy",
         )
         s3_client.delete_object(
             Bucket=bucket_name,
-            Key="pytest_pca_ad/v0.0.1/models/predictions/test_pca_ad_model_v0.0.1_pcaDummyDataTrain_pcaDummyDataTest_residuals.npy",
+            Key="pytest_pca_ad/v0.0.1/models/predictions/test_pca_ad_model_v0.0.0_pcaDummyDataTrain_pcaDummyDataTest_residuals.npy",
         )
     except Exception as error_message:
         errors.append(error_message)
