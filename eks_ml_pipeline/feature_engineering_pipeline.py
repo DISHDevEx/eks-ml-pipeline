@@ -92,9 +92,6 @@ class FeatureEngineeringPipeline:
                                                               [train_split, test_split])
         print(test_data.show(1,vertical=True))
 
-       
-        # initializing s3 utils
-        #s3_utils = S3Utilities(self.bucket, self.feature_group_name, self.feature_version)
         
         print(self.bucket)
         print(self.feature_group_name)
@@ -104,9 +101,7 @@ class FeatureEngineeringPipeline:
         # writing dfs to s3 bucket
         print('saving pre-processed to s3')
 
-        #self.s3_utilities.pyspark_write_parquet(processed_data, 'data/spark_df', f'raw_data_{self.file_name}')
-        
-        processed_data.write.mode('overwrite').parquet(f's3a://{self.bucket}/{self.feature_group_name}/{self.feature_version}/data/spark_df/raw_{self.file_name}/')
+        self.s3_utilities.pyspark_write_parquet(processed_data, 'data/spark_df', f'raw_data_{self.file_name}')
 
         print('saving features data to s3')
         self.s3_utilities.awswrangler_pandas_dataframe_to_s3(features_data, "data", "pandas_df",
@@ -203,13 +198,13 @@ class FeatureEngineeringPipeline:
         application_id = '00f6mv29kbd4e10l'
         s3_bucket_name = self.bucket
         zipped_env_path = 's3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
+        #zipped_env_path = f's3://{s3_bucket_name}/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
         #emr_entry_point = '/home/sagemaker-user/github/eks-ml-pipeline/eks_ml_pipeline/emr_job.py'
         emr_entry_point = 's3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/emr_entry_point/emr_job.py'
-        #emr_entry_point = 's3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
         # emr_entry_point = 'local:/home/hadoop/environment/bin/python3.7/site-packages/eks_ml_pipeline/emr_job.py'
         #emr_entry_point = 'environment/lib64/python3.7/site-packages/eks_ml_pipeline/emr_job.py'
         
-        #zipped_env_path = f's3://{s3_bucket_name}/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
+        
         
         # if rec_type == 'Node':
         #     emr_entry_point = 
