@@ -14,7 +14,7 @@ class FeatureEngineeringPipeline:
 
     """
 
-    def __init__(self, feature_engineering_inputs, aggregation_column, rec_type: str = None, compute_type: str = None):
+    def __init__(self, feature_engineering_inputs, rec_type: str = None, compute_type: str = None):
 
         self.feature_group_name = feature_engineering_inputs[0]
         self.feature_version = feature_engineering_inputs[1]
@@ -28,8 +28,8 @@ class FeatureEngineeringPipeline:
         self.folder_name_raw_data = feature_engineering_inputs[9]
         self.rec_type = rec_type
         self.compute_type = compute_type
-        self.aggregation_column = aggregation_column
         
+        self.aggregation_column = None
         self.s3_utilities = None
         self.file_name = None
         self.create_file_path()
@@ -37,6 +37,7 @@ class FeatureEngineeringPipeline:
         
     def initialize_s3(self):
         """Initialize s3 utilities class"""
+        
         self.s3_utilities = S3Utilities(
             bucket_name = self.bucket, 
             model_name = self.feature_group_name,
@@ -44,20 +45,19 @@ class FeatureEngineeringPipeline:
             )
 
     def create_file_path(self):
+        """Create File Paths"""
+        
         if self.partition_hour == -1:
             self.file_name = f'{self.partition_year}_{self.partition_month}_{self.partition_day}'
         elif self.partition_day == -1:
             self.file_name = f'{self.partition_year}_{self.partition_month}'
         else:
             self.file_name = f'{self.partition_year}_{self.partition_month}_{self.partition_day}_{self.partition_hour}'
-        # if rec_type == 'Node':
-        #     aggregation_column = 'InstanceId'
-        # elif rec_type == 'Container':
-        #     aggregation_column = 'container_name_pod_id'
-        # else:
-        #     aggregation_column = 'pod_id'
+        
     
     def run_preproceesing(self):
+        
+        """Run data pre-processing step"""
 
         print(self.bucket_name_raw_data)
         print(self.folder_name_raw_data)
@@ -118,8 +118,17 @@ class FeatureEngineeringPipeline:
         processed_data.unpersist()
 
     def run_feature_engineering(self):
+        """Run feature enginerring step"""
+        
         # Create a spark session to read files from s3
         spark = Spark_Utils().get_spark()
+        
+        if self.rec_type == 'Node':
+            self.aggregation_column = 'InstanceId'
+        elif self.rec_type == 'Container':
+            self.aggregation_column = 'container_name_pod_id'
+        else:
+            self.aggregation_column = 'pod_id'
 
         train_data = spark.read.parquet(
             f's3a://{self.bucket}/{self.feature_group_name}/{self.feature_version}/data/spark_df/raw_training_data_{self.file_name}/')
@@ -129,9 +138,6 @@ class FeatureEngineeringPipeline:
             f's3a://{self.bucket}/{self.feature_group_name}/{self.feature_version}/data/spark_df/raw_testing_data_{self.file_name}/')
         print(f'train data shape: {test_data.columns}')
 
-        #s3_utils = S3Utilities(self.bucket, self.feature_group_name, self.feature_version)
-
-        #features_data = s3_utils.read_parquet_to_pandas_df("data", "pandas_df", f'raw_features_{file_name}.parquet')
         features_data = self.s3_utilities.read_parquet_to_pandas_df("data", "pandas_df", f'raw_features_{self.file_name}.parquet')
 
         # parsing model parameters
@@ -168,12 +174,11 @@ class FeatureEngineeringPipeline:
         print(f'lenght of tensir list: {len(tensor_list)}')
 
         print('reshaping tensors')
-        train_tensor = np.zeros((n_samples, time_steps, len(features)))
-        for n in range(n_samples):
-            train_tensor[n, :, :] = tensor_list[n]
+        train_tensor = np.array(tensor_list)
+        print(f'train tensor shape: {train_tensor.shape}')
 
         print('writing tensors rto s3')
-        s3_utils.write_tensor(train_tensor, "data", "tensors", f'training_{file_name}.npy')
+        self.s3_utilities.write_tensor(train_tensor, "data", "tensors", f'training_{self.file_name}.npy')
 
         print('Concatenating the train df lists')
         training_df = unionAll(*training_df_list)
@@ -181,20 +186,23 @@ class FeatureEngineeringPipeline:
         print(f'final training df columns : {training_df.columns}')
 
         print('Writing train df to s3')
-        training_df.coalesce(20).write.mode("overwrite").parquet(
-            f's3://{self.bucket}/{self.feature_group_name}/{self.feature_version}/data/spark_df/training_data_{self.file_name}/')
+        #training_df.coalesce(20).write.mode("overwrite").parquet(f's3a://{self.bucket}/{self.feature_group_name}/{self.feature_version}/data/spark_df/training_data_{self.file_name}/')
+        self.s3_utilities.pyspark_write_parquet(training_df, 'data/spark_df', f'training_data_{self.file_name}')
         print('Un-persisting')
-        train_data.unpersist()
+        processed_train_data.unpersist()
         print("training and testing data_builder completed successfully")
 
 
     def run_in_sagemaker(self):
+        """Run pre-processing and feature engineering steps in sagemaker"""
+        
         print('running data pre-processing step')
         self.run_preproceesing()
         print('running data engineering step')
         self.run_feature_engineering()
         
     def run_in_emr(self):
+        """Run pre-processing and feature engineering steps in emr serverless"""
         application_id = '00f6mv29kbd4e10l'
         s3_bucket_name = self.bucket
         zipped_env_path = 's3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
