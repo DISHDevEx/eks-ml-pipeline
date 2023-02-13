@@ -6,7 +6,8 @@ from eks_ml_pipeline import node_autoencoder_fe_input
 
 
 if __name__ == "__main__":
-    load_dotenv("/run/secrets/")
+    # load_dotenv("/run/secrets/")
+
     rec_type = 'Node'
     compute_type = 'sagemaker'
     aggregation_column = 'InstanceId'
