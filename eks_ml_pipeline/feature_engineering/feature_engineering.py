@@ -2,7 +2,6 @@ from pyspark.sql import SparkSession, DataFrame, Window
 from pyspark.sql.functions import col, count, rand, row_number
 from pyspark.ml.feature import VectorAssembler, StandardScaler
 from pyspark.ml import Pipeline
-from pyspark.ml.linalg import Vectors
 from pyspark.ml.functions import vector_to_array
 import numpy as np
 import random
@@ -10,6 +9,7 @@ import random
 """
 feature engineering functions to help us run jobs that build training data for Anomaly Detection models
 """
+
 
 def rec_type_list_generator(input_data_type, input_split_ratio, input_rec_type_df, aggregation_column,
                             input_rec_type_features_df):
@@ -46,13 +46,10 @@ def rec_type_list_generator(input_data_type, input_split_ratio, input_rec_type_d
     batch_size = model_parameters["batch_size"]
 
     if input_data_type == 'train':
-        #n_samples = batch_size * model_parameters["train_sample_multiplier"]
-        n_samples = 100
+        n_samples = batch_size * model_parameters["train_sample_multiplier"]
     elif input_data_type == 'test':
-        # n_samples = round(
-        #     (batch_size * model_parameters["train_sample_multiplier"] * input_split_ratio[1]) / input_split_ratio[0])
         n_samples = round(
-            (100 * input_split_ratio[1]) / input_split_ratio[0])
+            (batch_size * model_parameters["train_sample_multiplier"] * input_split_ratio[1]) / input_split_ratio[0])
 
     input_rec_type_df_freq = input_rec_type_df.groupby(aggregation_column).count().withColumnRenamed("count", "freq")
     input_rec_type_df = input_rec_type_df.join(input_rec_type_df_freq, on=aggregation_column, how='inner')
@@ -65,7 +62,8 @@ def rec_type_list_generator(input_data_type, input_split_ratio, input_rec_type_d
     return rec_type_list, input_rec_type_df
 
 
-def rec_type_ad_feature_engineering(rec_type_list_element, input_df, aggregation_column, input_features, input_scaled_features, input_time_steps, spark):
+def rec_type_ad_feature_engineering(rec_type_list_element, input_df, aggregation_column, input_features,
+                                    input_scaled_features, input_time_steps, spark):
     """
      Perform feature engineering on the randomly selected rec_type ids from the rec_typelist. 
      inputs
@@ -97,9 +95,9 @@ def rec_type_ad_feature_engineering(rec_type_list_element, input_df, aggregation
 
     spark.sparkContext.setLocalProperty("spark.scheduler.pool", rec_type_list_element)
     input_df.cache()
-    #print('starting the loop')
     # pick random df, and normalize
-    rec_type_fe_df = input_df[(input_df[aggregation_column] == rec_type_list_element)].select('*').sort("Timestamp").na.drop(
+    rec_type_fe_df = input_df[(input_df[aggregation_column] == rec_type_list_element)].select('*').sort(
+        "Timestamp").na.drop(
         subset=input_features)
     rec_type_fe_df.cache()
     rec_type_fe_df_len = rec_type_fe_df.count()
@@ -117,9 +115,11 @@ def rec_type_ad_feature_engineering(rec_type_list_element, input_df, aggregation
 
     # Verify shape of tensor to be uniform with others
     if (rec_type_fe_df.count()) == input_time_steps:
-        rec_type_tensor = np.array(rec_type_fe_df.select(vector_to_array("scaled_features").alias('scaled_features')).select([col("scaled_features")[i] for i in range(3)]).collect())
+        rec_type_tensor = np.array(
+            rec_type_fe_df.select(vector_to_array("scaled_features").alias('scaled_features')).select(
+                [col("scaled_features")[i] for i in range(3)]).collect())
     else:
-        rec_type_tensor = np.zeros((input_time_steps,len(input_features)))
+        rec_type_tensor = np.zeros((input_time_steps, len(input_features)))
 
     spark.sparkContext.setLocalProperty("spark.scheduler.pool", None)
     input_df.unpersist()
