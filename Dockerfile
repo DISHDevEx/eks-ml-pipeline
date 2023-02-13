@@ -10,10 +10,12 @@ WORKDIR /app
 RUN pip3 install git+https://github.com/DISHDevEx/dish-devex-sdk.git
 RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/emr-pr
 #RUN apt install yarn
-RUN ls
+
 RUN touch .env \
 ENV BUCKET_NAME_RAW_DATA=BUCKET_NAME_RAW_DATA
 ENV FOLDER_NAME_RAW_DATA=FOLDER_NAME_RAW_DATA
+RUN echo BUCKET_NAME_RAW_DATA
+RUN echo FOLDER_NAME_RAW_DATA
 #RUN --mount=type=secret,id=BUCKET_NAME_RAW_DATA \
 #  --mount=type=secret,id=FOLDER_NAME_RAW_DATA \
 #   export BUCKET_NAME_RAW_DATA=$(cat /run/secrets/BUCKET_NAME_RAW_DATA) && \
