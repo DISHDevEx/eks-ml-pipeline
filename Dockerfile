@@ -5,7 +5,7 @@ ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-WORKDIR /app
+#WORKDIR /app
 RUN pip3 install git+https://github.com/DISHDevEx/dish-devex-sdk.git
 RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/emr-pr
 #RUN apt install yarn

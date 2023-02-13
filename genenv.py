@@ -1,7 +1,7 @@
 import os
 def get_config_from_environment(env_content):
-    env_content += "MYSQL_HOST={}\n".format(os.environ.get("BUCKET_NAME_RAW_DATA", ""))
-    env_content += "MYSQL_USER={}\n".format(os.environ.get("FOLDER_NAME_RAW_DATA", ""))
+    env_content += "BUCKET_NAME_RAW_DATA={}\n".format(os.environ.get("BUCKET_NAME_RAW_DATA", ""))
+    env_content += "FOLDER_NAME_RAW_DATA={}\n".format(os.environ.get("FOLDER_NAME_RAW_DATA", ""))
     name1 = os.environ.get("BUCKET_NAME_RAW_DATA", "")
     name2 = os.environ.get("FOLDER_NAME_RAW_DATA", "")
     print(name1)
