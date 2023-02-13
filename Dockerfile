@@ -11,17 +11,13 @@ WORKDIR /app
 #RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/emr-pr
 #RUN apt install yarn
 
-RUN touch .env \
-ENV BUCKET_NAME_RAW_DATA=BUCKET_NAME_RAW_DATA
-ENV FOLDER_NAME_RAW_DATA=FOLDER_NAME_RAW_DATA
-RUN echo ${{ secrets.ROLE_TO_ASSUME }}
-RUN echo ${{ secrets.ROLE_SESSION_NAME }}
-RUN echo ${{ env.AWS_REGION }}
-#RUN --mount=type=secret,id=BUCKET_NAME_RAW_DATA \
-#  --mount=type=secret,id=FOLDER_NAME_RAW_DATA \
-#   export BUCKET_NAME_RAW_DATA=$(cat /run/secrets/BUCKET_NAME_RAW_DATA) && \
-#   export FOLDER_NAME_RAW_DATA=$(cat /run/secrets/FOLDER_NAME_RAW_DATA) && \
-#   yarn gen
+
+RUN --mount=type=secret,id=BUCKET_NAME_RAW_DATA \
+  --mount=type=secret,id=FOLDER_NAME_RAW_DATA \
+  export BUCKET_NAME_RAW_DATA=$(cat /run/secrets/BUCKET_NAME_RAW_DATA) && \
+  export FOLDER_NAME_RAW_DATA=$(cat /run/secrets/FOLDER_NAME_RAW_DATA) && \
+  yarn gen
+
 #COPY . .
 #RUN pip3 install venv-pack==0.2.0
 #RUN  pip3 install boto3
