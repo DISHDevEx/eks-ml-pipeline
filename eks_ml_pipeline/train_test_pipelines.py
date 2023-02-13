@@ -174,7 +174,7 @@ class TrainTestPipelines:
                 tensor = result,
                 folder = "models",
                 type_ = "predictions",
-                file_name = f'{test_data_filename.split(".")[-2]}_{label}.npy')
+                file_name = self.save_model_locations[2]+"_"+f'{test_data_filename.split(".")[-2]}_{label}.npy')
 
         #Delete locally saved model
         if self.file_flags[3]: # clean_local_folder

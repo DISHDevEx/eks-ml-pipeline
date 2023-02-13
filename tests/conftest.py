@@ -88,7 +88,7 @@ def ae_train_input(bucket_name):
     save_model_local_path = "../test_autoencoder"
     model_bucketname = bucket_name
     model_name = "train_autoencoder_ad"
-    model_version = "v0.0.1"
+    model_version = "v0.0.0Pytest"
 
     # Define model filename and path
     model_filename = "_".join(
@@ -168,7 +168,7 @@ def ae_test_input(bucket_name):
     save_model_local_path = "../test_autoencoder"
     model_bucketname = bucket_name
     model_name = "test_autoencoder_ad"
-    model_version = "v0.0.1"
+    model_version = "v0.0.0"
 
     # Define model filename and path
     model_filename = "_".join(
@@ -249,7 +249,7 @@ def pca_train_input(bucket_name):
     save_model_local_path = "../test_pca.npy"
     model_bucketname = bucket_name
     model_name = "train_pca_ad"
-    model_version = "v0.0.1"
+    model_version = "v0.0.0Pytest"
     # Define model filename
     model_filename = "_".join(
         [
@@ -329,7 +329,7 @@ def pca_test_input(bucket_name):
     save_model_local_path = "../test_pca.npy"
     model_bucketname = bucket_name
     model_name = "test_pca_ad"
-    model_version = "v0.0.1"
+    model_version = "v0.0.0"
     # Define model filename
     model_filename = "_".join(
         [
