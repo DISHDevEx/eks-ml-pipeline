@@ -40,10 +40,10 @@ jobs:
 #              "FOLDER_NAME_RAW_DATA=${{ secrets.FOLDER_NAME_RAW_DATA }}"
       - name: upload to s3
         run: |
-          DOCKER_BUILDKIT=1 docker build \
+          DOCKER_BUILDKIT=1 docker build --output . .\
             --build-arg  "BUCKET_NAME_RAW_DATA=${{ secrets.BUCKET_NAME_RAW_DATA }}" \ 
-            --build-arg "FOLDER_NAME_RAW_DATA=${{ secrets.FOLDER_NAME_RAW_DATA }}" \
-            --output . .
+            --build-arg "FOLDER_NAME_RAW_DATA=${{ secrets.FOLDER_NAME_RAW_DATA }}" 
+            
           aws s3 cp ./pyspark_deps_github.tar.gz s3://${{ secrets.BUCKET_NAME_PYTEST }}/emr_serverless/code/spark_dependency/
           aws s3 cp ./eks_ml_pipeline/emr_job.py s3://${{ secrets.BUCKET_NAME_PYTEST }}/emr_serverless/code/emr_entry_point/
           
