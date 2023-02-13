@@ -31,6 +31,7 @@ jobs:
         env:
           BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
           FOLDER_NAME_RAW_DATA: ${{ secrets.FOLDER_NAME_RAW_DATA }}
+          TEST: ${{ env.TEST }}
       - name: upload to s3
         run: |            
           aws s3 cp ./pyspark_deps_github.tar.gz s3://${{ secrets.BUCKET_NAME_PYTEST }}/emr_serverless/code/spark_dependency/
