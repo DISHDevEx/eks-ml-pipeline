@@ -1,7 +1,6 @@
 #FROM public.ecr.aws/amazonlinux/amazonlinux:2.0.20221210.1-amd64 AS base
 FROM --platform=linux/amd64 amazonlinux:2 AS base
 RUN yum install -y python3 git
-RUN pip install pipenv && pipenv sync
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
