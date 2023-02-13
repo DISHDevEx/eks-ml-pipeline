@@ -7,8 +7,8 @@ RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 WORKDIR /app
-RUN pip3 install git+https://github.com/DISHDevEx/dish-devex-sdk.git
-RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/emr-pr
+#RUN pip3 install git+https://github.com/DISHDevEx/dish-devex-sdk.git
+#RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/emr-pr
 #RUN apt install yarn
 
 RUN touch .env \
@@ -16,21 +16,21 @@ ENV BUCKET_NAME_RAW_DATA=BUCKET_NAME_RAW_DATA
 ENV FOLDER_NAME_RAW_DATA=FOLDER_NAME_RAW_DATA
 RUN echo BUCKET_NAME_RAW_DATA
 RUN echo FOLDER_NAME_RAW_DATA
+RUN echo TEST
 #RUN --mount=type=secret,id=BUCKET_NAME_RAW_DATA \
 #  --mount=type=secret,id=FOLDER_NAME_RAW_DATA \
 #   export BUCKET_NAME_RAW_DATA=$(cat /run/secrets/BUCKET_NAME_RAW_DATA) && \
 #   export FOLDER_NAME_RAW_DATA=$(cat /run/secrets/FOLDER_NAME_RAW_DATA) && \
 #   yarn gen
-RUN ls
-COPY . .
-RUN pip3 install venv-pack==0.2.0
-RUN  pip3 install boto3
-RUN  pip3 install pyarrow
-RUN  pip3 install awswrangler
-RUN  pip3 install fast-arrow
-RUN  pip3 install tf2onnx
-RUN  pip3 install python-dotenv
-RUN pwd
+#COPY . .
+#RUN pip3 install venv-pack==0.2.0
+#RUN  pip3 install boto3
+#RUN  pip3 install pyarrow
+#RUN  pip3 install awswrangler
+#RUN  pip3 install fast-arrow
+#RUN  pip3 install tf2onnx
+#RUN  pip3 install python-dotenv
+#RUN pwd
 
 RUN mkdir /output && venv-pack -o /output/pyspark_deps_github.tar.gz
 
