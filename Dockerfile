@@ -14,9 +14,9 @@ WORKDIR /app
 RUN touch .env \
 ENV BUCKET_NAME_RAW_DATA=BUCKET_NAME_RAW_DATA
 ENV FOLDER_NAME_RAW_DATA=FOLDER_NAME_RAW_DATA
-RUN echo BUCKET_NAME_RAW_DATA
-RUN echo FOLDER_NAME_RAW_DATA
-RUN echo TEST
+RUN echo ${{ secrets.ROLE_TO_ASSUME }}
+RUN echo ${{ secrets.ROLE_SESSION_NAME }}
+RUN echo ${{ env.AWS_REGION }}
 #RUN --mount=type=secret,id=BUCKET_NAME_RAW_DATA \
 #  --mount=type=secret,id=FOLDER_NAME_RAW_DATA \
 #   export BUCKET_NAME_RAW_DATA=$(cat /run/secrets/BUCKET_NAME_RAW_DATA) && \
