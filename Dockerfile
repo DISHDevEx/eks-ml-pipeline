@@ -14,9 +14,9 @@ WORKDIR /app
 
 RUN --mount=type=secret,id=BUCKET_NAME_RAW_DATA \
   --mount=type=secret,id=FOLDER_NAME_RAW_DATA \
-  export BUCKET_NAME_RAW_DATA=$(cat /run/secrets/BUCKET_NAME_RAW_DATA) && \
-  export FOLDER_NAME_RAW_DATA=$(cat /run/secrets/FOLDER_NAME_RAW_DATA) && \
-  yarn gen
+  export BUCKET_NAME_RAW_DATA=$(cat BUCKET_NAME_RAW_DATA) && \
+  export FOLDER_NAME_RAW_DATA=$(cat FOLDER_NAME_RAW_DATA) && \
+
 
 #COPY . .
 #RUN pip3 install venv-pack==0.2.0
