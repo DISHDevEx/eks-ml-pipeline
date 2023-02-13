@@ -40,7 +40,7 @@ jobs:
 #              "FOLDER_NAME_RAW_DATA=${{ secrets.FOLDER_NAME_RAW_DATA }}"
       - name: upload to s3
         run: |
-          DOCKER_BUILDKIT=1 docker build --output . .\
+          docker build --output . .\
             --build-arg  "BUCKET_NAME_RAW_DATA=${{ secrets.BUCKET_NAME_RAW_DATA }}" \ 
             --build-arg "FOLDER_NAME_RAW_DATA=${{ secrets.FOLDER_NAME_RAW_DATA }}" 
             
