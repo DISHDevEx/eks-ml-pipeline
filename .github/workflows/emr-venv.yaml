@@ -25,6 +25,10 @@ jobs:
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
           role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
           aws-region: ${{ env.AWS_REGION }}
+      - name: Echo stuff
+        shell: bash
+        run:
+            echo ${{ secrets.BUCKET_NAME_RAW_DATA }}
       # Upload a file to AWS s3
 #      - name:  run docker build
 #        run:   DOCKER_BUILDKIT=1 docker build --output . .
