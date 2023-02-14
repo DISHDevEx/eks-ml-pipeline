@@ -6,7 +6,7 @@ from eks_ml_pipeline import node_autoencoder_fe_input
 
 
 if __name__ == "__main__":
-    load_dotenv("")
+    load_dotenv()
 
     rec_type = 'Node'
     compute_type = 'sagemaker'
