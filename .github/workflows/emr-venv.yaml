@@ -83,7 +83,7 @@ jobs:
 #          BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
 #          FOLDER_NAME_RAW_DATA: ${{ secrets.FOLDER_NAME_RAW_DATA }}
       - name: Build and push
-        uses: actions-aws-ssm-params-to-env@v1
+        uses: marvinpinto/action-inject-ssm-secrets@latest
         env:
           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }} # required
           BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
