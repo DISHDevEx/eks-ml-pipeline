@@ -83,7 +83,7 @@ jobs:
 #          BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
 #          FOLDER_NAME_RAW_DATA: ${{ secrets.FOLDER_NAME_RAW_DATA }}
       - name: Build and push
-        uses: Bardavon-Health/actions-aws-ssm-params-to-env@v1.2
+        uses: actions-aws-ssm-params-to-env@v1
         env:
           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }} # required
           BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
