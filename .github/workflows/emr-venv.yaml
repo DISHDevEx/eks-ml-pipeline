@@ -89,7 +89,8 @@ jobs:
           BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
           FOLDER_NAME_RAW_DATA: ${{ secrets.FOLDER_NAME_RAW_DATA }}
         with:
-          ssm-path: /pd/buckets # required
+          ssm_parameter: "/pd/buckets" # required
+          env_variable_name: "bucket-test"
           decryption: true # optional, default false
       - name: upload to s3
         run: |
