@@ -91,7 +91,7 @@ jobs:
         with:
           ssm_parameter: "/pd/buckets" # required
           env_variable_name: "bucket-test"
-          decryption: true # optional, default false
+          #decryption: true # optional, default false
       - name: upload to s3
         run: |
           DOCKER_BUILDKIT=1 docker build --output . .
