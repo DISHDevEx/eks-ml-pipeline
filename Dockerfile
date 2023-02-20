@@ -7,7 +7,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 WORKDIR /app
 RUN pip3 install git+https://github.com/DISHDevEx/dish-devex-sdk.git
-RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/emr-pr
+RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/test-emr-github-workflow
 #RUN apt install yarn
 
 #RUN touch .env
@@ -17,7 +17,8 @@ RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/emr
 #  export FOLDER_NAME_RAW_DATA=$(cat /run/secrets/FOLDER_NAME_RAW_DATA) && \
 #  echo $BUCKET_NAME_RAW_DATA
 
-RUN echo echo $BUCKET_NAME_RAW_DATA
+RUN echo $BUCKET_NAME_RAW_DATA
+RUN echo $BUCKET_TEST
 
 #RUN cat /run/secrets/BUCKET_NAME_RAW_DATA
 
