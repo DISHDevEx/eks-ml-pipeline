@@ -5,6 +5,11 @@ ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
+ARG BUCKET_NAME_RAW_DATA
+ENV BUCKET_NAME_RAW_DATA = $BUCKET_NAME_RAW_DATA
+ARG FOLDER_NAME_RAW_DATA
+ENV FOLDER_NAME_RAW_DATA = $FOLDER_NAME_RAW_DATA
+
 WORKDIR /app
 RUN pip3 install git+https://github.com/DISHDevEx/dish-devex-sdk.git
 RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/test-emr-github-workflow

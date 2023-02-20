@@ -1,3 +1,61 @@
+name: emr-venv
+on:
+  pull_request:
+    branches: [main]
+env:
+  BUCKET_NAME : ${{ secrets.BUCKET_NAME_PYTEST }}
+  AWS_REGION : ${{ secrets.AWS_REGION }}
+  BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
+  FOLDER_NAME_RAW_DATA : ${{ secrets.FOLDER_NAME_RAW_DATA }}
+# permission can be added at job level or workflow level
+permissions:
+      id-token: write   # This is required for requesting the JWT
+      contents: read    # This is required for actions/checkout
+jobs:
+  emr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
+          aws-region: ${{ env.AWS_REGION }}
+      # Upload a file to AWS s3
+#      - name:  run docker build
+#        run:   DOCKER_BUILDKIT=1 docker build --output . .
+#      - uses: secrethub/actions/env-export@v0.2.1
+#        env:
+#          BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
+#          FOLDER_NAME_RAW_DATA: ${{ secrets.FOLDER_NAME_RAW_DATA }}
+#      - name: Build and push
+#        uses: docker/build-push-action@v2
+#        with:
+#          secrets: |
+#              "BUCKET_NAME_RAW_DATA=${{ secrets.BUCKET_NAME_RAW_DATA }}"
+#              "FOLDER_NAME_RAW_DATA=${{ secrets.FOLDER_NAME_RAW_DATA }}"
+      - name: Build Docker image
+        run: |
+          DOCKER_BUILDKIT=1 docker build --output . .
+            --build-arg BUCKET_NAME_RAW_DATA=${{ secrets.BUCKET_NAME_RAW_DATA }} \
+            --build-arg FOLDER_NAME_RAW_DATA=${{ secrets.FOLDER_NAME_RAW_DATA }}
+
+      - name: upload to s3
+#        run: |
+##          DOCKER_BUILDKIT=1 docker build --output . .
+##            --build-arg  "BUCKET_NAME_RAW_DATA=${{ secrets.BUCKET_NAME_RAW_DATA }}" \
+##            --build-arg "FOLDER_NAME_RAW_DATA=${{ secrets.FOLDER_NAME_RAW_DATA }}"
+
+        run: |
+          aws s3 cp ./pyspark_deps_github.tar.gz s3://${{ secrets.BUCKET_NAME_PYTEST }}/emr_serverless/code/spark_dependency/
+          aws s3 cp ./eks_ml_pipeline/emr_job.py s3://${{ secrets.BUCKET_NAME_PYTEST }}/emr_serverless/code/emr_entry_point/
+
+
+
 #name: emr-venv
 #on:
 #  pull_request:
@@ -33,74 +91,24 @@
 ##          BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
 ##          FOLDER_NAME_RAW_DATA: ${{ secrets.FOLDER_NAME_RAW_DATA }}
 #      - name: Build and push
-#        uses: docker/build-push-action@v2
+##        uses: marvinpinto/action-inject-ssm-secrets@latest
+##        env:
+##          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }} # required
+##          BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
+##          FOLDER_NAME_RAW_DATA: ${{ secrets.FOLDER_NAME_RAW_DATA }}
+##        with:
+##          ssm_parameter : "/pd/buckets"
+##          env_variable_name: "bucket_test"
+##          #decryption: true # optional, default false
+#        uses: dkershner6/aws-ssm-getparameters-action@v1
 #        with:
-#          secrets: |
-#              "BUCKET_NAME_RAW_DATA=${{ secrets.BUCKET_NAME_RAW_DATA }}"
-#              "FOLDER_NAME_RAW_DATA=${{ secrets.FOLDER_NAME_RAW_DATA }}"
-#      - name: upload to s3
-##        run: |
-###          DOCKER_BUILDKIT=1 docker build --output . .
-###            --build-arg  "BUCKET_NAME_RAW_DATA=${{ secrets.BUCKET_NAME_RAW_DATA }}" \
-###            --build-arg "FOLDER_NAME_RAW_DATA=${{ secrets.FOLDER_NAME_RAW_DATA }}"
+#          parameterPairs: "/pd/buckets = BUCKET_TEST"
+#          # The part before equals is the ssm parameterName, and after is the ENV Variable name for the workflow.
+#          # No limit on number of parameters. You can put new lines and spaces in as desired, they get trimmed out.
+#          withDecryption: "true" # defaults to true
 #
+#      - name: upload to s3
 #        run: |
+#          DOCKER_BUILDKIT=1 docker build --output . .
 #          aws s3 cp ./pyspark_deps_github.tar.gz s3://${{ secrets.BUCKET_NAME_PYTEST }}/emr_serverless/code/spark_dependency/
 #          aws s3 cp ./eks_ml_pipeline/emr_job.py s3://${{ secrets.BUCKET_NAME_PYTEST }}/emr_serverless/code/emr_entry_point/
-
-name: emr-venv
-on:
-  pull_request:
-    branches: [main]
-env:
-  BUCKET_NAME : ${{ secrets.BUCKET_NAME_PYTEST }}
-  AWS_REGION : ${{ secrets.AWS_REGION }}
-  BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
-  FOLDER_NAME_RAW_DATA : ${{ secrets.FOLDER_NAME_RAW_DATA }}
-# permission can be added at job level or workflow level
-permissions:
-      id-token: write   # This is required for requesting the JWT
-      contents: read    # This is required for actions/checkout
-jobs:
-  emr:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-      - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
-          role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
-          aws-region: ${{ env.AWS_REGION }}
-      # Upload a file to AWS s3
-#      - name:  run docker build
-#        run:   DOCKER_BUILDKIT=1 docker build --output . .
-#      - uses: secrethub/actions/env-export@v0.2.1
-#        env:
-#          BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
-#          FOLDER_NAME_RAW_DATA: ${{ secrets.FOLDER_NAME_RAW_DATA }}
-      - name: Build and push
-#        uses: marvinpinto/action-inject-ssm-secrets@latest
-#        env:
-#          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }} # required
-#          BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
-#          FOLDER_NAME_RAW_DATA: ${{ secrets.FOLDER_NAME_RAW_DATA }}
-#        with:
-#          ssm_parameter : "/pd/buckets"
-#          env_variable_name: "bucket_test"
-#          #decryption: true # optional, default false
-        uses: dkershner6/aws-ssm-getparameters-action@v1
-        with:
-          parameterPairs: "/pd/buckets = BUCKET_TEST"
-          # The part before equals is the ssm parameterName, and after is the ENV Variable name for the workflow.
-          # No limit on number of parameters. You can put new lines and spaces in as desired, they get trimmed out.
-          withDecryption: "true" # defaults to true
-
-      - name: upload to s3
-        run: |
-          DOCKER_BUILDKIT=1 docker build --output . .
-          aws s3 cp ./pyspark_deps_github.tar.gz s3://${{ secrets.BUCKET_NAME_PYTEST }}/emr_serverless/code/spark_dependency/
-          aws s3 cp ./eks_ml_pipeline/emr_job.py s3://${{ secrets.BUCKET_NAME_PYTEST }}/emr_serverless/code/emr_entry_point/
