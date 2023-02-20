@@ -12,7 +12,8 @@ setup(
     author= 'Hamza Khokhar, Praveen Mada',
     author_email='hamza.khokhar@dish.com, praveen.mada@dish.com',
     license='Dish Wireless',
-    packages=find_packages(include=['eks_ml_pipeline',
+    packages=find_packages(include=['eks-ml-pipeline'
+        'eks_ml_pipeline',
                                     'eks_ml_pipeline.feature_engineering',
                                     'eks_ml_pipeline.models',
                                     'eks_ml_pipeline.inputs',

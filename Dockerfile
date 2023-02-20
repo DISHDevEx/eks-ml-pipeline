@@ -15,11 +15,13 @@ RUN echo $FOLDER_NAME_RAW_DATA
 RUN echo $pwd
 
 WORKDIR /app
+COPY . .
+
 RUN echo $pwd
 
 RUN pip3 install git+https://github.com/DISHDevEx/dish-devex-sdk.git
-#RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/test-emr-github-workflow
-RUN git clone https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/test-emr-github-workflow
+RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/test-emr-github-workflow
+#RUN git clone https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/test-emr-github-workflow
 #RUN apt install yarn
 
 RUN touch .env \
@@ -41,7 +43,7 @@ RUN echo $FOLDER_NAME_RAW_DATA
 #  export FOLDER_NAME_RAW_DATA=$(cat FOLDER_NAME_RAW_DATA) && \
 #  echo $BUCKET_NAME_RAW_DATA
 
-COPY . .
+
 RUN pip3 install venv-pack==0.2.0
 RUN  pip3 install boto3
 RUN  pip3 install pyarrow
