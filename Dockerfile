@@ -15,7 +15,6 @@ RUN echo $FOLDER_NAME_RAW_DATA
 RUN echo $pwd
 
 WORKDIR /app
-COPY . .
 
 RUN echo $pwd
 
@@ -43,6 +42,7 @@ RUN echo $FOLDER_NAME_RAW_DATA
 #  export FOLDER_NAME_RAW_DATA=$(cat FOLDER_NAME_RAW_DATA) && \
 #  echo $BUCKET_NAME_RAW_DATA
 
+COPY . .
 
 RUN pip3 install venv-pack==0.2.0
 RUN  pip3 install boto3
