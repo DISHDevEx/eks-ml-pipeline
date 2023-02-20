@@ -18,15 +18,17 @@ WORKDIR /app
 RUN echo $pwd
 
 RUN pip3 install git+https://github.com/DISHDevEx/dish-devex-sdk.git
-RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/test-emr-github-workflow
+#RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/test-emr-github-workflow
+RUN git clone https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/test-emr-github-workflow
 #RUN apt install yarn
 
-#RUN touch .env
-RUN --mount=type=secret,id=BUCKET_NAME_RAW_DATA \
-  --mount=type=secret,id=FOLDER_NAME_RAW_DATA \
-  export BUCKET_NAME_RAW_DATA=$BUCKET_NAME_RAW_DATA && \
-  export FOLDER_NAME_RAW_DATA=$FOLDER_NAME_RAW_DATA && \
-  python genenv.py
+RUN touch .env \
+RUN python genenv.py
+#RUN --mount=type=secret,id=BUCKET_NAME_RAW_DATA \
+#  --mount=type=secret,id=FOLDER_NAME_RAW_DATA \
+#  export BUCKET_NAME_RAW_DATA=$BUCKET_NAME_RAW_DATA && \
+#  export FOLDER_NAME_RAW_DATA=$FOLDER_NAME_RAW_DATA && \
+#  python genenv.py
 
 RUN echo $BUCKET_NAME_RAW_DATA
 RUN echo $FOLDER_NAME_RAW_DATA

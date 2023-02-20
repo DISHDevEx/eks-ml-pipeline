@@ -11,5 +11,5 @@ def get_config_from_environment(env_content):
 env_content = ""
 env_content = get_config_from_environment(env_content)
 
-with open(".env.Sample", "w", encoding="utf8") as env:
+with open(".env", "w", encoding="utf8") as env:
     env.write(env_content)
