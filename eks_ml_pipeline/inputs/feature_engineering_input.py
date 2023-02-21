@@ -29,9 +29,9 @@ def node_autoencoder_fe_input():
     # bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
     # folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
 
-    bucket = 'dish-dp-uswest2-992240864529-infra-metrics-raw'
-    bucket_name_raw_data = 'eks_containerinsights_performance_logs'
-    folder_name_raw_data = 'emr-serverless-output-pd'
+    bucket = 'emr-serverless-output-pd'
+    bucket_name_raw_data = 'dish-dp-uswest2-992240864529-infra-metrics-raw'
+    folder_name_raw_data = 'eks_containerinsights_performance_logs'
 
     return [feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
