@@ -118,7 +118,7 @@ jobs:
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
           secret-ids: |
-            arn:aws:secretsmanager:us-west-2:064047601590:secret:pd/dev/buckets-6zJyOm::
+            arn:aws:secretsmanager:us-west-2:064047601590:secret:pd/dev/buckets-6zJyOm
           parse-json-secrets: true
 
       - name: upload to s3
