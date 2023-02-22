@@ -114,12 +114,11 @@ jobs:
 #          # The part before equals is the ssm parameterName, and after is the ENV Variable name for the workflow.
 #          # No limit on number of parameters. You can put new lines and spaces in as desired, they get trimmed out.
 #          withDecryption: "true" # defaults to true
-      - name: Build and push
+      - name: Get secrets
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
           secret-ids: |
-            TEST2,arn:aws:secretsmanager:us-west-2:064047601590:secret:dev/pd/buckets-LFf9qi
-            BUCKET_TEST,dev/pd/buckets
+            dev/pd/buckets
 
       - name: upload to s3
         run: |
