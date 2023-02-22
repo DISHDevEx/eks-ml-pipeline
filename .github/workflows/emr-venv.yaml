@@ -118,7 +118,7 @@ jobs:
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
           secret-ids: |
-            dev/pd/buckets
+            pd/dev/buckets
           parse-json-secrets: true
 
       - name: upload to s3
