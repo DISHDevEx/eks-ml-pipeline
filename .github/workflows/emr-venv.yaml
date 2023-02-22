@@ -118,7 +118,7 @@ jobs:
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
           secret-ids: |
-            BUCKET_TEST,/dev/pd/buckets
+            BUCKET_TEST,dev/pd/buckets
 
       - name: upload to s3
         run: |
