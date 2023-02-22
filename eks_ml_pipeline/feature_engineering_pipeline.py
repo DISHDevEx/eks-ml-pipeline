@@ -57,9 +57,6 @@ class FeatureEngineeringPipeline:
     def run_preproceesing(self):
         """Run data pre-processing step"""
 
-        print(self.bucket_name_raw_data)
-        print(self.folder_name_raw_data)
-
         features_data, processed_data = rec_type_ad_preprocessing(rec_type=self.rec_type,
                                                                   input_feature_group_name=self.feature_group_name,
                                                                   input_feature_group_version=self.feature_version,
@@ -71,8 +68,7 @@ class FeatureEngineeringPipeline:
                                                                   bucket_name_raw_data=self.bucket_name_raw_data,
                                                                   folder_name_raw_data=self.folder_name_raw_data)
 
-        print(f'processed data columns: {processed_data.columns}')
-        print('caching')
+        # caching
         processed_data.cache()
 
         # parsing model parameters
@@ -198,11 +194,7 @@ class FeatureEngineeringPipeline:
         application_id = '00f6mv29kbd4e10l'
         s3_bucket_name = self.bucket
         zipped_env_path = 's3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
-        # zipped_env_path = f's3://{s3_bucket_name}/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
-        # emr_entry_point = '/home/sagemaker-user/github/eks-ml-pipeline/eks_ml_pipeline/emr_job.py'
         emr_entry_point = 's3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/emr_entry_point/emr_job.py'
-        # emr_entry_point = 'local:/home/hadoop/environment/bin/python3.7/site-packages/eks_ml_pipeline/emr_job.py'
-        # emr_entry_point = 'environment/lib64/python3.7/site-packages/eks_ml_pipeline/emr_job.py'
 
         # if rec_type == 'Node':
         #     emr_entry_point = 
