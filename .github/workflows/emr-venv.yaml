@@ -98,22 +98,27 @@ jobs:
 #        env:
 #          BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
 #          FOLDER_NAME_RAW_DATA: ${{ secrets.FOLDER_NAME_RAW_DATA }}
-      - name: Build and push
-#        uses: marvinpinto/action-inject-ssm-secrets@latest
-#        env:
-#          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }} # required
-#          BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
-#          FOLDER_NAME_RAW_DATA: ${{ secrets.FOLDER_NAME_RAW_DATA }}
+#      - name: Build and push
+##        uses: marvinpinto/action-inject-ssm-secrets@latest
+##        env:
+##          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }} # required
+##          BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
+##          FOLDER_NAME_RAW_DATA: ${{ secrets.FOLDER_NAME_RAW_DATA }}
+##        with:
+##          ssm_parameter : "/pd/buckets"
+##          env_variable_name: "bucket_test"
+##          #decryption: true # optional, default false
+#        uses: dkershner6/aws-ssm-getparameters-action@v1
 #        with:
-#          ssm_parameter : "/pd/buckets"
-#          env_variable_name: "bucket_test"
-#          #decryption: true # optional, default false
-        uses: dkershner6/aws-ssm-getparameters-action@v1
+#          parameterPairs: "/pd/buckets = BUCKET_TEST"
+#          # The part before equals is the ssm parameterName, and after is the ENV Variable name for the workflow.
+#          # No limit on number of parameters. You can put new lines and spaces in as desired, they get trimmed out.
+#          withDecryption: "true" # defaults to true
+      - name: Build and push
+        uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
-          parameterPairs: "/pd/buckets = BUCKET_TEST"
-          # The part before equals is the ssm parameterName, and after is the ENV Variable name for the workflow.
-          # No limit on number of parameters. You can put new lines and spaces in as desired, they get trimmed out.
-          withDecryption: "true" # defaults to true
+          secret-ids: |
+            BUCKET_TEST,/pd/buckets
 
       - name: upload to s3
         run: |
