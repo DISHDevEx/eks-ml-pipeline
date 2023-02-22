@@ -119,6 +119,7 @@ jobs:
         with:
           secret-ids: |
             dev/pd/buckets
+          parse-json-secrets: true
 
       - name: upload to s3
         run: |
