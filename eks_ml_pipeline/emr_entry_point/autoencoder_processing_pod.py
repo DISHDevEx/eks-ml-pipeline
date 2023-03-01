@@ -12,4 +12,4 @@ if __name__ == "__main__":
     fep = FeatureEngineeringPipeline(pod_autoencoder_fe_input(), rec_type, compute_type, input_data_type)
 
     print('Run pre-processing')
-    fep.run_preproceesing()
+    fep.run_preprocessing()

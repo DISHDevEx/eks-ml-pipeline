@@ -224,18 +224,14 @@ class FeatureEngineeringPipeline:
         if job_type == 'processing':
             job_run_id = emr_serverless.run_spark_job(
                 script_location=emr_entry_point_processing,
-                # job_role_arn=serverless_job_role_arn,
                 application_id=application_id,
-                # arguments=[f"s3://{s3_bucket_name}/emr_serverless/output"],
                 s3_bucket_name=s3_bucket_name,
                 zipped_env_path=zipped_env_path
             )
         elif job_type == 'feature_engineering':
             job_run_id = emr_serverless.run_spark_job(
                 script_location=emr_entry_point_feature_engineering,
-                # job_role_arn=serverless_job_role_arn,
                 application_id=application_id,
-                # arguments=[f"s3://{s3_bucket_name}/emr_serverless/output"],
                 s3_bucket_name=s3_bucket_name,
                 zipped_env_path=zipped_env_path
             )
