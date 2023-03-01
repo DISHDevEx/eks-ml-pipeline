@@ -13,7 +13,8 @@ class FeatureEngineeringPipeline:
     Allows running of data processing and feature engineering steps
     """
 
-    def __init__(self, feature_engineering_inputs, rec_type: str = None, compute_type: str = None, input_data_type: str = None):
+    def __init__(self, feature_engineering_inputs, rec_type: str = None, compute_type: str = None,
+                 input_data_type: str = None):
 
         self.feature_group_name = feature_engineering_inputs[0]
         self.feature_version = feature_engineering_inputs[1]
@@ -54,7 +55,7 @@ class FeatureEngineeringPipeline:
         else:
             self.file_name = f'{self.partition_year}_{self.partition_month}_{self.partition_day}_{self.partition_hour}'
 
-    def run_preproceesing(self):
+    def run_preprocessing(self):
         """Run data pre-processing step"""
 
         features_data, processed_data = rec_type_ad_preprocessing(rec_type=self.rec_type,
@@ -96,7 +97,7 @@ class FeatureEngineeringPipeline:
         self.s3_utilities.pyspark_write_parquet(train_data, 'data/spark_df', f'raw_training_data_{self.file_name}')
 
         print('saving raw test to s3')
-        self.s3_utilities.pyspark_write_parquet(train_data, 'data/spark_df/', f'raw_testing_data_{self.file_name}')
+        self.s3_utilities.pyspark_write_parquet(train_data, 'data/spark_df', f'raw_testing_data_{self.file_name}')
 
         # un-persisting processed data
         processed_data.unpersist()
@@ -120,7 +121,7 @@ class FeatureEngineeringPipeline:
 
         test_data = spark.read.parquet(
             f's3a://{self.bucket}/{self.feature_group_name}/{self.feature_version}/data/spark_df/raw_testing_data_{self.file_name}/')
-        print(f'train data shape: {test_data.columns}')
+        print(f'test data shape: {test_data.columns}')
 
         features_data = self.s3_utilities.read_parquet_to_pandas_df("data", "pandas_df",
                                                                     f'raw_features_{self.file_name}.parquet')
@@ -139,18 +140,22 @@ class FeatureEngineeringPipeline:
 
         print('generating random selected list of ids')
         if self.input_data_type == 'train':
-            selected_rec_type_list, processed_rec_type_data = rec_type_list_generator('train', [train_split, test_split],
-                                                                            train_data, self.aggregation_column,
-                                                                            features_data)
+            selected_rec_type_list, processed_rec_type_data = rec_type_list_generator('train',
+                                                                                      [train_split, test_split],
+                                                                                      train_data,
+                                                                                      self.aggregation_column,
+                                                                                      features_data)
         elif self.input_data_type == 'test':
             selected_rec_type_list, processed_rec_type_data = rec_type_list_generator('test', [train_split, test_split],
-                                                                                test_data, self.aggregation_column,
-                                                                                features_data)
+                                                                                      test_data,
+                                                                                      self.aggregation_column,
+                                                                                      features_data)
 
         # Caching
         processed_rec_type_data.cache()
 
         # feature engineering
+        print('multithreading')
         rec_type_df_list, tensor_list = run_multithreading(rec_type_ad_feature_engineering,
                                                            input_df=processed_rec_type_data,
                                                            aggregation_column=self.aggregation_column,
@@ -167,7 +172,8 @@ class FeatureEngineeringPipeline:
         print(f' tensor shape: {train_tensor.shape}')
 
         print('writing tensorsr to s3')
-        self.s3_utilities.write_tensor(train_tensor, "data", "tensors", f'{self.input_data_type}ing_{self.file_name}.npy')
+        self.s3_utilities.write_tensor(train_tensor, "data", "tensors",
+                                       f'{self.input_data_type}ing_{self.file_name}.npy')
 
         print('Concatenating the df lists')
         rec_type_df = unionAll(*rec_type_df_list)
@@ -176,7 +182,8 @@ class FeatureEngineeringPipeline:
 
         print('Writing df to s3')
         # training_df.coalesce(20).write.mode("overwrite").parquet(f's3a://{self.bucket}/{self.feature_group_name}/{self.feature_version}/data/spark_df/training_data_{self.file_name}/')
-        self.s3_utilities.pyspark_write_parquet(rec_type_df, 'data/spark_df', f'{self.input_data_type}ing_data_{self.file_name}')
+        self.s3_utilities.pyspark_write_parquet(rec_type_df, 'data/spark_df',
+                                                f'{self.input_data_type}ing_data_{self.file_name}')
         print('Un-persisting')
         processed_rec_type_data.unpersist()
         print("training and testing data_builder completed successfully")
@@ -185,23 +192,25 @@ class FeatureEngineeringPipeline:
         """Run pre-processing and feature engineering steps in sagemaker"""
 
         print('running data pre-processing step')
-        self.run_preproceesing()
+        self.run_preprocessing()
         print('running data engineering step')
         self.run_feature_engineering()
 
-    def run_in_emr(self):
+    def run_in_emr(self, job_type='processing'):
         """Run pre-processing and feature engineering steps in emr serverless"""
         application_id = '00f6mv29kbd4e10l'
         s3_bucket_name = self.bucket
-        zipped_env_path = 's3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
-        emr_entry_point = 's3://dish-5g.core.pd.g.dp.eks.logs.e/emr_serverless/code/emr_entry_point/emr_job.py'
+        zipped_env_path = f's3://{s3_bucket_name}/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
 
-        # if rec_type == 'Node':
-        #     emr_entry_point = 
-        # elif rec_type == 'Pod':
-        #     emr_entry_point = 
-        # elif rec_type == 'Container':
-        #     emr_entry_point = 
+        if self.rec_type == 'Node':
+            emr_entry_point_processing = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_processing_node.py'
+            emr_entry_point_feature_engineering = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_fe_node.py'
+        elif self.rec_type == 'Pod':
+            emr_entry_point_processing = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_processing_pod.py'
+            emr_entry_point_feature_engineering = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_fe_pod.py'
+        elif self.rec_type == 'Container':
+            emr_entry_point_processing = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_processing_container.py'
+            emr_entry_point_feature_engineering = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_fe_container.py'
 
         emr_serverless = EMRServerless()
         print("Starting EMR Serverless Spark App")
@@ -211,13 +220,24 @@ class FeatureEngineeringPipeline:
 
         # Run (and wait for) a Spark job
         print("Submitting new Spark job")
-        job_run_id = emr_serverless.run_spark_job(
-            script_location=emr_entry_point,
-            # job_role_arn=serverless_job_role_arn,
-            application_id=application_id,
-            # arguments=[f"s3://{s3_bucket_name}/emr_serverless/output"],
-            s3_bucket_name=s3_bucket_name,
-            zipped_env_path=zipped_env_path
-        )
+
+        if job_type == 'processing':
+            job_run_id = emr_serverless.run_spark_job(
+                script_location=emr_entry_point_processing,
+                # job_role_arn=serverless_job_role_arn,
+                application_id=application_id,
+                # arguments=[f"s3://{s3_bucket_name}/emr_serverless/output"],
+                s3_bucket_name=s3_bucket_name,
+                zipped_env_path=zipped_env_path
+            )
+        elif job_type == 'feature_engineering':
+            job_run_id = emr_serverless.run_spark_job(
+                script_location=emr_entry_point_feature_engineering,
+                # job_role_arn=serverless_job_role_arn,
+                application_id=application_id,
+                # arguments=[f"s3://{s3_bucket_name}/emr_serverless/output"],
+                s3_bucket_name=s3_bucket_name,
+                zipped_env_path=zipped_env_path
+            )
 
         emr_serverless.fetch_driver_log(s3_bucket_name)
