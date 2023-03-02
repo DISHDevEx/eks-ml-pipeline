@@ -204,13 +204,22 @@ class FeatureEngineeringPipeline:
 
         if self.rec_type == 'Node':
             emr_entry_point_processing = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_processing_node.py'
-            emr_entry_point_feature_engineering = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_fe_node.py'
+            if self.input_data_type == 'train':
+                emr_entry_point_feature_engineering = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_fe_node_train.py'
+            else:
+                emr_entry_point_feature_engineering = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_fe_node_test.py'
         elif self.rec_type == 'Pod':
             emr_entry_point_processing = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_processing_pod.py'
-            emr_entry_point_feature_engineering = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_fe_pod.py'
+            if self.input_data_type == 'train':
+                emr_entry_point_feature_engineering = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_fe_pod_train.py'
+            else:
+                emr_entry_point_feature_engineering = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_fe_pod_test.py'
         elif self.rec_type == 'Container':
             emr_entry_point_processing = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_processing_container.py'
-            emr_entry_point_feature_engineering = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_fe_container.py'
+            if self.input_data_type == 'train':
+                emr_entry_point_feature_engineering = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_fe_container_train.py'
+            else:
+                emr_entry_point_feature_engineering = f's3://{s3_bucket_name}/emr_serverless/code/emr_entry_point/autoencoder_fe_container_test.py'
 
         emr_serverless = EMRServerless()
         print("Starting EMR Serverless Spark App")
