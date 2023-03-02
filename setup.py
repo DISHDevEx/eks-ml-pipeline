@@ -15,6 +15,7 @@ setup(
     packages=find_packages(include=['eks_ml_pipeline',
                                     'eks_ml_pipeline.feature_engineering',
                                     'eks_ml_pipeline.models',
+                                    'eks_ml_pipeline.inputs',
                                     'eks_ml_pipeline.utilities']),
     include_package_data=True,
     install_requires = [

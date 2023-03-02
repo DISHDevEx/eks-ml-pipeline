@@ -4,7 +4,7 @@ via the command line.
 """
 
 import argparse
-from eks_ml_pipeline import EMRServerless
+from emr_serverless import EMRServerless
 
 def parse_args():
     """
