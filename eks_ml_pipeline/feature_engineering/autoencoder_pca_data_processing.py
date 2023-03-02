@@ -59,13 +59,9 @@ def rec_type_ad_preprocessing(rec_type, input_feature_group_name, input_feature_
     if err == 'PASS':
 
         # get features
-        print(input_feature_group_name, input_feature_group_version)
         features_df = get_features(input_feature_group_name, input_feature_group_version)
         features = features_df["feature_name"].to_list()
-        print(f' features df: {features_df.columns}')
         processed_features = feature_processor.cleanup(features)
-        print(processed_features)
-        print(features_df["model_parameters"])
         model_parameters = features_df["model_parameters"].iloc[0]
         time_steps = model_parameters["time_steps"]
 

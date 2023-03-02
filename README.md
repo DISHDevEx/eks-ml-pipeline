@@ -100,15 +100,6 @@ from eks_ml_pipeline import EMRServerless
 ```
 For detailed steps on how to submit a new job to EMR serverless application, refer to the documentaion [here](https://dish-wireless-network.atlassian.net/wiki/spaces/MSS/pages/327549297/EMR+Serverless+-+How+To+Guide#2.a-When-submitting-a-new-job-to-EMR-serverless-application).
 
-### __Running Feature Engineering jobs__
-
-1. update feature engineering input functions per required parameters
-2. run below function to start the feature engineering job
-```python
-from eks_ml_pipeline import node_autoencoder_fe_input, node_fe_pipeline
-node_fe_pipeline(*node_autoencoder_fe_input())
-```
-
 ### __Using s3_utilities__
 s3_utilities has a number of helper functions for the pipeline to download and upload files/objects to s3.
 #### - Usage
@@ -182,6 +173,33 @@ example_bucket
 │            └── inference_pod_id_40f6b928-9ac6-4824-9031-a52f5d529940_predictions.npy
 │            └── inference_pod_id_40f6b928-9ac6-4824-9031-a52f5d529940_residuals.npy
 
+```
+
+### __Running Feature Engineering jobs__
+
+1. update feature engineering input functions per required parameters
+2. run below function to start the feature engineering job
+```python
+from eks_ml_pipeline import FeatureEngineeringPipeline
+from eks_ml_pipeline import node_autoencoder_fe_input
+
+rec_type = 'Node'
+compute_type = 'sagemaker'
+input_data_type = 'train'
+
+# Run feature engineering in sagemaker
+fep = FeatureEngineeringPipeline(node_autoencoder_fe_input(), rec_type, compute_type, input_data_type)
+
+# Run in sagemaker
+fep.run_in_sagemaker()
+
+# Run in EMR Serverless 
+fep.run_in_emr(job_type='processing')
+fep.run_in_emr(job_type='feature_engineering')
+
+# Run either data processing or feature engineering in sagemaker
+fep.run_preprocessing()
+fep.run_feature_engineering()
 ```
 
 ### __Running Model Training and Testing Jobs__
@@ -264,6 +282,7 @@ inference_pipeline(pod_inference_input(), pod_pca_input())
 #Inference for container pca model
 inference_pipeline(container_inference_input(), container_pca_input())
 ```
+
 ### Setting up environment variables.
 And create a new file named as ```.env``` in the root of the project and copy variables names from ```.env.SAMPLE```
 ```python
