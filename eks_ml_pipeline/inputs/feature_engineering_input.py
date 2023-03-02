@@ -1,7 +1,29 @@
-import os
-from dotenv import load_dotenv
+import ast
+import boto3
+from botocore.exceptions import ClientError
 
-load_dotenv()
+secret_name = "pd/dev/buckets"
+region_name = "us-west-2"
+
+# Create a Secrets Manager client
+session = boto3.session.Session()
+client = session.client(
+    service_name='secretsmanager',
+    region_name=region_name
+)
+
+try:
+    get_secret_value_response = client.get_secret_value(
+        SecretId=secret_name
+    )
+except ClientError as e:
+    raise e
+
+secrets = ast.literal_eval(get_secret_value_response['SecretString'])
+
+output_bucket = secrets['BUCKET_NAME_OUTPUT']
+input_bucket = secrets['BUCKET_NAME_RAW_DATA']
+input_folder = secrets['FOLDER_NAME_RAW_DATA']
 
 
 def node_autoencoder_fe_input():
@@ -25,9 +47,9 @@ def node_autoencoder_fe_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket parameters
-    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
-    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
-    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
+    bucket = output_bucket
+    bucket_name_raw_data = input_bucket
+    folder_name_raw_data = input_folder
 
     return [feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
@@ -57,9 +79,9 @@ def node_pca_fe_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket parameters
-    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
-    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
-    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
+    bucket = output_bucket
+    bucket_name_raw_data = input_bucket
+    folder_name_raw_data = input_folder
 
     return [feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
@@ -88,9 +110,9 @@ def node_hmm_fe_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket parameters
-    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
-    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
-    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
+    bucket = output_bucket
+    bucket_name_raw_data = input_bucket
+    folder_name_raw_data = input_folder
 
     return [feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
@@ -119,9 +141,9 @@ def pod_autoencoder_fe_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket parameters
-    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
-    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
-    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
+    bucket = output_bucket
+    bucket_name_raw_data = input_bucket
+    folder_name_raw_data = input_folder
 
     return [feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
@@ -150,9 +172,9 @@ def pod_pca_fe_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket parameters
-    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
-    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
-    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
+    bucket = output_bucket
+    bucket_name_raw_data = input_bucket
+    folder_name_raw_data = input_folder
     return [feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
             partition_hour, spark_config_setup,
@@ -180,9 +202,9 @@ def container_autoencoder_fe_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket parameters
-    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
-    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
-    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
+    bucket = output_bucket
+    bucket_name_raw_data = input_bucket
+    folder_name_raw_data = input_folder
     return [feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
             partition_hour, spark_config_setup,
@@ -210,9 +232,9 @@ def container_pca_fe_input():
     spark_config_setup = "384gb"
 
     ##s3 bucket parameters
-    bucket = os.environ.get("BUCKET_NAME_OUTPUT")
-    bucket_name_raw_data = os.environ.get("BUCKET_NAME_RAW_DATA")
-    folder_name_raw_data = os.environ.get("FOLDER_NAME_RAW_DATA")
+    bucket = output_bucket
+    bucket_name_raw_data = input_bucket
+    folder_name_raw_data = input_folder
     return [feature_group_name, feature_version,
             partition_year, partition_month, partition_day,
             partition_hour, spark_config_setup,
