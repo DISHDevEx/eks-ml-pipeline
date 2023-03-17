@@ -70,7 +70,7 @@ class FeatureEngineeringPipeline:
                                                                   folder_name_raw_data=self.folder_name_raw_data)
 
         # caching
-        processed_data.persist()
+        #processed_data.persist()
 
         # parsing model parameters
         scaled_features = []
@@ -100,7 +100,7 @@ class FeatureEngineeringPipeline:
         self.s3_utilities.pyspark_write_parquet(train_data, 'data/spark_df', f'raw_testing_data_{self.file_name}')
 
         # un-persisting processed data
-        processed_data.unpersist()
+        #processed_data.unpersist()
 
     def run_feature_engineering(self):
         """Run feature engineering step"""
