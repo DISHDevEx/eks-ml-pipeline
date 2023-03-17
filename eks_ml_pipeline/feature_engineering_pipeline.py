@@ -70,7 +70,7 @@ class FeatureEngineeringPipeline:
                                                                   folder_name_raw_data=self.folder_name_raw_data)
 
         # caching
-        processed_data.cache()
+        processed_data.persist()
 
         # parsing model parameters
         scaled_features = []
