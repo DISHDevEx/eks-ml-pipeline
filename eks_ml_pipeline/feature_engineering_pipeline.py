@@ -59,7 +59,8 @@ class FeatureEngineeringPipeline:
         """Run data pre-processing step"""
 
         # Create a spark session to read files from s3
-        spark = Spark_Utils().get_spark()
+        #spark = Spark_Utils().get_spark()
+        spark = SparkSession.builder.appName("EMRServerless").getOrCreate()
         
         features_data, processed_data = rec_type_ad_preprocessing(rec_type=self.rec_type,
                                                                   input_feature_group_name=self.feature_group_name,
@@ -109,7 +110,8 @@ class FeatureEngineeringPipeline:
         """Run feature engineering step"""
 
         # Create a spark session to read files from s3
-        spark = Spark_Utils().get_spark()
+        #spark = Spark_Utils().get_spark()
+        spark = SparkSession.builder.appName("EMRServerless").getOrCreate()
 
         if self.rec_type == 'Node':
             self.aggregation_column = 'InstanceId'
