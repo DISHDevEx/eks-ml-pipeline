@@ -58,6 +58,9 @@ class FeatureEngineeringPipeline:
     def run_preprocessing(self):
         """Run data pre-processing step"""
 
+        # Create a spark session to read files from s3
+        spark = Spark_Utils().get_spark()
+        
         features_data, processed_data = rec_type_ad_preprocessing(rec_type=self.rec_type,
                                                                   input_feature_group_name=self.feature_group_name,
                                                                   input_feature_group_version=self.feature_version,
