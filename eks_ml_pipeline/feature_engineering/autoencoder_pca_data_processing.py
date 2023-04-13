@@ -54,6 +54,7 @@ def rec_type_ad_preprocessing(rec_type, input_feature_group_name, input_feature_
     pyspark_data = EKS_Connector(bucket_name=bucket_name_raw_data, folder_name=folder_name_raw_data, year=input_year,
                                  month=input_month, day=input_day, hour=input_hour, filter_column_value=rec_type,
                                  setup=input_setup)
+    
     err, pyspark_df = pyspark_data.read()
 
     if err == 'PASS':

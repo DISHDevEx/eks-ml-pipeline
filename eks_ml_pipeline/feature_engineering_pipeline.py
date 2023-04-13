@@ -2,6 +2,7 @@ from devex_sdk import EKS_Connector, Spark_Utils
 from eks_ml_pipeline.utilities import feature_processor, null_report, S3Utilities, run_multithreading, unionAll
 from eks_ml_pipeline import rec_type_ad_preprocessing, rec_type_ad_feature_engineering, rec_type_list_generator, \
     all_rectypes_train_test_split
+from pyspark.sql import SparkSession  # new addition
 from eks_ml_pipeline import EMRServerless
 
 import numpy as np
@@ -59,8 +60,8 @@ class FeatureEngineeringPipeline:
         """Run data pre-processing step"""
 
         # Create a spark session to read files from s3
-        #spark = Spark_Utils().get_spark()
-        spark = SparkSession.builder.appName("EMRServerless").getOrCreate()
+        spark = Spark_Utils().get_spark()
+        #spark = SparkSession.builder.appName("EMRServerless").getOrCreate()
         
         features_data, processed_data = rec_type_ad_preprocessing(rec_type=self.rec_type,
                                                                   input_feature_group_name=self.feature_group_name,
@@ -122,11 +123,11 @@ class FeatureEngineeringPipeline:
 
         train_data = spark.read.parquet(
             f's3a://{self.bucket}/{self.feature_group_name}/{self.feature_version}/data/spark_df/raw_training_data_{self.file_name}/')
-        print(f'train data shape: {train_data.columns}')
+        print(f'train data columns: {train_data.columns}')
 
         test_data = spark.read.parquet(
             f's3a://{self.bucket}/{self.feature_group_name}/{self.feature_version}/data/spark_df/raw_testing_data_{self.file_name}/')
-        print(f'test data shape: {test_data.columns}')
+        print(f'test data columns: {test_data.columns}')
 
         features_data = self.s3_utilities.read_parquet_to_pandas_df("data", "pandas_df",
                                                                     f'raw_features_{self.file_name}.parquet')
