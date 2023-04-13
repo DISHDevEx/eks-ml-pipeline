@@ -22,7 +22,7 @@ except ClientError as e:
 secrets = ast.literal_eval(get_secret_value_response['SecretString'])
 
 #output_bucket = secrets['BUCKET_NAME_OUTPUT']
-output_bucket = secrets['BUCKET_NAME_OUTPUT_TEST'] 
+output_bucket = secrets['BUCKET_NAME_OUTPUT_TEST'] ### made change here to read the test bucket 
 input_bucket = secrets['BUCKET_NAME_RAW_DATA']
 input_folder = secrets['FOLDER_NAME_RAW_DATA']
 
