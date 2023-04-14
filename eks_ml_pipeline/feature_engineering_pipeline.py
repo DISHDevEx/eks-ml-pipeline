@@ -111,8 +111,8 @@ class FeatureEngineeringPipeline:
         """Run feature engineering step"""
 
         # Create a spark session to read files from s3
-        #spark = Spark_Utils().get_spark()
-        spark = SparkSession.builder.appName("EMRServerless").getOrCreate()
+        spark = Spark_Utils().get_spark()
+        #spark = SparkSession.builder.appName("EMRServerless").getOrCreate()
 
         if self.rec_type == 'Node':
             self.aggregation_column = 'InstanceId'
