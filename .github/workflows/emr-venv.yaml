@@ -1,36 +1,36 @@
-name: emr-venv
-on:
-  pull_request:
-    branches: [main]
-env:
-  BUCKET_NAME : ${{ secrets.BUCKET_NAME_PYTEST }}
-  AWS_REGION : ${{ secrets.AWS_REGION }}
-  BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
-  FOLDER_NAME_RAW_DATA : ${{ secrets.FOLDER_NAME_RAW_DATA }}
-# permission can be added at job level or workflow level
-permissions:
-      id-token: write   # This is required for requesting the JWT
-      contents: read    # This is required for actions/checkout
-jobs:
-  emr:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-      - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
-          role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
-          aws-region: ${{ env.AWS_REGION }}
-      - name: Build Docker image
-        run: |
-          DOCKER_BUILDKIT=1 docker build --output . . \
-            --build-arg BUCKET_NAME_RAW_DATA=${{ secrets.BUCKET_NAME_RAW_DATA }} \
-            --build-arg FOLDER_NAME_RAW_DATA=${{ secrets.FOLDER_NAME_RAW_DATA }}
-      - name: upload to s3
-        run: |
-          aws s3 cp ./pyspark_deps_github.tar.gz s3://${{ secrets.BUCKET_NAME_PYTEST }}/emr_serverless/code/spark_dependency/
-          aws s3 cp ./eks_ml_pipeline/emr_entry_point s3://${{ secrets.BUCKET_NAME_PYTEST }}/emr_serverless/code/emr_entry_point/ --recursive
+#name: emr-venv
+#on:
+#  pull_request:
+#    branches: [main]
+#env:
+#  BUCKET_NAME : ${{ secrets.BUCKET_NAME_PYTEST }}
+#  AWS_REGION : ${{ secrets.AWS_REGION }}
+#  BUCKET_NAME_RAW_DATA: ${{ secrets.BUCKET_NAME_RAW_DATA }}
+#  FOLDER_NAME_RAW_DATA : ${{ secrets.FOLDER_NAME_RAW_DATA }}
+## permission can be added at job level or workflow level
+#permissions:
+#      id-token: write   # This is required for requesting the JWT
+#      contents: read    # This is required for actions/checkout
+#jobs:
+#  emr:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: actions/setup-python@v4
+#        with:
+#          python-version: '3.9'
+#      - name: configure aws credentials
+#        uses: aws-actions/configure-aws-credentials@v1
+#        with:
+#          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+#          role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
+#          aws-region: ${{ env.AWS_REGION }}
+#      - name: Build Docker image
+#        run: |
+#          DOCKER_BUILDKIT=1 docker build --output . . \
+#            --build-arg BUCKET_NAME_RAW_DATA=${{ secrets.BUCKET_NAME_RAW_DATA }} \
+#            --build-arg FOLDER_NAME_RAW_DATA=${{ secrets.FOLDER_NAME_RAW_DATA }}
+#      - name: upload to s3
+#        run: |
+#          aws s3 cp ./pyspark_deps_github.tar.gz s3://${{ secrets.BUCKET_NAME_PYTEST }}/emr_serverless/code/spark_dependency/
+#          aws s3 cp ./eks_ml_pipeline/emr_entry_point s3://${{ secrets.BUCKET_NAME_PYTEST }}/emr_serverless/code/emr_entry_point/ --recursive
