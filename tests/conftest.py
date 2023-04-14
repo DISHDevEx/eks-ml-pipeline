@@ -371,3 +371,51 @@ def pca_test_input(bucket_name):
         ],  # save_model_locations,
         [upload_zip, upload_onnx, upload_npy, clean_local_folder],  # file_flags
     ]
+
+@pytest.fixture(scope="module")
+def ae_preprocessing_input(bucket_name):
+    """
+    Create inputs to pre-processing and feature engineering steps.
+    Includes all of bucket versioning and model versioning needed
+    as well as the file locations for a pipeline.
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    feature engineering inputs
+        List of parameters for node rec type
+        required by autoencoder feature engineering pipeline
+    """
+
+    ##feature parameters
+    feature_group_name = "pytest_autoencoder_ad"
+    feature_version = "v0.0.1"
+
+    ##eks s3 bucket parameters
+    partition_year = "2022"
+    partition_month = "9"
+    partition_day = "29"
+    partition_hour = "1"
+    spark_config_setup = "16gb"
+
+    ##s3 bucket parameters
+    bucket = bucket_name
+    bucket_name_raw_data = bucket_name
+    folder_name_raw_data = 'pytest_eks_sample_data'
+
+    return [feature_group_name, feature_version,
+            partition_year, partition_month, partition_day,
+            partition_hour, spark_config_setup,
+            bucket, bucket_name_raw_data, folder_name_raw_data]
+
+
+@pytest.fixture(scope='module')
+def eks_connector_read_data(bucket_name):
+
+    folder_name = 'pytest_eks_sample_data'
+    pytest_obj = EKSConnector(bucket_name, folder_name, filter_column_value="Node")
+    err_code, df = pytest_obj.read()
+
+    return err_code, df
