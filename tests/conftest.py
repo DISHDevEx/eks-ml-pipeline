@@ -373,7 +373,7 @@ def pca_test_input(bucket_name):
     ]
 
 @pytest.fixture(scope="module")
-def ae_preprocessing_input(bucket_name):
+def ae_fe_input(bucket_name):
     """
     Create inputs to pre-processing and feature engineering steps.
     Includes all of bucket versioning and model versioning needed
