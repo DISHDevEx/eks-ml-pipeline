@@ -5,7 +5,7 @@ It also defines the configurations for pytest.
 """
 import os
 import pytest
-from devex_sdk import get_features
+from devex_sdk import get_features, EKS_Connector
 from eks_ml_pipeline import AutoencoderModelDish5g
 from eks_ml_pipeline import PcaModelDish5g
 
@@ -410,12 +410,32 @@ def ae_fe_input(bucket_name):
             partition_hour, spark_config_setup,
             bucket, bucket_name_raw_data, folder_name_raw_data]
 
+# fixtures for pyspark context and session
+@pytest.fixture(scope="module")
+def Spark():
+    
+    obj = Spark_Utils()
+    spark = obj.get_spark()
+    return spark
+
+@pytest.fixture(scope="module")
+def Spark_context():
+    
+    obj = Spark_Utils()
+    spark_context = obj.get_spark_context()
+    return spark_context
+
+@pytest.fixture(scope="module")
+def Stop_spark():
+
+    obj = Spark_Utils()
+    obj.stop_spark_context()
 
 @pytest.fixture(scope='module')
 def eks_connector_read_data(bucket_name):
 
     folder_name = 'pytest_eks_sample_data'
-    pytest_obj = EKSConnector(bucket_name, folder_name, filter_column_value="Node")
+    pytest_obj = EKS_Connector(bucket_name, folder_name, filter_column_value="Node")
     err_code, df = pytest_obj.read()
 
     return err_code, df

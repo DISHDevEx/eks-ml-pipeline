@@ -19,11 +19,11 @@ def test_ae_pipeline_preprocessing(ae_fe_input, bucket_name):
     input_data_type = 'train'
 
     s3_client = boto3.client("s3")
-    fep = FeatureEngineeringPipeline(ae_fe_input(), rec_type, compute_type, input_data_type)
+    fep = FeatureEngineeringPipeline(ae_fe_input, rec_type, compute_type, input_data_type)
     fep.run_preprocessing()
 
 
-
+# @pytest.mark.skip()
 def test_ae_pipeline_feature_engineering(ae_fe_input):
     """
     Verify the pre-processing logic for the autoencoder feature engineering pipeline.
@@ -37,6 +37,6 @@ def test_ae_pipeline_feature_engineering(ae_fe_input):
     input_data_type = 'train'
 
     s3_client = boto3.client("s3")
-    fep = FeatureEngineeringPipeline(ae_fe_input(), rec_type, compute_type, input_data_type)
+    fep = FeatureEngineeringPipeline(ae_fe_input, rec_type, compute_type, input_data_type)
     fep.run_feature_engineering()
 
