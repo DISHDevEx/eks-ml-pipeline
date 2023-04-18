@@ -53,3 +53,4 @@ jobs:
            python --version
            java --version
         pytest --slow
+        
