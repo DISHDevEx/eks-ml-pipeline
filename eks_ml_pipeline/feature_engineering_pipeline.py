@@ -11,7 +11,7 @@ from functools import partial, reduce
 
 class FeatureEngineeringPipeline:
     """
-    Allows running of data processing and feature engineering steps
+    Allows running of data processing and feature engineering steps.
     """
 
     def __init__(self, feature_engineering_inputs, rec_type: str = None, compute_type: str = None,
@@ -38,7 +38,7 @@ class FeatureEngineeringPipeline:
         self.initialize_s3()
 
     def initialize_s3(self):
-        """Initialize s3 utilities class"""
+        """Initialize s3 utilities class."""
 
         self.s3_utilities = S3Utilities(
             bucket_name=self.bucket,
@@ -47,7 +47,7 @@ class FeatureEngineeringPipeline:
         )
 
     def create_file_path(self):
-        """Create File Paths"""
+        """Create File Paths."""
 
         if self.partition_hour == -1:
             self.file_name = f'{self.partition_year}_{self.partition_month}_{self.partition_day}'
@@ -55,16 +55,12 @@ class FeatureEngineeringPipeline:
             self.file_name = f'{self.partition_year}_{self.partition_month}'
         else:
             self.file_name = f'{self.partition_year}_{self.partition_month}_{self.partition_day}_{self.partition_hour}'
-
-    def get_raw_input_data(self):
-        """Read in raw data """
     
     def run_preprocessing(self):
-        """Run data pre-processing step"""
+        """Run data pre-processing step."""
 
         # Create a spark session to read files from s3
         spark = Spark_Utils().get_spark()
-        #spark = SparkSession.builder.appName("EMRServerless").getOrCreate()
         
         raw_input_df = read_raw_input_data(rec_type=self.rec_type,
                                            input_year=self.partition_year,
@@ -99,16 +95,13 @@ class FeatureEngineeringPipeline:
                                                               [train_split, test_split])
 
         # writing dfs to s3 bucket
-        print('saving pre-processed to s3')
         self.s3_utilities.pyspark_write_parquet(processed_data, 'data/spark_df', f'raw_data_{self.file_name}')
 
-        print('saving features data to s3')
         self.s3_utilities.awswrangler_pandas_dataframe_to_s3(features_data, "data/", "pandas_df",
                                                              f'raw_features_{self.file_name}.parquet')
-        print('saving raw train to s3')
+        
         self.s3_utilities.pyspark_write_parquet(train_data, 'data/spark_df', f'raw_training_data_{self.file_name}')
 
-        print('saving raw test to s3')
         self.s3_utilities.pyspark_write_parquet(train_data, 'data/spark_df', f'raw_testing_data_{self.file_name}')
 
         # un-persisting processed data
@@ -119,7 +112,6 @@ class FeatureEngineeringPipeline:
 
         # Create a spark session to read files from s3
         spark = Spark_Utils().get_spark()
-        #spark = SparkSession.builder.appName("EMRServerless").getOrCreate()
 
         if self.rec_type == 'Node':
             self.aggregation_column = 'InstanceId'
@@ -131,14 +123,12 @@ class FeatureEngineeringPipeline:
         # read train data
         train_data = spark.read.parquet(
             f's3a://{self.bucket}/{self.feature_group_name}/{self.feature_version}/data/spark_df/raw_training_data_{self.file_name}/')
-        print(f'train data columns: {train_data.columns}')
 
         # read test data
         test_data = spark.read.parquet(
             f's3a://{self.bucket}/{self.feature_group_name}/{self.feature_version}/data/spark_df/raw_testing_data_{self.file_name}/')
-        print(f'test data columns: {test_data.columns}')
 
-        features_data = self.s3_utilities.read_parquet_to_pandas_df("data", "pandas_df",
+        features_data = self.s3_utilities.read_parquet_to_pandas_df("data/", "pandas_df",
                                                                     f'raw_features_{self.file_name}.parquet')
 
         # parsing model parameters
@@ -179,32 +169,26 @@ class FeatureEngineeringPipeline:
                                                            input_time_steps=time_steps, spark=spark,
                                                            selected_rec_type_list=selected_rec_type_list)
 
-        print(f'length of {self.input_data_type} df list: {len(rec_type_df_list)}')
-        print(f'length of tensor list: {len(tensor_list)}')
-
-        print('reshaping tensors')
+        # reshaping tensors
         train_tensor = np.array(tensor_list)
-        print(f' tensor shape: {train_tensor.shape}')
-
-        print('writing tensorsr to s3')
+        
+        # writing artifacts to s3
         self.s3_utilities.write_tensor(train_tensor, "data", "tensors",
                                        f'{self.input_data_type}ing_{self.file_name}.npy')
 
-        print('Concatenating the df lists')
+        # concatenating the list of dfs
         rec_type_df = unionAll(*rec_type_df_list)
 
-        print(f'final df columns : {rec_type_df.columns}')
-
-        print('Writing df to s3')
-        # training_df.coalesce(20).write.mode("overwrite").parquet(f's3a://{self.bucket}/{self.feature_group_name}/{self.feature_version}/data/spark_df/training_data_{self.file_name}/')
+        # writing df to s3'
         self.s3_utilities.pyspark_write_parquet(rec_type_df, 'data/spark_df',
                                                 f'{self.input_data_type}ing_data_{self.file_name}')
-        print('Un-persisting')
+        # unpersist
         processed_rec_type_data.unpersist()
-        print("training and testing data_builder completed successfully")
+        
+        print(f"{self.input_data_type} data building completed successfully")
 
     def run_in_sagemaker(self):
-        """Run pre-processing and feature engineering steps in sagemaker"""
+        """Run pre-processing and feature engineering steps in SageMaker."""
 
         print('running data pre-processing step')
         self.run_preprocessing()
@@ -212,7 +196,7 @@ class FeatureEngineeringPipeline:
         self.run_feature_engineering()
 
     def run_in_emr(self, job_type='processing'):
-        """Run pre-processing and feature engineering steps in emr serverless"""
+        """Run pre-processing and feature engineering steps in EMR Serverless."""
         application_id = '00f6mv29kbd4e10l'
         s3_bucket_name = self.bucket
         zipped_env_path = f's3://{s3_bucket_name}/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'

@@ -8,7 +8,6 @@ import boto3
 import pytest
 
 
-# @pytest.mark.skip()
 def test_rec_type_ad_preprocessing(Spark, Spark_context, bucket_name):
     """
     Verify the pre-processing logic for the autoencoder feature engineering pipeline.

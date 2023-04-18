@@ -21,8 +21,7 @@ except ClientError as e:
 
 secrets = ast.literal_eval(get_secret_value_response['SecretString'])
 
-#output_bucket = secrets['BUCKET_NAME_OUTPUT']
-output_bucket = secrets['BUCKET_NAME_OUTPUT_TEST'] ### made change here to read the test bucket 
+output_bucket = secrets['BUCKET_NAME_OUTPUT']
 input_bucket = secrets['BUCKET_NAME_RAW_DATA']
 input_folder = secrets['FOLDER_NAME_RAW_DATA']
 
@@ -37,7 +36,10 @@ def node_autoencoder_fe_input():
 
     """
     ##feature parameters
-    feature_group_name = "node_autoencoder_ad"
+    # feature_group_name = "node_autoencoder_ad"
+    # feature_version = "v0.0.1"
+    
+    feature_group_name = "pytest_autoencoder_ad"
     feature_version = "v0.0.1"
 
     ##eks s3 bucket parameters
