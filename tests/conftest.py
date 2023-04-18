@@ -5,7 +5,7 @@ It also defines the configurations for pytest.
 """
 import os
 import pytest
-from devex_sdk import get_features, EKS_Connector
+from devex_sdk import get_features, EKS_Connector, Spark_Utils
 from eks_ml_pipeline import AutoencoderModelDish5g
 from eks_ml_pipeline import PcaModelDish5g
 
@@ -49,7 +49,7 @@ def bucket_name():
     """
     Get bucket name from the github workflow runner secrets
     """
-    BUCKET_NAME = os.environ.get("BUCKET_NAME_PYTEST")
+    BUCKET_NAME = os.environ.get("BUCKET_NAME_PYTEST") 
     return BUCKET_NAME
 
 
@@ -431,11 +431,11 @@ def Stop_spark():
     obj = Spark_Utils()
     obj.stop_spark_context()
 
-@pytest.fixture(scope='module')
-def eks_connector_read_data(bucket_name):
+# @pytest.fixture(scope='module')
+# def eks_connector_read_data(bucket_name):
 
-    folder_name = 'pytest_eks_sample_data'
-    pytest_obj = EKS_Connector(bucket_name, folder_name, filter_column_value="Node")
-    err_code, df = pytest_obj.read()
+#     folder_name = 'pytest_eks_sample_data'
+#     pytest_obj = EKS_Connector(bucket_name, folder_name, filter_column_value="Node")
+#     err_code, df = pytest_obj.read()
 
-    return err_code, df
+#     return err_code, df

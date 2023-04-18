@@ -1,7 +1,7 @@
 from devex_sdk import EKS_Connector, Spark_Utils
 from eks_ml_pipeline.utilities import feature_processor, null_report, S3Utilities, run_multithreading, unionAll
 from eks_ml_pipeline import rec_type_ad_preprocessing, rec_type_ad_feature_engineering, rec_type_list_generator, \
-    all_rectypes_train_test_split
+    all_rectypes_train_test_split, read_raw_input_data
 from pyspark.sql import SparkSession  # new addition
 from eks_ml_pipeline import EMRServerless
 
@@ -56,6 +56,9 @@ class FeatureEngineeringPipeline:
         else:
             self.file_name = f'{self.partition_year}_{self.partition_month}_{self.partition_day}_{self.partition_hour}'
 
+    def get_raw_input_data(self):
+        """Read in raw data """
+    
     def run_preprocessing(self):
         """Run data pre-processing step"""
 
@@ -63,16 +66,20 @@ class FeatureEngineeringPipeline:
         spark = Spark_Utils().get_spark()
         #spark = SparkSession.builder.appName("EMRServerless").getOrCreate()
         
-        features_data, processed_data = rec_type_ad_preprocessing(rec_type=self.rec_type,
-                                                                  input_feature_group_name=self.feature_group_name,
-                                                                  input_feature_group_version=self.feature_version,
-                                                                  input_year=self.partition_year,
-                                                                  input_month=self.partition_month,
-                                                                  input_day=self.partition_day,
-                                                                  input_hour=self.partition_hour,
-                                                                  input_setup=self.spark_config_setup,
-                                                                  bucket_name_raw_data=self.bucket_name_raw_data,
-                                                                  folder_name_raw_data=self.folder_name_raw_data)
+        raw_input_df = read_raw_input_data(rec_type=self.rec_type,
+                                           input_year=self.partition_year,
+                                           input_month=self.partition_month,
+                                           input_day=self.partition_day,
+                                           input_hour=self.partition_hour,
+                                           input_setup=self.spark_config_setup,
+                                           bucket_name_raw_data=self.bucket_name_raw_data,
+                                           folder_name_raw_data=self.folder_name_raw_data)
+        
+        
+        features_data, processed_data = rec_type_ad_preprocessing(input_df=raw_input_df, 
+                                                                  rec_type = self.rec_type, 
+                                                                  input_feature_group_name = self.feature_group_name, 
+                                                                  input_feature_group_version = self.feature_version)
 
         # caching
         #processed_data.persist()
@@ -96,7 +103,7 @@ class FeatureEngineeringPipeline:
         self.s3_utilities.pyspark_write_parquet(processed_data, 'data/spark_df', f'raw_data_{self.file_name}')
 
         print('saving features data to s3')
-        self.s3_utilities.awswrangler_pandas_dataframe_to_s3(features_data, "data", "pandas_df",
+        self.s3_utilities.awswrangler_pandas_dataframe_to_s3(features_data, "data/", "pandas_df",
                                                              f'raw_features_{self.file_name}.parquet')
         print('saving raw train to s3')
         self.s3_utilities.pyspark_write_parquet(train_data, 'data/spark_df', f'raw_training_data_{self.file_name}')
@@ -121,10 +128,12 @@ class FeatureEngineeringPipeline:
         else:
             self.aggregation_column = 'pod_id'
 
+        # read train data
         train_data = spark.read.parquet(
             f's3a://{self.bucket}/{self.feature_group_name}/{self.feature_version}/data/spark_df/raw_training_data_{self.file_name}/')
         print(f'train data columns: {train_data.columns}')
 
+        # read test data
         test_data = spark.read.parquet(
             f's3a://{self.bucket}/{self.feature_group_name}/{self.feature_version}/data/spark_df/raw_testing_data_{self.file_name}/')
         print(f'test data columns: {test_data.columns}')
