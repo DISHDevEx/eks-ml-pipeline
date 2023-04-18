@@ -8,7 +8,7 @@ import boto3
 import pytest
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_rec_type_ad_preprocessing(Spark, Spark_context, bucket_name):
     """
     Verify the pre-processing logic for the autoencoder feature engineering pipeline.
@@ -17,7 +17,7 @@ def test_rec_type_ad_preprocessing(Spark, Spark_context, bucket_name):
     Inputs: fixtures of spark and bucket name.
     Output: None
     """
-    folder_name = 'v0.0.1/data/spark_df/EKS_SAMPLE_DATA.snappy.parquet'
+    folder_name = 'pytest_autoencoder_ad/v0.0.1/data/spark_df/EKS_SAMPLE_DATA.snappy.parquet'
     feature_group_name = 'pytest_autoencoder_ad'
     feature_group_version = 'v0.0.1'
     rec_type = 'Node'
