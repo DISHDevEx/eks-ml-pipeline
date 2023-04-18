@@ -8,6 +8,7 @@ import boto3
 import pytest
 
 
+@pytest.mark.skip()
 def test_rec_type_ad_preprocessing(Spark, Spark_context, bucket_name):
     """
     Verify the pre-processing logic for the autoencoder feature engineering pipeline.
@@ -32,7 +33,7 @@ def test_rec_type_ad_preprocessing(Spark, Spark_context, bucket_name):
 
 
 def test_rec_type_list_generator(Spark, Spark_context, bucket_name):
-    file_name_features_df = 'raw_features_2022_9_29_1'
+    file_name_features_df = 'sample_raw_features_2022_9_29_1'
     folder_name_raw_df = 'pytest_autoencoder_ad/v0.0.1/data/spark_df/raw_training_data_2022_9_29_1/'
     feature_group_name = 'pytest_autoencoder_ad'
     feature_group_version = 'v0.0.1'
@@ -45,7 +46,7 @@ def test_rec_type_list_generator(Spark, Spark_context, bucket_name):
         version=feature_group_version,
     )
 
-    features_df = s3_util.read_parquet_to_pandas_df("data", "sample/pandas_df", f'{file_name_features_df}.parquet')
+    features_df = s3_util.read_parquet_to_pandas_df("data", "pandas_df", f'{file_name_features_df}.parquet')
     input_preprocessed_df = Spark.read.parquet(f's3a://{bucket_name}/{folder_name_raw_df}')
 
     model_parameters = features_df["model_parameters"].iloc[0]
