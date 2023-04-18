@@ -26,6 +26,7 @@ from .inputs import pod_inference_input
 from .inputs import container_inference_input
 
 from .feature_engineering import rec_type_ad_preprocessing
+from .feature_engineering import read_raw_input_data
 
 from .feature_engineering import node_hmm_ad_preprocessing
 from .feature_engineering import node_hmm_ad_feature_engineering

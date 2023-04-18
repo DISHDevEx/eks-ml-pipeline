@@ -7,7 +7,7 @@ import numpy as np
 import random
 
 """
-feature engineering functions to help us run jobs that build training data for Anomaly Detection models
+Feature engineering functions to help us run jobs that build training data for Anomaly Detection models.
 """
 
 
