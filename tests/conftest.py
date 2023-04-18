@@ -430,12 +430,3 @@ def Stop_spark():
 
     obj = Spark_Utils()
     obj.stop_spark_context()
-
-# @pytest.fixture(scope='module')
-# def eks_connector_read_data(bucket_name):
-
-#     folder_name = 'pytest_eks_sample_data'
-#     pytest_obj = EKS_Connector(bucket_name, folder_name, filter_column_value="Node")
-#     err_code, df = pytest_obj.read()
-
-#     return err_code, df
