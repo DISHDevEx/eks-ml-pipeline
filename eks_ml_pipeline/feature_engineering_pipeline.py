@@ -97,12 +97,12 @@ class FeatureEngineeringPipeline:
         # writing dfs to s3 bucket
         self.s3_utilities.pyspark_write_parquet(processed_data, 'data/spark_df', f'raw_data_{self.file_name}')
 
-        self.s3_utilities.awswrangler_pandas_dataframe_to_s3(features_data, "data/", "pandas_df",
+        self.s3_utilities.awswrangler_pandas_dataframe_to_s3(features_data, "data", "pandas_df",
                                                              f'raw_features_{self.file_name}.parquet')
         
         self.s3_utilities.pyspark_write_parquet(train_data, 'data/spark_df', f'raw_training_data_{self.file_name}')
 
-        self.s3_utilities.pyspark_write_parquet(train_data, 'data/spark_df', f'raw_testing_data_{self.file_name}')
+        self.s3_utilities.pyspark_write_parquet(test_data, 'data/spark_df', f'raw_testing_data_{self.file_name}')
 
         # un-persisting processed data
         #processed_data.unpersist()
