@@ -197,7 +197,7 @@ class FeatureEngineeringPipeline:
 
     def run_in_emr(self, job_type='processing'):
         """Run pre-processing and feature engineering steps in EMR Serverless."""
-        application_id = '00f6mv29kbd4e10l'
+        application_id = '00f6muv5dgv8n509'
         s3_bucket_name = self.bucket
         zipped_env_path = f's3://{s3_bucket_name}/emr_serverless/code/spark_dependency/pyspark_deps_github.tar.gz'
 
