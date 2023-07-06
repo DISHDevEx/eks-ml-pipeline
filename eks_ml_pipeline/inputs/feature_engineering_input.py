@@ -35,12 +35,12 @@ def node_autoencoder_fe_input():
             pipeline
 
     """
-    ##feature parameters
-    # feature_group_name = "node_autoencoder_ad"
-    # feature_version = "v0.0.1"
-    
-    feature_group_name = "pytest_autoencoder_ad"
+    #feature parameters
+    feature_group_name = "node_autoencoder_ad"
     feature_version = "v0.0.1"
+    
+    # feature_group_name = "pytest_autoencoder_ad"
+    # feature_version = "v0.0.1"
 
     ##eks s3 bucket parameters
     partition_year = "2022"
