@@ -4,6 +4,7 @@ import shutil
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
+import tf2onnx
 from tensorflow import keras
 import tensorflow as tf
 from tensorflow.keras import layers
