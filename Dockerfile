@@ -19,7 +19,7 @@ RUN pip3 install awswrangler
 RUN pip3 install fast-arrow
 RUN pip3 install tf2onnx==1.14.0
 RUN pip3 install python-dotenv
-RUN pip3 install protobuf==3.19.6
+RUN pip3 install protobuf==3.20.2
 
 RUN mkdir /output && venv-pack -o /output/pyspark_deps_github.tar.gz
 
