@@ -17,7 +17,7 @@ RUN  pip3 install boto3
 RUN  pip3 install pyarrow
 RUN  pip3 install awswrangler
 RUN  pip3 install fast-arrow
-RUN  pip3 install tf2onnx
+RUN  pip3 install tf2onnx==1.14.0
 RUN  pip3 install python-dotenv
 
 RUN mkdir /output && venv-pack -o /output/pyspark_deps_github.tar.gz
