@@ -13,12 +13,13 @@ RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/fea
 COPY . .
 
 RUN pip3 install venv-pack==0.2.0
-RUN  pip3 install boto3
-RUN  pip3 install pyarrow
-RUN  pip3 install awswrangler
-RUN  pip3 install fast-arrow
-RUN  pip3 install tf2onnx==1.14.0
-RUN  pip3 install python-dotenv
+RUN pip3 install boto3
+RUN pip3 install pyarrow
+RUN pip3 install awswrangler
+RUN pip3 install fast-arrow
+RUN pip3 install tf2onnx==1.14.0
+RUN pip3 install python-dotenv
+RUN pip3 install protobuf==3.19.6
 
 RUN mkdir /output && venv-pack -o /output/pyspark_deps_github.tar.gz
 
