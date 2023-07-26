@@ -38,7 +38,7 @@ jobs:
           pip install  pytest
           pip install s3fs
           pip install -r requirements.txt
-          pip install devex-sdk
+          pip install git+https://github.com/DISHDevEx/dish-devex-sdk.git@aakash/pytest-test
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       ## run the pytest module
       - name: Test with pytest
