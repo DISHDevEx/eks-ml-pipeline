@@ -46,7 +46,7 @@ jobs:
         env:
            ROLE_TO_ASSUME: ${{ secrets.ROLE_TO_ASSUME }}
            SAMPLE_ROLE_SESSION: ${{ secrets.ROLE_SESSION_NAME }}
-           BUCKET_NAME_PYTEST: ${{ secrets.BUCKET_NAME_PYTEST_TEST }}
+           BUCKET_NAME_PYTEST: ${{ secrets.BUCKET_NAME_PYTEST }}
            PYTEST_FLAG:  "True"
         ##define some code here to also run during pytest
         run: |
