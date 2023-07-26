@@ -7,7 +7,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 WORKDIR /app
 
-RUN pip3 install git+https://github.com/DISHDevEx/dish-devex-sdk.git
+RUN pip3 install git+https://github.com/DISHDevEx/dish-devex-sdk.git@aakash/pytest-test
 RUN pip3 install git+https://github.com/DISHDevEx/eks-ml-pipeline.git@aakash/feature-engineering-pyspark-changes
 
 COPY . .
