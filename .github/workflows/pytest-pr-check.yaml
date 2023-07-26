@@ -38,7 +38,7 @@ jobs:
           pip install  pytest
           pip install s3fs
           pip install -r requirements.txt
-          pip install devex-sdk==1.0.3
+          pip install devex-sdk==1.0.2
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       ## run the pytest module
       - name: Test with pytest
@@ -46,14 +46,10 @@ jobs:
         env:
            ROLE_TO_ASSUME: ${{ secrets.ROLE_TO_ASSUME }}
            SAMPLE_ROLE_SESSION: ${{ secrets.ROLE_SESSION_NAME }}
-           BUCKET_NAME_PYTEST: ${{ secrets.BUCKET_NAME_PYTEST }}
+           BUCKET_NAME_PYTEST: ${{ secrets.BUCKET_NAME_PYTEST_TEST }}
            PYTEST_FLAG:  "True"
         ##define some code here to also run during pytest
         run: |
            python --version
            java --version
            pytest --slow
-
-
-
-
