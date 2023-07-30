@@ -105,7 +105,13 @@ def ae_train_input(bucket_name):
     # ********************************************#
 
     features_df = get_features(feature_group_name, feature_input_version)
+    
+    print(features_df.columns)
+    print(features_df.count())
+    
     model_parameters = features_df["model_parameters"].iloc[0]
+    
+    print(model_parameters)
 
     # Initialize autoencoder model class with specific parameters
     encode_decode_model = AutoencoderModelDish5g(
