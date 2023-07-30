@@ -78,7 +78,7 @@ def test_ae_train_input(bucket_name):
     
     all_features_path = glob(os.path.join(os.path.dirname(__file__), "eks_feature_store", "*.json"))
     
-    print(all_features_path)
+    #print(all_features_path)
 
     for count,file_name in enumerate(all_features_path):
         with open(file_name) as f:
