@@ -1,12 +1,16 @@
 import os
 import pytest
-from devex_sdk import get_features, EKS_Connector, Spark_Utils
-from eks_ml_pipeline import AutoencoderModelDish5g
+import sys
+import json
+from glob import glob
 import tempfile
 import shutil
 import numpy as np
 import pandas as pd
+from devex_sdk import get_features, EKS_Connector, Spark_Utils
+from eks_ml_pipeline import AutoencoderModelDish5g
 from eks_ml_pipeline import S3Utilities
+
 
 
 @pytest.fixture(scope="module")
@@ -70,7 +74,26 @@ def test_ae_train_input(bucket_name):
     # ********** initialize model class **********#
     # ********************************************#
 
-    features_df = get_features(feature_group_name, feature_input_version)
+    #features_df = get_features(feature_group_name, feature_input_version)
+    
+    all_features_path = glob(os.path.join(os.path.dirname(__file__), "eks_feature_store", "*.json"))
+    
+    print(all_features_path)
+
+    for count,file_name in enumerate(all_features_path):
+        with open(file_name) as f:
+            feature_data = json.load(f)
+            if count == 0 :
+                features_df = pd.json_normalize(data=feature_data, record_path='features_list', 
+                            meta=['feature_group_name', 'feature_group_description', 'model_type', 'problem_type', 'created_by', 'version', 'model_parameters'])
+            else:
+                features_df =  features_df.append(pd.json_normalize(data=feature_data, record_path='features_list', 
+                            meta=['feature_group_name', 'feature_group_description', 'model_type', 'problem_type',  'created_by', 'version', 'model_parameters']))
+
+    if feature_group_name != "" and feature_input_version != "":
+        features_df = features_df[(features_df['feature_group_name'] == feature_group_name) & (features_df['version'] == feature_input_version)]
+    
+    
     
     print(features_df.columns)
     print(features_df.count())
@@ -78,45 +101,3 @@ def test_ae_train_input(bucket_name):
     print (features_df["model_parameters"].iloc[0])
     
     assert len(features_df.columns) == 11
-
-
-# def test_upload_file(
-#     ae_train_input, # for instantiating the S3Utilities class
-#     bucket_name
-#     ):
-#     """Upload file wtih method under test, and check for uploaded file."""
-
-#     # generate a file to be uploaded and save it in a temp path
-#     filename = 'test_upload_file.npy'
-#     tmpdir = tempfile.mkdtemp()
-#     file_path = f'{tmpdir}/{filename}'
-
-#     np.save(file_path, np.array([1,2,3]))
-
-#     # Instantiate the class with fixtures from conftest.py.
-#     s3_util = S3Utilities(
-#         bucket_name = bucket_name,
-#         model_name = ae_train_input[1][0], #feature_selection[0] = feature_group_name
-#         version = ae_train_input[1][1], #feature_selection[1] =  feature_input_version
-#         )
-
-#     # use the method under test to upload that file to s3
-#     s3_util.upload_file(
-#         local_path = file_path,
-#         bucket_name = bucket_name,
-#         key = "pytest_s3_utilities/" + filename
-#         )
-
-#     # test that the file is in s3
-#     head = s3_util.client.head_object(
-#         Bucket = bucket_name,
-#         Key = "pytest_s3_utilities/" + filename
-#         )
-#     # HTTP status code 200 indicates request succeeded
-#     assert head['ResponseMetadata']['HTTPStatusCode'] == 200
-
-#     # Cleanup by deleting file from s3.
-#     s3_util.client.delete_object(
-#         Bucket=bucket_name,
-#         Key = "pytest_s3_utilities/" + filename
-#         )
