@@ -1,56 +1,56 @@
-# """
-# Define fixtures and configuration
-# that can be reused throughout pytest without redefinition.
-# It also defines the configurations for pytest.
-# """
-# import os
-# import pytest
-# from devex_sdk import get_features, EKS_Connector, Spark_Utils
-# from eks_ml_pipeline import AutoencoderModelDish5g
-# from eks_ml_pipeline import PcaModelDish5g
+"""
+Define fixtures and configuration
+that can be reused throughout pytest without redefinition.
+It also defines the configurations for pytest.
+"""
+import os
+import pytest
+from devex_sdk import get_features, EKS_Connector, Spark_Utils
+from eks_ml_pipeline import AutoencoderModelDish5g
+from eks_ml_pipeline import PcaModelDish5g
 
 
-# # functions to mark slow tests and skip them.
-# def pytest_addoption(parser):
-#     """
-#     Parse pytest to read --slow in testing
-#     """
-#     parser.addoption(
-#         "--slow",
-#         action="store_true",
-#         default=False,
-#         help="run (slow) performance tests",
-#     )
+# functions to mark slow tests and skip them.
+def pytest_addoption(parser):
+    """
+    Parse pytest to read --slow in testing
+    """
+    parser.addoption(
+        "--slow",
+        action="store_true",
+        default=False,
+        help="run (slow) performance tests",
+    )
 
 
-# def pytest_configure(config):
-#     """
-#     Configure markers that may be needed in our testing framework
-#     """
-#     config.addinivalue_line(
-#         "markers", "slow: mark test as a (potentially slow) performance test"
-#     )
+def pytest_configure(config):
+    """
+    Configure markers that may be needed in our testing framework
+    """
+    config.addinivalue_line(
+        "markers", "slow: mark test as a (potentially slow) performance test"
+    )
 
 
-# def pytest_collection_modifyitems(config, items):
-#     """
-#     Modify items from config
-#     """
-#     if config.getoption("--slow"):
-#         return
-#     skip_perf = pytest.mark.skip(reason="need --slow option to run")
-#     for item in items:
-#         if "slow" in item.keywords:
-#             item.add_marker(skip_perf)
+def pytest_collection_modifyitems(config, items):
+    """
+    Modify items from config
+    """
+    if config.getoption("--slow"):
+        return
+    skip_perf = pytest.mark.skip(reason="need --slow option to run")
+    for item in items:
+        if "slow" in item.keywords:
+            item.add_marker(skip_perf)
 
 
-# @pytest.fixture(scope="module")
-# def bucket_name():
-#     """
-#     Get bucket name from the github workflow runner secrets
-#     """
-#     BUCKET_NAME = os.environ.get("BUCKET_NAME_PYTEST") 
-#     return BUCKET_NAME
+@pytest.fixture(scope="module")
+def bucket_name():
+    """
+    Get bucket name from the github workflow runner secrets
+    """
+    BUCKET_NAME = os.environ.get("BUCKET_NAME_PYTEST") 
+    return BUCKET_NAME
 
 
 # @pytest.fixture(scope="module")
@@ -106,7 +106,6 @@
 
 #     features_df = get_features(feature_group_name, feature_input_version)
 #     model_parameters = features_df["model_parameters"].iloc[0]
-
 
 #     # Initialize autoencoder model class with specific parameters
 #     encode_decode_model = AutoencoderModelDish5g(
@@ -371,63 +370,63 @@
 #             model_filename,
 #         ],  # save_model_locations,
 #         [upload_zip, upload_onnx, upload_npy, clean_local_folder],  # file_flags
-#     ]
+#    ]
 
-# @pytest.fixture(scope="module")
-# def ae_fe_input(bucket_name):
-#     """
-#     Create inputs to pre-processing and feature engineering steps.
-#     Includes all of bucket versioning and model versioning needed
-#     as well as the file locations for a pipeline.
-#     Parameters
-#     ----------
-#     None
+@pytest.fixture(scope="module")
+def ae_fe_input(bucket_name):
+    """
+    Create inputs to pre-processing and feature engineering steps.
+    Includes all of bucket versioning and model versioning needed
+    as well as the file locations for a pipeline.
+    Parameters
+    ----------
+    None
 
-#     Returns
-#     -------
-#     feature engineering inputs
-#         List of parameters for node rec type
-#         required by autoencoder feature engineering pipeline
-#     """
+    Returns
+    -------
+    feature engineering inputs
+        List of parameters for node rec type
+        required by autoencoder feature engineering pipeline
+    """
 
-#     ##feature parameters
-#     feature_group_name = "pytest_autoencoder_ad"
-#     feature_version = "v0.0.1"
+    ##feature parameters
+    feature_group_name = "pytest_autoencoder_ad"
+    feature_version = "v0.0.1"
 
-#     ##eks s3 bucket parameters
-#     partition_year = "2022"
-#     partition_month = "9"
-#     partition_day = "29"
-#     partition_hour = "1"
-#     spark_config_setup = "16gb"
+    ##eks s3 bucket parameters
+    partition_year = "2022"
+    partition_month = "9"
+    partition_day = "29"
+    partition_hour = "1"
+    spark_config_setup = "16gb"
 
-#     ##s3 bucket parameters
-#     bucket = bucket_name
-#     bucket_name_raw_data = bucket_name
-#     folder_name_raw_data = 'pytest_eks_sample_data'
+    ##s3 bucket parameters
+    bucket = bucket_name
+    bucket_name_raw_data = bucket_name
+    folder_name_raw_data = 'pytest_eks_sample_data'
 
-#     return [feature_group_name, feature_version,
-#             partition_year, partition_month, partition_day,
-#             partition_hour, spark_config_setup,
-#             bucket, bucket_name_raw_data, folder_name_raw_data]
+    return [feature_group_name, feature_version,
+            partition_year, partition_month, partition_day,
+            partition_hour, spark_config_setup,
+            bucket, bucket_name_raw_data, folder_name_raw_data]
 
-# # fixtures for pyspark context and session
-# @pytest.fixture(scope="module")
-# def Spark():
+# fixtures for pyspark context and session
+@pytest.fixture(scope="module")
+def Spark():
     
-#     obj = Spark_Utils()
-#     spark = obj.get_spark()
-#     return spark
+    obj = Spark_Utils()
+    spark = obj.get_spark()
+    return spark
 
-# @pytest.fixture(scope="module")
-# def Spark_context():
+@pytest.fixture(scope="module")
+def Spark_context():
     
-#     obj = Spark_Utils()
-#     spark_context = obj.get_spark_context()
-#     return spark_context
+    obj = Spark_Utils()
+    spark_context = obj.get_spark_context()
+    return spark_context
 
-# @pytest.fixture(scope="module")
-# def Stop_spark():
+@pytest.fixture(scope="module")
+def Stop_spark():
 
-#     obj = Spark_Utils()
-#     obj.stop_spark_context()
+    obj = Spark_Utils()
+    obj.stop_spark_context()
